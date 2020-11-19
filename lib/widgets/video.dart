@@ -49,6 +49,8 @@ class VideoReadyState extends State<VideoReady> {
   List<bool> _showAMomentRewindIcons = [false, false];
   int _lastPosition = 0, _forwardAmount = 0;
   VideoPlayerController _controller;
+  double _draggingProgressPosition;
+  bool _isDraggingProgress = false;
   Offset _horizontalDragStartOffset;
   String _activedSource;
 
@@ -403,77 +405,92 @@ class VideoReadyState extends State<VideoReady> {
 
     return Align(
       alignment: Alignment.bottomLeft,
-      child: Padding(
-        padding: Margin.vertical(5),
-        child: Column(children: [
-          Expanded(child: _rewindAndForward()),
-          Row(
-            children: [
-              Container(
-                alignment: Alignment.center,
-                margin: Margin.left(padding),
-                color: Colors.transparent,
-                child: Text(position, style: style.textStyle),
-              ),
-              Expanded(
-                child: Container(
-                  padding: Margin.horizontal(padding),
-                  child: VideoProgressBar(
-                    _controller,
-                    style: style,
-                    isBuffering: isBuffering,
-                  ),
-                ),
-              ),
-              Container(
-                color: Colors.transparent,
-                alignment: Alignment.center,
-                child: GestureDetector(
-                  onTap: () => setState(() => _progressBarTextShowPosition =
-                      !_progressBarTextShowPosition),
-                  child: Text(
-                    _progressBarTextShowPosition ? duration : remaing,
-                    style: style.textStyle,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: Margin.horizontal(padding > 5 ? padding - 5 : 0),
-                child: GestureDetector(
-                  onTap: () {
-                    if (!isFullScreen) {
-                      PushRoute.page(
-                        context,
-                        FullScreenPage(
-                          style: widget.style,
-                          source: widget.source,
-                          looping: widget.looping,
-                          controller: _controller,
-                          rewindAmount: widget.rewindAmount,
-                          forwardAmount: widget.forwardAmount,
-                          activedSource: _activedSource,
-                          defaultAspectRatio: widget.defaultAspectRatio,
-                          changeSource: (controller, activedSource) {
-                            _changeVideoSource(
-                                controller, activedSource, false);
-                          },
-                        ),
-                        withTransition: false,
-                      );
-                    } else {
-                      Misc.setSystemOverlay(SystemOverlay.values);
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: isFullScreen
-                      ? widget.style.fullScreenExit
-                      : widget.style.fullScreen,
-                ),
-              ),
-            ],
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(child: _rewindAndForward()),
+        OpacityTransition(
+          visible: _isDraggingProgress,
+          child: Container(
+            height: 20,
+            width: 20,
+            color: Colors.white,
+            margin: Margin.left(_draggingProgressPosition - 10),
           ),
-        ]),
-      ),
+        ),
+        Row(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              margin: Margin.left(padding),
+              color: Colors.transparent,
+              child: Text(position, style: style.textStyle),
+            ),
+            Expanded(
+              child: Padding(
+                padding: Margin.horizontal(padding),
+                child: VideoProgressBar(
+                  _controller,
+                  style: style,
+                  isBuffering: isBuffering,
+                  changePosition: (double position) {
+                    if (position != null)
+                      setState(() {
+                        _draggingProgressPosition = position;
+                        _isDraggingProgress = true;
+                      });
+                    else
+                      setState(() => _isDraggingProgress = false);
+                  },
+                ),
+              ),
+            ),
+            Container(
+              color: Colors.transparent,
+              alignment: Alignment.center,
+              child: GestureDetector(
+                onTap: () => setState(() => _progressBarTextShowPosition =
+                    !_progressBarTextShowPosition),
+                child: Text(
+                  _progressBarTextShowPosition ? duration : remaing,
+                  style: style.textStyle,
+                ),
+              ),
+            ),
+            Padding(
+              padding: Margin.horizontal(padding > 5 ? padding - 5 : 0),
+              child: GestureDetector(
+                onTap: () {
+                  if (!isFullScreen) {
+                    PushRoute.page(
+                      context,
+                      FullScreenPage(
+                        style: widget.style,
+                        source: widget.source,
+                        looping: widget.looping,
+                        controller: _controller,
+                        rewindAmount: widget.rewindAmount,
+                        forwardAmount: widget.forwardAmount,
+                        activedSource: _activedSource,
+                        defaultAspectRatio: widget.defaultAspectRatio,
+                        changeSource: (controller, activedSource) {
+                          _changeVideoSource(controller, activedSource, false);
+                        },
+                      ),
+                      withTransition: false,
+                    );
+                  } else {
+                    Misc.setSystemOverlay(SystemOverlay.values);
+                    Navigator.pop(context);
+                  }
+                },
+                child: isFullScreen
+                    ? widget.style.fullScreenExit
+                    : widget.style.fullScreen,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 5),
+      ]),
     );
   }
 }

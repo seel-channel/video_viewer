@@ -10,12 +10,14 @@ class VideoProgressBar extends StatefulWidget {
     Key key,
     VideoProgressBarStyle style,
     this.isBuffering = false,
+    this.changePosition,
   })  : this.style = style ?? VideoProgressBarStyle(),
         super(key: key);
 
+  final bool isBuffering;
   final VideoProgressBarStyle style;
   final VideoPlayerController controller;
-  final bool isBuffering;
+  final void Function(double) changePosition;
 
   @override
   _VideoProgressBarState createState() => _VideoProgressBarState();
@@ -80,6 +82,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (_, constraints) {
       double width = constraints.maxWidth;
+
       return _detectTap(
         width: width,
         child: Container(
@@ -88,17 +91,14 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
           margin: widget.style.margin,
           alignment: Alignment.centerLeft,
           child: controller.value.initialized
-              ? Stack(
-                  alignment: AlignmentDirectional.centerStart,
-                  children: [
-                    _progressBar(width, backgroundColor),
-                    _progressBar(
-                        (maxBuffering / duration) * width, bufferedColor),
-                    _progressBar((position / duration) * width, activeColor),
-                    _dotDragging(width),
-                    _dotIdentifier(width),
-                  ],
-                )
+              ? Stack(alignment: AlignmentDirectional.centerStart, children: [
+                  _progressBar(width, backgroundColor),
+                  _progressBar(
+                      (maxBuffering / duration) * width, bufferedColor),
+                  _progressBar((position / duration) * width, activeColor),
+                  _dotDragging(width),
+                  _dotIdentifier(width),
+                ])
               : _progressBar(width, backgroundColor),
         ),
       );
@@ -108,7 +108,9 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   Widget _dotIdentifier(double maxWidth) => _dot(maxWidth);
   Widget _dotDragging(double maxWidth) {
     return BooleanTween(
-      animate: dragging,
+      animate: dragging &&
+          position != 0 &&
+          position != controller.value.duration.inMilliseconds,
       tween: Tween<double>(begin: 0, end: 0.4),
       builder: (value) => _dot(maxWidth, value, 2),
     );
@@ -148,10 +150,13 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   }
 
   Widget _detectTap({Widget child, double width}) {
-    void seekToRelativePosition(Offset tap) async {
-      final double localPos = tap.dx / width;
+    void seekToRelativePosition(Offset local, [Offset global]) async {
+      final double localPos = local.dx / width;
       final Duration position = controller.value.duration * localPos;
       await controller.seekTo(position);
+      if (widget.changePosition != null && global != null) {
+        if (local.dx > 0 && local.dx < width) widget.changePosition(global.dx);
+      }
     }
 
     return GestureDetector(
@@ -161,9 +166,10 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
         setState(() => dragging = true);
       },
       onHorizontalDragUpdate: (DragUpdateDetails details) {
-        seekToRelativePosition(details.localPosition);
+        seekToRelativePosition(details.localPosition, details.globalPosition);
       },
       onHorizontalDragEnd: (DragEndDetails details) async {
+        if (widget.changePosition != null) widget.changePosition(null);
         setState(() => dragging = false);
         play();
       },
