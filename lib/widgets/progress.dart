@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
+import 'package:flutter/material.dart';
+
 import 'package:video_player/video_player.dart';
 import 'package:video_viewer/video_viewer.dart';
 
@@ -94,10 +95,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
                     _progressBar(
                         (maxBuffering / duration) * width, bufferedColor),
                     _progressBar((position / duration) * width, activeColor),
-                    OpacityTransition(
-                      visible: dragging,
-                      child: _dotDragging(width),
-                    ),
+                    _dotDragging(width),
                     _dotIdentifier(width),
                   ],
                 )
@@ -107,15 +105,16 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
     });
   }
 
-  Widget _dotIdentifier(double maxWidth) {
-    return _dot(maxWidth);
-  }
-
+  Widget _dotIdentifier(double maxWidth) => _dot(maxWidth);
   Widget _dotDragging(double maxWidth) {
-    return _dot(maxWidth, widget.style.dotColor.withOpacity(0.32), 2);
+    return BooleanTween(
+      animate: dragging,
+      tween: Tween<double>(begin: 0, end: 0.4),
+      builder: (value) => _dot(maxWidth, value, 2),
+    );
   }
 
-  Widget _dot(double maxWidth, [Color color, int multiplicator]) {
+  Widget _dot(double maxWidth, [double opacity = 1, int multiplicator]) {
     multiplicator = Misc.ifNull(multiplicator, 1);
     double width = position == 0
         ? height * 2
@@ -129,7 +128,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
         height: height * 2 * multiplicator,
         width: height * 2 * multiplicator,
         decoration: BoxDecoration(
-          color: Misc.ifNull(color, widget.style.dotColor),
+          color: widget.style.dotColor.withOpacity(opacity),
           shape: BoxShape.circle,
         ),
       ),
