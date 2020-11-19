@@ -49,11 +49,13 @@ class VideoReadyState extends State<VideoReady> {
   List<bool> _showAMomentRewindIcons = [false, false];
   int _lastPosition = 0, _forwardAmount = 0;
   VideoPlayerController _controller;
-  // double _draggingProgressPosition;
-  // bool _isDraggingProgress = false;
   double _progressBarBottomMargin = 0;
   Offset _horizontalDragStartOffset;
   String _activedSource;
+  //Preview Frame
+  // bool _isDraggingProgress = false;
+  // double _draggingProgressPosition;
+  // Duration _seekToPosition;
 
   set fullScreen(bool value) => setState(() => isFullScreen = value);
 
@@ -422,9 +424,9 @@ class VideoReadyState extends State<VideoReady> {
         //   visible: _isDraggingProgress,
         //   child: _PreviewFrame(
         //     source: widget.source,
+        //     seekTo: _seekToPosition,
+        //     position: _controller.value.position,
         //     activedSource: _activedSource,
-        //     position: _draggingProgressPosition,
-        //     seekTo: _controller.value.position,
         //   ),
         // ),
         Row(
@@ -443,13 +445,15 @@ class VideoReadyState extends State<VideoReady> {
                   style: style,
                   isBuffering: isBuffering,
                   // changePosition: (double position) {
-                  //   if (position != null)
-                  //     setState(() {
-                  //       _draggingProgressPosition = position;
-                  //       _isDraggingProgress = true;
-                  //     });
-                  //   else
-                  //     setState(() => _isDraggingProgress = false);
+                  //   if (mounted) {
+                  //     if (position != null)
+                  //       setState(() {
+                  //         _isDraggingProgress = true;
+                  //         _draggingProgressPosition = position;
+                  //       });
+                  //     else
+                  //       setState(() => _isDraggingProgress = false);
+                  //   }
                   // },
                 ),
               ),
@@ -541,7 +545,7 @@ class VideoReadyState extends State<VideoReady> {
 
 //   @override
 //   void dispose() {
-//     disposeController();
+//     //disposeController();
 //     super.dispose();
 //   }
 

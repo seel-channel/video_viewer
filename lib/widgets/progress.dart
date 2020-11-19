@@ -27,9 +27,10 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   Color backgroundColor, bufferedColor, activeColor;
   int maxBuffering, duration, position;
   VideoPlayerController controller;
+  Duration seekToPosition;
   int animationMS = 500;
-  double height = 0;
   bool dragging = false;
+  double height = 0;
 
   @override
   void initState() {
@@ -63,6 +64,10 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 
   void pause() {
     if (controller.value.isPlaying) controller.pause();
+  }
+
+  void changePosition(double position) {
+    if (widget.changePosition != null) widget.changePosition(position);
   }
 
   void progressListener() {
@@ -154,9 +159,8 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
       final double localPos = local.dx / width;
       final Duration position = controller.value.duration * localPos;
       await controller.seekTo(position);
-      if (widget.changePosition != null && global != null) {
-        if (local.dx > 0 && local.dx < width) widget.changePosition(global.dx);
-      }
+      // if (global != null && local.dx > 0 && local.dx < width)
+      //   changePosition(global.dx);
     }
 
     return GestureDetector(
@@ -169,7 +173,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
         seekToRelativePosition(details.localPosition, details.globalPosition);
       },
       onHorizontalDragEnd: (DragEndDetails details) async {
-        if (widget.changePosition != null) widget.changePosition(null);
+        //changePosition(null);
         setState(() => dragging = false);
         play();
       },
