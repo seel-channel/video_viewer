@@ -16,12 +16,17 @@ class VideoViewerStyle {
     Widget fullScreenExit,
     this.onPlayingHidePlayAndPause = true,
   })  : this.loading = loading ??
-            Center(child: CircularProgressIndicator(strokeWidth: 1.6)),
+            Center(
+              child: CircularProgressIndicator(strokeWidth: 1.6),
+            ),
         this.buffering = buffering ??
             Center(
-                child: CircularProgressIndicator(
-                    strokeWidth: 1.6,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white))),
+              child: CircularProgressIndicator(
+                strokeWidth: 1.6,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                    Colors.white.withOpacity(0.8)),
+              ),
+            ),
         this.rewind = rewind ?? Icon(Icons.fast_rewind, color: Colors.white),
         this.forward = forward ?? Icon(Icons.fast_forward, color: Colors.white),
         this.fullScreen =
@@ -104,7 +109,7 @@ class ForwardAndRewindStyle {
     EdgeInsetsGeometry padding,
     BorderRadiusGeometry borderRadius,
     this.alignment = Alignment.topCenter,
-  })  : this.padding = padding ?? Margin.all(5),
+  })  : this.padding = padding ?? Margin.all(5) + Margin.top(5),
         this.backgroundColor =
             backgroundColor ?? Colors.black.withOpacity(0.25),
         this.textStyle =

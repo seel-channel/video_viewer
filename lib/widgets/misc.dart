@@ -273,45 +273,29 @@ class _FullScreenPageState extends State<FullScreenPage> {
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(
-      builder: (_, Orientation orientation) {
-        // if (orientation == Orientation.landscape && !isFullScreen) {
-        //   isFullScreen = true;
-        //   Misc.setSystemOverlay([]);
-        //   Misc.delayed(100, () => Misc.setSystemOverlay([]));
-        //   Misc.delayed(200, () => Misc.setSystemOverlay([]));
-        // } else if (orientation == Orientation.portrait && isFullScreen) {
-        //   isFullScreen = false;
-        //   Misc.setSystemOverlay([]);
-        //   Misc.delayed(200, () => Misc.setSystemOverlay([]));
-        //   Misc.delayed(400, () => Misc.setSystemOverlay([]));
-        // }
-
-        return Scaffold(
-          backgroundColor: Colors.black,
-          body: WillPopScope(
-            onWillPop: _returnButton,
-            child: Center(
-              child: Hero(
-                tag: 'VideoReady',
-                child: VideoReady(
-                  key: key,
-                  style: widget.style,
-                  source: widget.source,
-                  looping: widget.looping,
-                  controller: widget.controller,
-                  activedSource: widget.activedSource,
-                  rewindAmount: widget.rewindAmount,
-                  forwardAmount: widget.forwardAmount,
-                  defaultAspectRatio: widget.defaultAspectRatio,
-                  onChangeSource: (controller, activedSource) =>
-                      widget.changeSource(controller, activedSource),
-                ),
-              ),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: WillPopScope(
+        onWillPop: _returnButton,
+        child: Center(
+          child: Hero(
+            tag: 'VideoReady',
+            child: VideoReady(
+              key: key,
+              style: widget.style,
+              source: widget.source,
+              looping: widget.looping,
+              controller: widget.controller,
+              activedSource: widget.activedSource,
+              rewindAmount: widget.rewindAmount,
+              forwardAmount: widget.forwardAmount,
+              defaultAspectRatio: widget.defaultAspectRatio,
+              onChangeSource: (controller, activedSource) =>
+                  widget.changeSource(controller, activedSource),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

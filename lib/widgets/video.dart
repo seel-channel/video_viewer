@@ -51,6 +51,7 @@ class VideoReadyState extends State<VideoReady> {
   VideoPlayerController _controller;
   // double _draggingProgressPosition;
   // bool _isDraggingProgress = false;
+  double _progressBarBottomMargin = 0;
   Offset _horizontalDragStartOffset;
   String _activedSource;
 
@@ -229,55 +230,65 @@ class VideoReadyState extends State<VideoReady> {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: _globalGesture(
-        Stack(children: [
-          VideoPlayer(_controller),
-          if (_showThumbnail && widget.style.thumbnail != null)
-            Container(child: widget.style.thumbnail),
-          _rewindAndForward(),
-          OpacityTransition(
-            visible: _showButtons,
-            child: _overlayButtons(),
-          ),
-          _settingsIconButton(Colors.transparent),
-          Center(
-            child: _playAndPause(
-              Container(
-                height: widget.style.playAndPauseStyle.circleSize * 2,
-                width: widget.style.playAndPauseStyle.circleSize * 2,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  shape: BoxShape.circle,
+    return OrientationBuilder(builder: (_, orientation) {
+      _progressBarBottomMargin = orientation == Orientation.landscape ? 15 : 5;
+
+      if (orientation == Orientation.landscape) {
+        Misc.delayed(100, () => Misc.setSystemOverlay([]));
+      } else if (!isFullScreen) {
+        Misc.delayed(100, () => Misc.setSystemOverlay(SystemOverlay.values));
+      }
+
+      return AspectRatio(
+        aspectRatio: _controller.value.aspectRatio,
+        child: _globalGesture(
+          Stack(children: [
+            VideoPlayer(_controller),
+            if (_showThumbnail && widget.style.thumbnail != null)
+              Container(child: widget.style.thumbnail),
+            _rewindAndForward(),
+            OpacityTransition(
+              visible: _showButtons,
+              child: _overlayButtons(),
+            ),
+            _settingsIconButton(Colors.transparent),
+            Center(
+              child: _playAndPause(
+                Container(
+                  height: widget.style.playAndPauseStyle.circleSize * 2,
+                  width: widget.style.playAndPauseStyle.circleSize * 2,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
             ),
-          ),
-          OpacityTransition(
-            visible: isBuffering,
-            child: widget.style.buffering,
-          ),
-          OpacityTransition(
-            visible: _showForwardStatus,
-            child: _forwardAmountAlert(),
-          ),
-          OpacityTransition(
-            visible: _showAMomentPlayAndPause,
-            child: _playAndPauseIconButtons(),
-          ),
-          SettingsMenu(
-            source: widget.source,
-            visible: _showSettings,
-            controller: _controller,
-            activedSource: _activedSource,
-            changeSource: _changeVideoSource,
-            changeState: () => setState(() => _showSettings = !_showSettings),
-          ),
-          _rewindAndForwardIconsIndicator(),
-        ]),
-      ),
-    );
+            OpacityTransition(
+              visible: isBuffering,
+              child: widget.style.buffering,
+            ),
+            OpacityTransition(
+              visible: _showForwardStatus,
+              child: _forwardAmountAlert(),
+            ),
+            OpacityTransition(
+              visible: _showAMomentPlayAndPause,
+              child: _playAndPauseIconButtons(),
+            ),
+            SettingsMenu(
+              source: widget.source,
+              visible: _showSettings,
+              controller: _controller,
+              activedSource: _activedSource,
+              changeSource: _changeVideoSource,
+              changeState: () => setState(() => _showSettings = !_showSettings),
+            ),
+            _rewindAndForwardIconsIndicator(),
+          ]),
+        ),
+      );
+    });
   }
 
   //--------//
@@ -489,7 +500,7 @@ class VideoReadyState extends State<VideoReady> {
             ),
           ],
         ),
-        SizedBox(height: 5),
+        SizedBox(height: _progressBarBottomMargin),
       ]),
     );
   }
