@@ -46,8 +46,8 @@ class _VideoViewerState extends State<VideoViewer> {
 
   @override
   void dispose() {
-    super.dispose();
     disposeController();
+    super.dispose();
   }
 
   void disposeController() async {

@@ -49,8 +49,8 @@ class VideoReadyState extends State<VideoReady> {
   List<bool> _showAMomentRewindIcons = [false, false];
   int _lastPosition = 0, _forwardAmount = 0;
   VideoPlayerController _controller;
-  double _draggingProgressPosition;
-  bool _isDraggingProgress = false;
+  // double _draggingProgressPosition;
+  // bool _isDraggingProgress = false;
   Offset _horizontalDragStartOffset;
   String _activedSource;
 
@@ -407,15 +407,15 @@ class VideoReadyState extends State<VideoReady> {
       alignment: Alignment.bottomLeft,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(child: _rewindAndForward()),
-        OpacityTransition(
-          visible: _isDraggingProgress,
-          child: Container(
-            height: 20,
-            width: 20,
-            color: Colors.white,
-            margin: Margin.left(_draggingProgressPosition - 10),
-          ),
-        ),
+        // OpacityTransition(
+        //   visible: _isDraggingProgress,
+        //   child: _PreviewFrame(
+        //     source: widget.source,
+        //     activedSource: _activedSource,
+        //     position: _draggingProgressPosition,
+        //     seekTo: _controller.value.position,
+        //   ),
+        // ),
         Row(
           children: [
             Container(
@@ -431,15 +431,15 @@ class VideoReadyState extends State<VideoReady> {
                   _controller,
                   style: style,
                   isBuffering: isBuffering,
-                  changePosition: (double position) {
-                    if (position != null)
-                      setState(() {
-                        _draggingProgressPosition = position;
-                        _isDraggingProgress = true;
-                      });
-                    else
-                      setState(() => _isDraggingProgress = false);
-                  },
+                  // changePosition: (double position) {
+                  //   if (position != null)
+                  //     setState(() {
+                  //       _draggingProgressPosition = position;
+                  //       _isDraggingProgress = true;
+                  //     });
+                  //   else
+                  //     setState(() => _isDraggingProgress = false);
+                  // },
                 ),
               ),
             ),
@@ -494,3 +494,70 @@ class VideoReadyState extends State<VideoReady> {
     );
   }
 }
+
+// class _PreviewFrame extends StatefulWidget {
+//   _PreviewFrame({
+//     Key key,
+//     this.seekTo,
+//     this.position,
+//     this.source,
+//     this.activedSource,
+//   }) : super(key: key);
+
+//   final Duration seekTo;
+//   final double position;
+//   final String activedSource;
+//   final Map<String, VideoPlayerController> source;
+
+//   @override
+//   _PreviewFrameState createState() => _PreviewFrameState();
+// }
+
+// class _PreviewFrameState extends State<_PreviewFrame> {
+//   VideoPlayerController controller;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     controller = widget.source[widget.activedSource]
+//       ..initialize().then((_) async {
+//         await controller.seekTo(widget.seekTo);
+//         await controller.play();
+//         controller.setVolume(0);
+//         setState(() {});
+//       });
+//   }
+
+//   @override
+//   void dispose() {
+//     disposeController();
+//     super.dispose();
+//   }
+
+//   @override
+//   void didUpdateWidget(_PreviewFrame oldWidget) {
+//     super.didUpdateWidget(oldWidget);
+//     controller.seekTo(widget.seekTo);
+//     controller.play();
+//   }
+
+//   void disposeController() async {
+//     await controller?.pause();
+//     await controller.dispose();
+//     controller = null;
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       width: 100,
+//       color: Colors.white,
+//       margin: Margin.left(widget.position - 50),
+//       child: controller.value.initialized
+//           ? AspectRatio(
+//               aspectRatio: controller.value.aspectRatio,
+//               child: VideoPlayer(controller))
+//           : SizedBox(),
+//     );
+//   }
+// }
