@@ -23,8 +23,7 @@ class VideoViewerStyle {
             Center(
               child: CircularProgressIndicator(
                 strokeWidth: 1.6,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                    Colors.white.withOpacity(0.8)),
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ),
         this.rewind = rewind ?? Icon(Icons.fast_rewind, color: Colors.white),
@@ -109,7 +108,7 @@ class ForwardAndRewindStyle {
     EdgeInsetsGeometry padding,
     BorderRadiusGeometry borderRadius,
     this.alignment = Alignment.topCenter,
-  })  : this.padding = padding ?? Margin.all(5) + Margin.top(5),
+  })  : this.padding = padding ?? Margin.all(5),
         this.backgroundColor =
             backgroundColor ?? Colors.black.withOpacity(0.25),
         this.textStyle =

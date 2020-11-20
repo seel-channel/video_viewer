@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -6,6 +7,8 @@ import 'package:video_player/video_player.dart';
 import 'package:video_viewer/utils/styles.dart';
 import 'package:video_viewer/widgets/misc.dart';
 import 'package:video_viewer/widgets/progress.dart';
+
+import '../helpers.dart';
 
 class VideoReady extends StatefulWidget {
   VideoReady({
@@ -174,7 +177,7 @@ class VideoReadyState extends State<VideoReady> {
         _hidePlayAndPause = Timer(Duration(milliseconds: 800), () {
           setState(() => _showAMomentPlayAndPause = false);
         });
-      }
+      } //else if (isPlaying) _showButtons = false;
     });
   }
 
@@ -194,7 +197,7 @@ class VideoReadyState extends State<VideoReady> {
       _showForwardStatus = true;
       _showAMomentRewindIcons[index] = true;
     });
-    Misc.delayed(400, () {
+    Misc.delayed(1200, () {
       setState(() {
         _showForwardStatus = false;
         _showAMomentRewindIcons[index] = false;
@@ -249,10 +252,7 @@ class VideoReadyState extends State<VideoReady> {
             if (_showThumbnail && widget.style.thumbnail != null)
               Container(child: widget.style.thumbnail),
             _rewindAndForward(),
-            OpacityTransition(
-              visible: _showButtons,
-              child: _overlayButtons(),
-            ),
+            _overlayButtons(),
             _settingsIconButton(Colors.transparent),
             Center(
               child: _playAndPause(
@@ -271,6 +271,9 @@ class VideoReadyState extends State<VideoReady> {
               child: widget.style.buffering,
             ),
             OpacityTransition(
+              curve: Curves.easeOut,
+              //direction: SwipeDirection.fromTop,
+              duration: Duration(milliseconds: 400),
               visible: _showForwardStatus,
               child: _forwardAmountAlert(),
             ),
@@ -379,13 +382,24 @@ class VideoReadyState extends State<VideoReady> {
   //---------------//
   Widget _overlayButtons() {
     return Stack(children: [
-      Container(color: Colors.black.withOpacity(0.32)),
-      _settingsIconButton(Colors.white),
-      _bottomProgressBar(),
-      widget.style.onPlayingHidePlayAndPause
-          ? OpacityTransition(
-              visible: !isPlaying, child: _playAndPauseIconButtons())
-          : _playAndPauseIconButtons(),
+      SwipeTransition(
+        visible: _showButtons,
+        child: _settingsIconButton(Colors.white),
+        direction: SwipeDirection.fromTop,
+      ),
+      SwipeTransition(
+        visible: _showButtons,
+        child: _bottomProgressBar(),
+      ),
+      OpacityTransition(
+        visible: _showButtons,
+        child: widget.style.onPlayingHidePlayAndPause
+            ? OpacityTransition(
+                duration: Duration(milliseconds: 400),
+                visible: !isPlaying,
+                child: _playAndPauseIconButtons())
+            : _playAndPauseIconButtons(),
+      ),
     ]);
   }
 
@@ -419,7 +433,7 @@ class VideoReadyState extends State<VideoReady> {
     return Align(
       alignment: Alignment.bottomLeft,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Expanded(child: _rewindAndForward()),
+        //Expanded(child: _rewindAndForward()),
         // OpacityTransition(
         //   visible: _isDraggingProgress,
         //   child: _PreviewFrame(
@@ -429,8 +443,17 @@ class VideoReadyState extends State<VideoReady> {
         //     activedSource: _activedSource,
         //   ),
         // ),
-        Row(
-          children: [
+        Expanded(child: SizedBox()),
+        Container(
+          padding: Margin.vertical(_progressBarBottomMargin),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, Colors.black.withOpacity(0.4)],
+            ),
+          ),
+          child: Row(children: [
             Container(
               alignment: Alignment.center,
               margin: Margin.left(padding),
@@ -502,9 +525,8 @@ class VideoReadyState extends State<VideoReady> {
                     : widget.style.fullScreen,
               ),
             ),
-          ],
+          ]),
         ),
-        SizedBox(height: _progressBarBottomMargin),
       ]),
     );
   }
