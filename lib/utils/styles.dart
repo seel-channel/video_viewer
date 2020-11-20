@@ -12,6 +12,7 @@ class VideoViewerStyle {
     Widget buffering,
     Widget rewind,
     Widget forward,
+    Widget settings,
     Widget fullScreen,
     Widget fullScreenExit,
     this.onPlayingHidePlayAndPause = true,
@@ -28,10 +29,24 @@ class VideoViewerStyle {
             ),
         this.rewind = rewind ?? Icon(Icons.fast_rewind, color: Colors.white),
         this.forward = forward ?? Icon(Icons.fast_forward, color: Colors.white),
-        this.fullScreen =
-            fullScreen ?? Icon(Icons.fullscreen, color: Colors.white),
-        this.fullScreenExit =
-            fullScreenExit ?? Icon(Icons.fullscreen_exit, color: Colors.white),
+        this.fullScreen = fullScreen ??
+            Icon(
+              Icons.fullscreen_outlined,
+              color: Colors.white,
+              size: 24,
+            ),
+        this.fullScreenExit = fullScreenExit ??
+            Icon(
+              Icons.fullscreen_exit_outlined,
+              color: Colors.white,
+              size: 24,
+            ),
+        this.settings = settings ??
+            Icon(
+              Icons.settings,
+              color: Colors.white,
+              size: 20,
+            ),
         this.progressBarStyle = progressBarStyle ?? VideoProgressBarStyle(),
         this.volumeBarStyle = volumeBarStyle ?? VideoVolumeBarStyle(),
         this.forwardAndRewindStyle =
@@ -46,6 +61,7 @@ class VideoViewerStyle {
   final Widget loading;
   final Widget rewind;
   final Widget forward;
+  final Widget settings;
   final Widget buffering;
   final Widget fullScreen;
   final Widget fullScreenExit;
@@ -56,18 +72,19 @@ class VideoProgressBarStyle {
   VideoProgressBarStyle({
     this.height = 5,
     this.dotColor = Colors.white,
-    this.activeColor = Colors.white,
+    Color activeColor,
     Color bufferedColor,
     Color backgroundColor,
     TextStyle textStyle,
     this.margin = EdgeInsets.zero,
     BorderRadiusGeometry borderRadius,
-    this.paddingBeetwen = 10,
-  })  : this.borderRadius = borderRadius ?? EdgeRadius.all(5),
+    this.paddingBeetwen = 14,
+  })  : this.activeColor = activeColor ?? Color(0xFF00b3ff),
         this.bufferedColor = bufferedColor ?? Colors.white.withOpacity(0.3),
         this.backgroundColor = backgroundColor ?? Colors.white.withOpacity(0.2),
+        this.borderRadius = borderRadius ?? EdgeRadius.all(5),
         this.textStyle =
-            textStyle ?? TextStyle(color: Colors.white, fontSize: 12);
+            textStyle ?? TextStyle(color: Colors.white, fontSize: 14);
 
   final double height;
   final double paddingBeetwen;
@@ -129,7 +146,7 @@ class PlayAndPauseWidgetStyle {
     Color background,
     this.circleBorder,
     this.circleSize = 40,
-  })  : this.background = background ?? Colors.black.withOpacity(0.4),
+  })  : this.background = background ?? Color(0xFF00b3ff).withOpacity(0.8),
         this._play = play ?? Icon(Icons.play_arrow, color: Colors.white),
         this._pause = pause ?? Icon(Icons.pause, color: Colors.white);
 

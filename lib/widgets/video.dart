@@ -236,7 +236,9 @@ class VideoReadyState extends State<VideoReady> {
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (_, orientation) {
-      _progressBarBottomMargin = orientation == Orientation.landscape ? 15 : 5;
+      double padding = widget.style.progressBarStyle.paddingBeetwen;
+      _progressBarBottomMargin =
+          orientation == Orientation.landscape ? padding : padding / 2;
 
       if (orientation == Orientation.landscape) {
         Misc.delayed(100, () => Misc.setSystemOverlay([]));
@@ -409,9 +411,9 @@ class VideoReadyState extends State<VideoReady> {
       child: GestureDetector(
         onTap: () => setState(() => _showSettings = !_showSettings),
         child: Container(
-          padding: Margin.all(10),
           color: Colors.transparent,
           child: Icon(Icons.settings, color: color),
+          padding: Margin.all(widget.style.progressBarStyle.paddingBeetwen),
         ),
       ),
     );
@@ -445,42 +447,44 @@ class VideoReadyState extends State<VideoReady> {
         // ),
         Expanded(child: SizedBox()),
         Container(
-          padding: Margin.vertical(_progressBarBottomMargin),
+          padding: Margin.horizontal(padding) +
+              Margin.only(
+                  bottom: _progressBarBottomMargin,
+                  top: _progressBarBottomMargin * 2),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
+              tileMode: TileMode.mirror,
               colors: [Colors.transparent, Colors.black.withOpacity(0.4)],
             ),
           ),
           child: Row(children: [
             Container(
               alignment: Alignment.center,
-              margin: Margin.left(padding),
               color: Colors.transparent,
               child: Text(position, style: style.textStyle),
             ),
+            SizedBox(width: padding),
             Expanded(
-              child: Padding(
-                padding: Margin.horizontal(padding),
-                child: VideoProgressBar(
-                  _controller,
-                  style: style,
-                  isBuffering: isBuffering,
-                  // changePosition: (double position) {
-                  //   if (mounted) {
-                  //     if (position != null)
-                  //       setState(() {
-                  //         _isDraggingProgress = true;
-                  //         _draggingProgressPosition = position;
-                  //       });
-                  //     else
-                  //       setState(() => _isDraggingProgress = false);
-                  //   }
-                  // },
-                ),
+              child: VideoProgressBar(
+                _controller,
+                style: style,
+                isBuffering: isBuffering,
+                // changePosition: (double position) {
+                //   if (mounted) {
+                //     if (position != null)
+                //       setState(() {
+                //         _isDraggingProgress = true;
+                //         _draggingProgressPosition = position;
+                //       });
+                //     else
+                //       setState(() => _isDraggingProgress = false);
+                //   }
+                // },
               ),
             ),
+            SizedBox(width: padding),
             Container(
               color: Colors.transparent,
               alignment: Alignment.center,
@@ -493,37 +497,35 @@ class VideoReadyState extends State<VideoReady> {
                 ),
               ),
             ),
-            Padding(
-              padding: Margin.horizontal(padding > 5 ? padding - 5 : 0),
-              child: GestureDetector(
-                onTap: () {
-                  if (!isFullScreen) {
-                    PushRoute.page(
-                      context,
-                      FullScreenPage(
-                        style: widget.style,
-                        source: widget.source,
-                        looping: widget.looping,
-                        controller: _controller,
-                        rewindAmount: widget.rewindAmount,
-                        forwardAmount: widget.forwardAmount,
-                        activedSource: _activedSource,
-                        defaultAspectRatio: widget.defaultAspectRatio,
-                        changeSource: (controller, activedSource) {
-                          _changeVideoSource(controller, activedSource, false);
-                        },
-                      ),
-                      withTransition: false,
-                    );
-                  } else {
-                    Misc.setSystemOverlay(SystemOverlay.values);
-                    Navigator.pop(context);
-                  }
-                },
-                child: isFullScreen
-                    ? widget.style.fullScreenExit
-                    : widget.style.fullScreen,
-              ),
+            SizedBox(width: padding),
+            GestureDetector(
+              onTap: () {
+                if (!isFullScreen) {
+                  PushRoute.page(
+                    context,
+                    FullScreenPage(
+                      style: widget.style,
+                      source: widget.source,
+                      looping: widget.looping,
+                      controller: _controller,
+                      rewindAmount: widget.rewindAmount,
+                      forwardAmount: widget.forwardAmount,
+                      activedSource: _activedSource,
+                      defaultAspectRatio: widget.defaultAspectRatio,
+                      changeSource: (controller, activedSource) {
+                        _changeVideoSource(controller, activedSource, false);
+                      },
+                    ),
+                    withTransition: false,
+                  );
+                } else {
+                  Misc.setSystemOverlay(SystemOverlay.values);
+                  Navigator.pop(context);
+                }
+              },
+              child: isFullScreen
+                  ? widget.style.fullScreenExit
+                  : widget.style.fullScreen,
             ),
           ]),
         ),
