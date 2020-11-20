@@ -174,10 +174,10 @@ class VideoReadyState extends State<VideoReady> {
       if (!_showButtons) {
         _showAMomentPlayAndPause = true;
         _hidePlayAndPause?.cancel();
-        _hidePlayAndPause = Timer(Duration(milliseconds: 800), () {
+        _hidePlayAndPause = Timer(Duration(milliseconds: 600), () {
           setState(() => _showAMomentPlayAndPause = false);
         });
-      } //else if (isPlaying) _showButtons = false;
+      } else if (isPlaying) _showButtons = false;
     });
   }
 
@@ -197,7 +197,7 @@ class VideoReadyState extends State<VideoReady> {
       _showForwardStatus = true;
       _showAMomentRewindIcons[index] = true;
     });
-    Misc.delayed(1200, () {
+    Misc.delayed(600, () {
       setState(() {
         _showForwardStatus = false;
         _showAMomentRewindIcons[index] = false;
@@ -255,7 +255,7 @@ class VideoReadyState extends State<VideoReady> {
               Container(child: widget.style.thumbnail),
             _rewindAndForward(),
             _overlayButtons(),
-            _settingsIconButton(Colors.transparent),
+            _settingsIconButton(true),
             Center(
               child: _playAndPause(
                 Container(
@@ -269,17 +269,20 @@ class VideoReadyState extends State<VideoReady> {
               ),
             ),
             OpacityTransition(
+              curve: Curves.ease,
+              duration: Duration(milliseconds: 400),
               visible: isBuffering,
               child: widget.style.buffering,
             ),
             OpacityTransition(
-              curve: Curves.easeOut,
-              //direction: SwipeDirection.fromTop,
+              curve: Curves.ease,
               duration: Duration(milliseconds: 400),
               visible: _showForwardStatus,
               child: _forwardAmountAlert(),
             ),
             OpacityTransition(
+              curve: Curves.ease,
+              duration: Duration(milliseconds: 400),
               visible: _showAMomentPlayAndPause,
               child: _playAndPauseIconButtons(),
             ),
@@ -367,7 +370,7 @@ class VideoReadyState extends State<VideoReady> {
     String text = secondsFormatter(_forwardAmount);
     final style = widget.style.forwardAndRewindStyle;
     return Align(
-      alignment: style.alignment,
+      alignment: Alignment.topCenter,
       child: Container(
         padding: style.padding,
         decoration: BoxDecoration(
@@ -384,35 +387,49 @@ class VideoReadyState extends State<VideoReady> {
   //---------------//
   Widget _overlayButtons() {
     return Stack(children: [
+      OpacityTransition(
+        curve: Curves.ease,
+        duration: Duration(milliseconds: 400),
+        visible: _showButtons,
+        child: Container(color: Colors.black.withOpacity(0.4)),
+      ),
       SwipeTransition(
         visible: _showButtons,
-        child: _settingsIconButton(Colors.white),
         direction: SwipeDirection.fromTop,
+        child: _settingsIconButton(),
       ),
       SwipeTransition(
         visible: _showButtons,
         child: _bottomProgressBar(),
       ),
       OpacityTransition(
-        visible: _showButtons,
-        child: widget.style.onPlayingHidePlayAndPause
-            ? OpacityTransition(
-                duration: Duration(milliseconds: 400),
-                visible: !isPlaying,
-                child: _playAndPauseIconButtons())
-            : _playAndPauseIconButtons(),
+        curve: Curves.ease,
+        duration: Duration(milliseconds: 400),
+        visible: _showButtons && !isPlaying,
+        child: _playAndPauseIconButtons(),
       ),
     ]);
   }
 
-  Widget _settingsIconButton(Color color) {
+  Widget _settingsIconButton([bool transparent = false]) {
     return Align(
       alignment: Alignment.topRight,
       child: GestureDetector(
         onTap: () => setState(() => _showSettings = !_showSettings),
         child: Container(
-          color: Colors.transparent,
-          child: Icon(Icons.settings, color: color),
+          // decoration: !transparent
+          //     ? BoxDecoration(
+          //         gradient: RadialGradient(
+          //           radius: 0.4,
+          //           colors: [
+          //             Colors.black.withOpacity(0.32),
+          //             Colors.transparent
+          //           ],
+          //         ),
+          //       )
+          //     : null,
+          child: Opacity(
+              opacity: transparent ? 0 : 1, child: widget.style.settings),
           padding: Margin.all(widget.style.progressBarStyle.paddingBeetwen),
         ),
       ),
@@ -451,14 +468,14 @@ class VideoReadyState extends State<VideoReady> {
               Margin.only(
                   bottom: _progressBarBottomMargin,
                   top: _progressBarBottomMargin * 2),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              tileMode: TileMode.mirror,
-              colors: [Colors.transparent, Colors.black.withOpacity(0.4)],
-            ),
-          ),
+          // decoration: BoxDecoration(
+          //   gradient: LinearGradient(
+          //     begin: Alignment.topCenter,
+          //     end: Alignment.bottomCenter,
+          //     tileMode: TileMode.mirror,
+          //     colors: [Colors.transparent, Colors.black.withOpacity(0.32)],
+          //   ),
+          // ),
           child: Row(children: [
             Container(
               alignment: Alignment.center,

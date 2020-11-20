@@ -15,7 +15,6 @@ class VideoViewerStyle {
     Widget settings,
     Widget fullScreen,
     Widget fullScreenExit,
-    this.onPlayingHidePlayAndPause = true,
   })  : this.loading = loading ??
             Center(
               child: CircularProgressIndicator(strokeWidth: 1.6),
@@ -65,7 +64,6 @@ class VideoViewerStyle {
   final Widget buffering;
   final Widget fullScreen;
   final Widget fullScreenExit;
-  final bool onPlayingHidePlayAndPause;
 }
 
 class VideoProgressBarStyle {
@@ -124,15 +122,13 @@ class ForwardAndRewindStyle {
     Color backgroundColor,
     EdgeInsetsGeometry padding,
     BorderRadiusGeometry borderRadius,
-    this.alignment = Alignment.topCenter,
   })  : this.padding = padding ?? Margin.all(5),
         this.backgroundColor =
             backgroundColor ?? Colors.black.withOpacity(0.25),
         this.textStyle =
-            textStyle ?? TextStyle(color: Colors.white, fontSize: 12),
+            textStyle ?? TextStyle(color: Colors.white, fontSize: 14),
         this.borderRadius = borderRadius ?? EdgeRadius.vertical(bottom: 5);
 
-  final Alignment alignment;
   final TextStyle textStyle;
   final Color backgroundColor;
   final EdgeInsetsGeometry padding;

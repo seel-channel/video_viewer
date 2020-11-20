@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: VideoViewer(source: getNetworkVideoSources(src)),
+      body: SafeArea(child: VideoViewer(source: getNetworkVideoSources(src))),
     );
   }
 

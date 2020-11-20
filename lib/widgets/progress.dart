@@ -170,24 +170,25 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
         setState(() => dragging = true);
       },
       onHorizontalDragUpdate: (DragUpdateDetails details) {
+        setState(() => animationMS = 0);
         seekToRelativePosition(details.localPosition, details.globalPosition);
       },
       onHorizontalDragEnd: (DragEndDetails details) async {
-        //changePosition(null);
         setState(() => dragging = false);
+        //changePosition(null);
         play();
       },
       onTapDown: (TapDownDetails details) {
+        pause();
         setState(() {
           dragging = true;
           animationMS = 0;
         });
-        pause();
         seekToRelativePosition(details.localPosition);
       },
       onTapUp: (TapUpDetails details) {
-        setState(() => dragging = false);
         seekToRelativePosition(details.localPosition);
+        setState(() => dragging = false);
         Misc.delayed(50, () => play());
       },
     );
