@@ -107,8 +107,8 @@ class VideoReadyState extends State<VideoReady> {
     _controller.setPlaybackSpeed(speed);
     _controller.seekTo(seekTo);
     _controller.play();
-    if (widget.onChangeSource != null)
-      widget.onChangeSource(source, _activedSource);
+    if (widget.onChangeSource != null) //Only used in fullscreenpage
+      widget.onChangeSource(_controller, _activedSource);
   }
 
   void _videoListener() {
@@ -488,17 +488,18 @@ class VideoReadyState extends State<VideoReady> {
                 _controller,
                 style: style,
                 isBuffering: isBuffering,
-                // changePosition: (double position) {
-                //   if (mounted) {
-                //     if (position != null)
-                //       setState(() {
-                //         _isDraggingProgress = true;
-                //         _draggingProgressPosition = position;
-                //       });
-                //     else
-                //       setState(() => _isDraggingProgress = false);
-                //   }
-                // },
+                changePosition: (double position) {
+                  if (mounted) {
+                    setState(() {});
+                    // if (position != null)
+                    //   setState(() {
+                    //     _isDraggingProgress = true;
+                    //     _draggingProgressPosition = position;
+                    //   });
+                    // else
+                    //   setState(() => _isDraggingProgress = false);
+                  }
+                },
               ),
             ),
             SizedBox(width: padding),
