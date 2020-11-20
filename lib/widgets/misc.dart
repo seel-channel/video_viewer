@@ -278,21 +278,18 @@ class _FullScreenPageState extends State<FullScreenPage> {
       body: WillPopScope(
         onWillPop: _returnButton,
         child: Center(
-          child: Hero(
-            tag: 'VideoReady',
-            child: VideoReady(
-              key: key,
-              style: widget.style,
-              source: widget.source,
-              looping: widget.looping,
-              controller: widget.controller,
-              activedSource: widget.activedSource,
-              rewindAmount: widget.rewindAmount,
-              forwardAmount: widget.forwardAmount,
-              defaultAspectRatio: widget.defaultAspectRatio,
-              onChangeSource: (controller, activedSource) =>
-                  widget.changeSource(controller, activedSource),
-            ),
+          child: VideoReady(
+            key: key,
+            style: widget.style,
+            source: widget.source,
+            looping: widget.looping,
+            controller: widget.controller,
+            activedSource: widget.activedSource,
+            rewindAmount: widget.rewindAmount,
+            forwardAmount: widget.forwardAmount,
+            defaultAspectRatio: widget.defaultAspectRatio,
+            onChangeSource: (controller, activedSource) =>
+                widget.changeSource(controller, activedSource),
           ),
         ),
       ),
