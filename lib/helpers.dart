@@ -143,3 +143,37 @@ class _SwipeTransitionState extends State<SwipeTransition> {
     );
   }
 }
+
+class _FadeRoute<T> extends PageRoute<T> {
+  _FadeRoute(this.child, {this.milliseconds = 400});
+
+  final Widget child;
+  final int milliseconds;
+
+  @override
+  Color get barrierColor => Colors.black;
+
+  @override
+  String get barrierLabel => null;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    return FadeTransition(
+      opacity: animation,
+      child: child,
+    );
+  }
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Duration get transitionDuration => Duration(milliseconds: milliseconds);
+}
+
+class PushRoute2 {
+  static void fadePage(BuildContext context, Widget page,
+          {int milliseconds = 400}) =>
+      Navigator.of(context).push(_FadeRoute(page, milliseconds: milliseconds));
+}
