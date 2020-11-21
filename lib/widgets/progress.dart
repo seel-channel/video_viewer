@@ -180,11 +180,11 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
       },
       onTapDown: (TapDownDetails details) {
         pause();
+        seekToRelativePosition(details.localPosition);
         setState(() {
           dragging = true;
           animationMS = 0;
         });
-        seekToRelativePosition(details.localPosition);
       },
       onTapUp: (TapUpDetails details) {
         seekToRelativePosition(details.localPosition);
