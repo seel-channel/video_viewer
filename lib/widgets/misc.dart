@@ -58,6 +58,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
   @override
   Widget build(BuildContext context) {
     return OpacityTransition(
+      curve: Curves.ease,
+      duration: Duration(milliseconds: 400),
       visible: widget.visible,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),

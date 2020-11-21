@@ -484,19 +484,19 @@ class VideoReadyState extends State<VideoReady> {
                 },
               ),
             ),
-            // SizedBox(width: padding),
-            // Container(
-            //   color: Colors.transparent,
-            //   alignment: Alignment.center,
-            //   child: GestureDetector(
-            //     onTap: () => setState(() => _progressBarTextShowPosition =
-            //         !_progressBarTextShowPosition),
-            //     child: Text(
-            //       _progressBarTextShowPosition ? position : remaing,
-            //       style: style.textStyle,
-            //     ),
-            //   ),
-            // ),
+            SizedBox(width: padding),
+            Container(
+              color: Colors.transparent,
+              alignment: Alignment.center,
+              child: GestureDetector(
+                onTap: () => setState(() => _progressBarTextShowPosition =
+                    !_progressBarTextShowPosition),
+                child: Text(
+                  _progressBarTextShowPosition ? position : remaing,
+                  style: style.textStyle,
+                ),
+              ),
+            ),
             _settingsIconButton(),
             GestureDetector(
               onTap: () {
