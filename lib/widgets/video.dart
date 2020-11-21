@@ -56,9 +56,8 @@ class VideoReadyState extends State<VideoReady> {
   Offset _horizontalDragStartOffset;
   String _activedSource;
   //Preview Frame
-  // bool _isDraggingProgress = false;
-  // double _draggingProgressPosition;
-  // Duration _seekToPosition;
+  bool _isDraggingProgress = false;
+  double _draggingProgressPosition = 50;
 
   set fullScreen(bool value) => setState(() => isFullScreen = value);
 
@@ -118,7 +117,8 @@ class VideoReadyState extends State<VideoReady> {
       if (_showButtons) {
         if (isPlaying) {
           if (_timerPosition == null) _createBufferTimer();
-          if (_closeOverlayButtons == null) _startCloseOverlayButtons();
+          if (_closeOverlayButtons == null && !_isDraggingProgress)
+            _startCloseOverlayButtons();
         } else if (_isGoingToCloseBufferingWidget) _cancelCloseOverlayButtons();
       }
     }
@@ -255,7 +255,6 @@ class VideoReadyState extends State<VideoReady> {
               Container(child: widget.style.thumbnail),
             _rewindAndForward(),
             _overlayButtons(),
-            _settingsIconButton(true),
             Center(
               child: _playAndPause(
                 Container(
@@ -319,6 +318,7 @@ class VideoReadyState extends State<VideoReady> {
         if (!_showSettings) {
           setState(() {
             _showButtons = !_showButtons;
+            if (_isDraggingProgress) _isDraggingProgress = false;
             if (_showButtons) _isGoingToCloseBufferingWidget = false;
           });
         }
@@ -326,6 +326,9 @@ class VideoReadyState extends State<VideoReady> {
     );
   }
 
+  //------//
+  //REWIND//
+  //------//
   Widget _rewindAndForward() {
     return _rewindAndForwardLayout(
       rewind: GestureDetector(
@@ -335,9 +338,6 @@ class VideoReadyState extends State<VideoReady> {
     );
   }
 
-  //-------//
-  //WIDGETS//
-  //-------//
   Widget _rewindAndForwardLayout({Widget rewind, Widget forward}) {
     return Row(children: [
       Expanded(child: rewind),
@@ -356,13 +356,6 @@ class VideoReadyState extends State<VideoReady> {
         visible: _showAMomentRewindIcons[1],
         child: Center(child: widget.style.forward),
       ),
-    );
-  }
-
-  Widget _playAndPauseIconButtons() {
-    final style = widget.style.playAndPauseStyle;
-    return Center(
-      child: _playAndPause(!isPlaying ? style.playWidget : style.pauseWidget),
     );
   }
 
@@ -385,19 +378,15 @@ class VideoReadyState extends State<VideoReady> {
   //---------------//
   //OVERLAY BUTTONS//
   //---------------//
+  Widget _playAndPauseIconButtons() {
+    final style = widget.style.playAndPauseStyle;
+    return Center(
+      child: _playAndPause(!isPlaying ? style.playWidget : style.pauseWidget),
+    );
+  }
+
   Widget _overlayButtons() {
     return Stack(children: [
-      OpacityTransition(
-        curve: Curves.ease,
-        duration: Duration(milliseconds: 400),
-        visible: _showButtons,
-        child: Container(color: Colors.black.withOpacity(0.4)),
-      ),
-      SwipeTransition(
-        visible: _showButtons,
-        direction: SwipeDirection.fromTop,
-        child: _settingsIconButton(),
-      ),
       SwipeTransition(
         visible: _showButtons,
         child: _bottomProgressBar(),
@@ -411,27 +400,36 @@ class VideoReadyState extends State<VideoReady> {
     ]);
   }
 
-  Widget _settingsIconButton([bool transparent = false]) {
+  //-------------------//
+  //BOTTOM PROGRESS BAR//
+  //-------------------//
+  Widget _settingsIconButton() {
     return Align(
       alignment: Alignment.topRight,
       child: GestureDetector(
         onTap: () => setState(() => _showSettings = !_showSettings),
         child: Container(
-          // decoration: !transparent
-          //     ? BoxDecoration(
-          //         gradient: RadialGradient(
-          //           radius: 0.4,
-          //           colors: [
-          //             Colors.black.withOpacity(0.32),
-          //             Colors.transparent
-          //           ],
-          //         ),
-          //       )
-          //     : null,
-          child: Opacity(
-              opacity: transparent ? 0 : 1, child: widget.style.settings),
-          padding: Margin.all(widget.style.progressBarStyle.paddingBeetwen),
+          child: widget.style.settings,
+          padding:
+              Margin.horizontal(widget.style.progressBarStyle.paddingBeetwen),
         ),
+      ),
+    );
+  }
+
+  Widget _draggingProgress(String position) {
+    VideoProgressBarStyle style = widget.style.progressBarStyle;
+    return OpacityTransition(
+      visible: _isDraggingProgress,
+      child: Container(
+        width: 60,
+        child: Text(position, style: style.textStyle),
+        margin: Margin.left(_draggingProgressPosition - 30),
+        padding: Margin.all(5),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.2),
+            borderRadius: EdgeRadius.all(5)),
       ),
     );
   }
@@ -452,74 +450,65 @@ class VideoReadyState extends State<VideoReady> {
     return Align(
       alignment: Alignment.bottomLeft,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        //Expanded(child: _rewindAndForward()),
-        // OpacityTransition(
-        //   visible: _isDraggingProgress,
-        //   child: _PreviewFrame(
-        //     source: widget.source,
-        //     seekTo: _seekToPosition,
-        //     position: _controller.value.position,
-        //     activedSource: _activedSource,
-        //   ),
-        // ),
         Expanded(child: SizedBox()),
+        _draggingProgress(position),
         Container(
           padding: Margin.horizontal(padding) +
-              Margin.only(
-                  bottom: _progressBarBottomMargin,
-                  top: _progressBarBottomMargin * 2),
-          // decoration: BoxDecoration(
-          //   gradient: LinearGradient(
-          //     begin: Alignment.topCenter,
-          //     end: Alignment.bottomCenter,
-          //     tileMode: TileMode.mirror,
-          //     colors: [Colors.transparent, Colors.black.withOpacity(0.32)],
-          //   ),
-          // ),
-          child: Row(children: [
-            Container(
-              alignment: Alignment.center,
-              color: Colors.transparent,
-              child: Text(position, style: style.textStyle),
+              Margin.vertical(_progressBarBottomMargin),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              tileMode: TileMode.mirror,
+              colors: [Colors.transparent, Colors.black.withOpacity(0.4)],
             ),
+          ),
+          child: Row(children: [
+            _playAndPause(!isPlaying
+                ? widget.style.playAndPauseStyle.play
+                : widget.style.playAndPauseStyle.pause),
             SizedBox(width: padding),
+            // Container(
+            //   alignment: Alignment.center,
+            //   color: Colors.transparent,
+            //   child: Text(position, style: style.textStyle),
+            // ),
+            // SizedBox(width: padding),
             Expanded(
               child: VideoProgressBar(
                 _controller,
                 style: style,
                 isBuffering: isBuffering,
                 changePosition: (double position) {
-                  if (mounted) {
-                    setState(() {});
-                    // if (position != null)
-                    //   setState(() {
-                    //     _isDraggingProgress = true;
-                    //     _draggingProgressPosition = position;
-                    //   });
-                    // else
-                    //   setState(() => _isDraggingProgress = false);
-                  }
+                  if (mounted)
+                    setState(() {
+                      if (position != null) {
+                        _isDraggingProgress = true;
+                        _draggingProgressPosition = position;
+                      } else
+                        _isDraggingProgress = false;
+                    });
                 },
               ),
             ),
-            SizedBox(width: padding),
-            Container(
-              color: Colors.transparent,
-              alignment: Alignment.center,
-              child: GestureDetector(
-                onTap: () => setState(() => _progressBarTextShowPosition =
-                    !_progressBarTextShowPosition),
-                child: Text(
-                  _progressBarTextShowPosition ? duration : remaing,
-                  style: style.textStyle,
-                ),
-              ),
-            ),
-            SizedBox(width: padding),
+            // SizedBox(width: padding),
+            // Container(
+            //   color: Colors.transparent,
+            //   alignment: Alignment.center,
+            //   child: GestureDetector(
+            //     onTap: () => setState(() => _progressBarTextShowPosition =
+            //         !_progressBarTextShowPosition),
+            //     child: Text(
+            //       _progressBarTextShowPosition ? duration : remaing,
+            //       style: style.textStyle,
+            //     ),
+            //   ),
+            // ),
+            _settingsIconButton(),
             GestureDetector(
               onTap: () {
                 if (!isFullScreen) {
-                  PushRoute.page(
+                  PushRoute.transparentPage(
                     context,
                     FullScreenPage(
                       style: widget.style,
@@ -534,7 +523,6 @@ class VideoReadyState extends State<VideoReady> {
                         _changeVideoSource(controller, activedSource, false);
                       },
                     ),
-                    withTransition: false,
                   );
                 } else {
                   Misc.setSystemOverlay(SystemOverlay.values);
@@ -551,70 +539,3 @@ class VideoReadyState extends State<VideoReady> {
     );
   }
 }
-
-// class _PreviewFrame extends StatefulWidget {
-//   _PreviewFrame({
-//     Key key,
-//     this.seekTo,
-//     this.position,
-//     this.source,
-//     this.activedSource,
-//   }) : super(key: key);
-
-//   final Duration seekTo;
-//   final double position;
-//   final String activedSource;
-//   final Map<String, VideoPlayerController> source;
-
-//   @override
-//   _PreviewFrameState createState() => _PreviewFrameState();
-// }
-
-// class _PreviewFrameState extends State<_PreviewFrame> {
-//   VideoPlayerController controller;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     controller = widget.source[widget.activedSource]
-//       ..initialize().then((_) async {
-//         await controller.seekTo(widget.seekTo);
-//         await controller.play();
-//         controller.setVolume(0);
-//         setState(() {});
-//       });
-//   }
-
-//   @override
-//   void dispose() {
-//     //disposeController();
-//     super.dispose();
-//   }
-
-//   @override
-//   void didUpdateWidget(_PreviewFrame oldWidget) {
-//     super.didUpdateWidget(oldWidget);
-//     controller.seekTo(widget.seekTo);
-//     controller.play();
-//   }
-
-//   void disposeController() async {
-//     await controller?.pause();
-//     await controller.dispose();
-//     controller = null;
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 100,
-//       color: Colors.white,
-//       margin: Margin.left(widget.position - 50),
-//       child: controller.value.initialized
-//           ? AspectRatio(
-//               aspectRatio: controller.value.aspectRatio,
-//               child: VideoPlayer(controller))
-//           : SizedBox(),
-//     );
-//   }
-// }
