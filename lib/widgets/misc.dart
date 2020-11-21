@@ -199,7 +199,6 @@ class _SettingsMenuState extends State<SettingsMenu> {
           onTap: () {
             widget.changeSource(entry.value, entry.key);
             closeAllAndShowMenu();
-            showMenu = false;
           },
           child: _textSettings(entry.key, entry.key == widget.activedSource),
         ),
