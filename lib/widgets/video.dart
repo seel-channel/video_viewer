@@ -436,14 +436,13 @@ class VideoReadyState extends State<VideoReady> {
 
   Widget _bottomProgressBar() {
     VideoProgressBarStyle style = widget.style.progressBarStyle;
-    String position = "00:00", remaing = "-00:00", duration = "00:00";
+    String position = "00:00", remaing = "-00:00";
     double padding = style.paddingBeetwen;
 
     if (_controller.value.initialized) {
       final value = _controller.value;
       final seconds = value.position.inSeconds;
       position = secondsFormatter(seconds);
-      duration = secondsFormatter(value.duration.inSeconds);
       remaing = secondsFormatter(seconds - value.duration.inSeconds);
     }
 
@@ -468,12 +467,6 @@ class VideoReadyState extends State<VideoReady> {
                 ? widget.style.playAndPauseStyle.play
                 : widget.style.playAndPauseStyle.pause),
             SizedBox(width: padding),
-            // Container(
-            //   alignment: Alignment.center,
-            //   color: Colors.transparent,
-            //   child: Text(position, style: style.textStyle),
-            // ),
-            // SizedBox(width: padding),
             Expanded(
               child: VideoProgressBar(
                 _controller,
@@ -499,7 +492,7 @@ class VideoReadyState extends State<VideoReady> {
             //     onTap: () => setState(() => _progressBarTextShowPosition =
             //         !_progressBarTextShowPosition),
             //     child: Text(
-            //       _progressBarTextShowPosition ? duration : remaing,
+            //       _progressBarTextShowPosition ? position : remaing,
             //       style: style.textStyle,
             //     ),
             //   ),

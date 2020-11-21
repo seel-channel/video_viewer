@@ -112,10 +112,11 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 
   Widget _dotIdentifier(double maxWidth) => _dot(maxWidth);
   Widget _dotDragging(double maxWidth) {
+    double widthPos = (position / duration) * maxWidth;
+    double widthDot = height * 2;
     return BooleanTween(
-      animate: dragging &&
-          position != 0 &&
-          position != controller.value.duration.inMilliseconds,
+      animate:
+          dragging && widthPos > widthDot && widthPos < maxWidth - widthDot,
       tween: Tween<double>(begin: 0, end: 0.4),
       builder: (value) => _dot(maxWidth, value, 2),
     );
@@ -123,9 +124,10 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 
   Widget _dot(double maxWidth, [double opacity = 1, int multiplicator]) {
     multiplicator = Misc.ifNull(multiplicator, 1);
-    double width = position == 0
-        ? height * 2
-        : ((position / duration) * maxWidth) + height * multiplicator;
+    double widthPos = (position / duration) * maxWidth;
+    double widthDot = height * 2;
+    double width =
+        widthPos < height ? widthDot : widthPos + height * multiplicator;
 
     return AnimatedContainer(
       width: width,
