@@ -76,13 +76,13 @@ class VideoProgressBarStyle {
     TextStyle textStyle,
     this.margin = EdgeInsets.zero,
     BorderRadiusGeometry borderRadius,
-    this.paddingBeetwen = 14,
+    this.paddingBeetwen = 12,
   })  : this.activeColor = activeColor ?? Color(0xFF00b3ff),
         this.bufferedColor = bufferedColor ?? Colors.white.withOpacity(0.3),
         this.backgroundColor = backgroundColor ?? Colors.white.withOpacity(0.2),
         this.borderRadius = borderRadius ?? EdgeRadius.all(5),
         this.textStyle =
-            textStyle ?? TextStyle(color: Colors.white, fontSize: 14);
+            textStyle ?? TextStyle(color: Colors.white, fontSize: 12);
 
   final double height;
   final double paddingBeetwen;
@@ -126,7 +126,7 @@ class ForwardAndRewindStyle {
         this.backgroundColor =
             backgroundColor ?? Colors.black.withOpacity(0.25),
         this.textStyle =
-            textStyle ?? TextStyle(color: Colors.white, fontSize: 14),
+            textStyle ?? TextStyle(color: Colors.white, fontSize: 12),
         this.borderRadius = borderRadius ?? EdgeRadius.vertical(bottom: 5);
 
   final TextStyle textStyle;
@@ -143,16 +143,16 @@ class PlayAndPauseWidgetStyle {
     this.circleBorder,
     this.circleSize = 40,
   })  : this.background = background ?? Color(0xFF00b3ff).withOpacity(0.8),
-        this._play = play ?? Icon(Icons.play_arrow, color: Colors.white),
-        this._pause = pause ?? Icon(Icons.pause, color: Colors.white);
+        this.play = play ?? Icon(Icons.play_arrow, color: Colors.white),
+        this.pause = pause ?? Icon(Icons.pause, color: Colors.white);
 
-  final Widget _play;
-  final Widget _pause;
+  final Widget play;
+  final Widget pause;
   final Color background;
   final double circleSize;
   final BoxBorder circleBorder;
 
-  Widget base(Widget child, Color background) {
+  Widget _base(Widget child, Color background) {
     return Container(
       width: circleSize,
       height: circleSize,
@@ -165,6 +165,6 @@ class PlayAndPauseWidgetStyle {
     );
   }
 
-  Widget get playWidget => base(_play, background);
-  Widget get pauseWidget => base(_pause, background);
+  Widget get playWidget => _base(play, background);
+  Widget get pauseWidget => _base(pause, background);
 }
