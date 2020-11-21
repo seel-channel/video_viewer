@@ -53,6 +53,20 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   }
 
   @override
+  void didUpdateWidget(VideoProgressBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller.hashCode != controller.hashCode) {
+      setState(() {
+        controller = widget.controller;
+        if (controller.value.initialized)
+          duration = controller.value.duration.inMilliseconds;
+      });
+      controller.addListener(progressListener);
+      progressListener();
+    }
+  }
+
+  @override
   void dispose() {
     controller.removeListener(progressListener);
     super.dispose();
@@ -87,7 +101,6 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (_, constraints) {
       double width = constraints.maxWidth;
-
       return _detectTap(
         width: width,
         child: Container(
