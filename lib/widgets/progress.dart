@@ -173,11 +173,12 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   }
 
   Widget _detectTap({Widget child, double width}) {
-    void seekToRelativePosition(Offset local) async {
+    void seekToRelativePosition(Offset local, [bool showText = false]) async {
       final double localPos = local.dx / width;
       final Duration position = controller.value.duration * localPos;
       await controller.seekTo(position);
-      if (local.dx > 0 && local.dx < width) changePosition(localPos, width);
+      if (showText && local.dx > 0 && local.dx < width)
+        changePosition(localPos, width);
     }
 
     return GestureDetector(
@@ -188,7 +189,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
       },
       onHorizontalDragUpdate: (DragUpdateDetails details) {
         setState(() => animationMS = 0);
-        seekToRelativePosition(details.localPosition);
+        seekToRelativePosition(details.localPosition, true);
       },
       onHorizontalDragEnd: (DragEndDetails details) async {
         setState(() => dragging = false);
