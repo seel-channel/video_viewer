@@ -8,6 +8,7 @@ class VideoProgressBar extends StatefulWidget {
   VideoProgressBar(
     this.controller, {
     Key key,
+    this.verticalPadding = 0,
     VideoProgressBarStyle style,
     this.isBuffering = false,
     this.changePosition,
@@ -15,9 +16,10 @@ class VideoProgressBar extends StatefulWidget {
         super(key: key);
 
   final bool isBuffering;
+  final double verticalPadding;
   final VideoProgressBarStyle style;
   final VideoPlayerController controller;
-  final void Function(double) changePosition;
+  final void Function(double, double) changePosition;
 
   @override
   _VideoProgressBarState createState() => _VideoProgressBarState();
@@ -80,8 +82,8 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
     if (controller.value.isPlaying) controller.pause();
   }
 
-  void changePosition(double position) {
-    if (widget.changePosition != null) widget.changePosition(position);
+  void changePosition(double scale, double width) {
+    if (widget.changePosition != null) widget.changePosition(scale, width);
   }
 
   void progressListener() {
@@ -106,6 +108,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
         child: Container(
           width: width,
           color: Colors.transparent,
+          padding: Margin.vertical(widget.verticalPadding),
           margin: widget.style.margin,
           alignment: Alignment.centerLeft,
           child: controller.value.initialized
@@ -170,12 +173,11 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   }
 
   Widget _detectTap({Widget child, double width}) {
-    void seekToRelativePosition(Offset local, [Offset global]) async {
+    void seekToRelativePosition(Offset local) async {
       final double localPos = local.dx / width;
       final Duration position = controller.value.duration * localPos;
       await controller.seekTo(position);
-      if (global != null && local.dx > 0 && local.dx < width)
-        changePosition(global.dx);
+      if (local.dx > 0 && local.dx < width) changePosition(localPos, width);
     }
 
     return GestureDetector(
@@ -186,11 +188,11 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
       },
       onHorizontalDragUpdate: (DragUpdateDetails details) {
         setState(() => animationMS = 0);
-        seekToRelativePosition(details.localPosition, details.globalPosition);
+        seekToRelativePosition(details.localPosition);
       },
       onHorizontalDragEnd: (DragEndDetails details) async {
         setState(() => dragging = false);
-        changePosition(null);
+        changePosition(null, width);
         play();
       },
       onTapDown: (TapDownDetails details) {
