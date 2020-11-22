@@ -55,7 +55,7 @@ class VideoReadyState extends State<VideoReady> {
   List<bool> _showAMomentRewindIcons = [false, false];
   String _activedSource;
   Offset _horizontalDragStartOffset;
-  int _lastPosition = 0, _forwardAmount = 0;
+  int _lastPosition = 0, _forwardAmount = 0, _transitions = 0;
   double _progressBarBottomMargin = 0;
   //TEXT POSITION ON DRAGGING
   bool _isDraggingProgress = false;
@@ -66,6 +66,7 @@ class VideoReadyState extends State<VideoReady> {
 
   @override
   void initState() {
+    _transitions = widget.style.transitions;
     _controller = widget.controller;
     _activedSource = widget.activedSource;
     _controller.addListener(_videoListener);
@@ -196,7 +197,7 @@ class VideoReadyState extends State<VideoReady> {
 
   void _changeIconPlayWidth() {
     Misc.delayed(
-      400,
+      _transitions,
       () => setState(() => _iconPlayWidth = GetKey.width(_playKey)),
     );
   }
@@ -340,7 +341,7 @@ class VideoReadyState extends State<VideoReady> {
   Widget _fadeTransition({bool visible, Widget child}) {
     return OpacityTransition(
       curve: Curves.ease,
-      duration: Duration(milliseconds: 400),
+      duration: Duration(milliseconds: _transitions),
       visible: visible,
       child: child,
     );
@@ -435,6 +436,7 @@ class VideoReadyState extends State<VideoReady> {
   Widget _overlayButtons() {
     return Stack(children: [
       SwipeTransition(
+        duration: Duration(milliseconds: _transitions),
         visible: _showButtons,
         child: _bottomProgressBar(),
       ),

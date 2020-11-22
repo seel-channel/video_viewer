@@ -70,7 +70,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   Widget build(BuildContext context) {
     return OpacityTransition(
       curve: Curves.ease,
-      duration: Duration(milliseconds: 400),
+      duration: Duration(milliseconds: widget.style.transitions),
       visible: widget.visible,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
@@ -80,28 +80,37 @@ class _SettingsMenuState extends State<SettingsMenu> {
               onTap: widget.changeState,
               child: Container(color: Colors.black.withOpacity(0.32)),
             ),
-            OpacityTransition(
+            _fadeTransition(
               visible: !showMenu,
               child: GestureDetector(
                 onTap: closeAllAndShowMenu,
                 child: Container(color: Colors.transparent),
               ),
             ),
-            OpacityTransition(
+            _fadeTransition(
               visible: showMenu,
               child: iconsMainMenu(),
             ),
-            OpacityTransition(
+            _fadeTransition(
               visible: show[0],
               child: settingsQualityMenu(),
             ),
-            OpacityTransition(
+            _fadeTransition(
               visible: show[1],
               child: settingsSpeedMenu(),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _fadeTransition({bool visible, Widget child}) {
+    return OpacityTransition(
+      curve: Curves.ease,
+      duration: Duration(milliseconds: (widget.style.transitions / 2).round()),
+      visible: visible,
+      child: child,
     );
   }
 
@@ -305,7 +314,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
 
   Future<void> resetOrientationValues() async {
     setState(() => showVideo = false);
-    await Future.delayed(Duration(milliseconds: 400), () {});
+    await Future.delayed(Duration(milliseconds: style.transitions), () {});
     await Misc.setSystemOverlay(SystemOverlay.values);
   }
 
@@ -325,7 +334,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
         child: Center(
           child: BooleanTween(
             tween: Tween<double>(begin: 0, end: 1.0),
-            duration: Duration(milliseconds: 200),
+            duration: Duration(milliseconds: style.transitions),
             curve: Curves.ease,
             animate: showVideo,
             builder: (value) {

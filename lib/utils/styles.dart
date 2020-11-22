@@ -12,6 +12,7 @@ class VideoViewerStyle {
     Widget loading,
     Widget buffering,
     TextStyle textStyle,
+    this.transitions = 400,
   })  : this.loading = loading ??
             Center(
               child: CircularProgressIndicator(strokeWidth: 1.6),
@@ -41,6 +42,7 @@ class VideoViewerStyle {
   final Widget thumbnail;
   final Widget loading;
   final Widget buffering;
+  final int transitions;
 
   final TextStyle textStyle;
 }
