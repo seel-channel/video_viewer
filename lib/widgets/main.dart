@@ -9,7 +9,7 @@ class VideoViewer extends StatefulWidget {
     Key key,
     this.source,
     VideoViewerStyle style,
-    this.looping = true,
+    this.looping = false,
     this.autoPlay = false,
     this.rewindAmount = 10,
     this.forwardAmount = 10,
@@ -59,16 +59,19 @@ class _VideoViewerState extends State<VideoViewer> {
   @override
   Widget build(BuildContext context) {
     Widget returnWidget = _controller.value.initialized
-        ? VideoReady(
-            key: key,
-            style: widget.style,
-            source: widget.source,
-            looping: widget.looping,
-            controller: _controller,
-            activedSource: _activedSource,
-            rewindAmount: widget.rewindAmount,
-            forwardAmount: widget.forwardAmount,
-            defaultAspectRatio: widget.defaultAspectRatio,
+        ? Hero(
+            tag: "VideoReady",
+            child: VideoReady(
+              key: key,
+              style: widget.style,
+              source: widget.source,
+              looping: widget.looping,
+              controller: _controller,
+              activedSource: _activedSource,
+              rewindAmount: widget.rewindAmount,
+              forwardAmount: widget.forwardAmount,
+              defaultAspectRatio: widget.defaultAspectRatio,
+            ),
           )
         : Center(child: CircularProgressIndicator(strokeWidth: 1.6));
     return returnWidget;
