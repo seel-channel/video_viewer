@@ -38,9 +38,9 @@ class VideoReady extends StatefulWidget {
 }
 
 class VideoReadyState extends State<VideoReady> {
-  bool isPlaying = false,
-      isBuffering = false,
-      isFullScreen = false,
+  bool _isPlaying = false,
+      _isBuffering = false,
+      _isFullScreen = false,
       _showButtons = false,
       _showSettings = false,
       _showThumbnail = true,
@@ -57,9 +57,10 @@ class VideoReadyState extends State<VideoReady> {
   String _activedSource;
   //Preview Frame
   bool _isDraggingProgress = false;
-  double _draggingProgressPosition = 50;
+  double _progressBarWidth = 0, _progressScale = 0, _iconPlayWidth = 0;
+  GlobalKey _playKey = GlobalKey();
 
-  set fullScreen(bool value) => setState(() => isFullScreen = value);
+  set fullScreen(bool value) => setState(() => _isFullScreen = value);
 
   @override
   void initState() {
@@ -68,6 +69,9 @@ class VideoReadyState extends State<VideoReady> {
     _controller.addListener(_videoListener);
     _controller.setLooping(widget.looping);
     super.initState();
+    Misc.onLayoutRendered(() {
+      setState(() => _iconPlayWidth = GetKey.width(_playKey));
+    });
   }
 
   @override
@@ -113,10 +117,10 @@ class VideoReadyState extends State<VideoReady> {
   void _videoListener() {
     if (mounted) {
       final value = _controller.value;
-      bool playing = value.isPlaying;
-      if (playing != isPlaying) setState(() => isPlaying = playing);
+      final playing = value.isPlaying;
+      if (playing != _isPlaying) setState(() => _isPlaying = playing);
       if (_showButtons) {
-        if (isPlaying) {
+        if (_isPlaying) {
           if (value.position >= value.duration && !widget.looping) {
             _controller.seekTo(Duration.zero);
           } else {
@@ -149,10 +153,10 @@ class VideoReadyState extends State<VideoReady> {
       _timerPosition = Timer.periodic(Duration(milliseconds: 1000), (_) {
         int position = _controller.value.position.inMilliseconds;
         setState(() {
-          if (isPlaying)
-            isBuffering = _lastPosition != position ? false : true;
+          if (_isPlaying)
+            _isBuffering = _lastPosition != position ? false : true;
           else
-            isBuffering = false;
+            _isBuffering = false;
           _lastPosition = position;
         });
       });
@@ -169,7 +173,7 @@ class VideoReadyState extends State<VideoReady> {
 
   void _onTapPlayAndPause() {
     setState(() {
-      if (isPlaying)
+      if (_isPlaying)
         _controller.pause();
       else {
         _controller.play();
@@ -182,7 +186,7 @@ class VideoReadyState extends State<VideoReady> {
         _hidePlayAndPause = Timer(Duration(milliseconds: 600), () {
           setState(() => _showAMomentPlayAndPause = false);
         });
-      } else if (isPlaying) _showButtons = false;
+      } else if (_isPlaying) _showButtons = false;
     });
   }
 
@@ -247,7 +251,7 @@ class VideoReadyState extends State<VideoReady> {
 
       if (orientation == Orientation.landscape) {
         Misc.delayed(100, () => Misc.setSystemOverlay([]));
-      } else if (!isFullScreen) {
+      } else if (!_isFullScreen) {
         Misc.delayed(100, () => Misc.setSystemOverlay(SystemOverlay.values));
       }
 
@@ -275,7 +279,7 @@ class VideoReadyState extends State<VideoReady> {
             OpacityTransition(
               curve: Curves.ease,
               duration: Duration(milliseconds: 400),
-              visible: isBuffering,
+              visible: _isBuffering,
               child: widget.style.buffering,
             ),
             OpacityTransition(
@@ -388,7 +392,7 @@ class VideoReadyState extends State<VideoReady> {
   Widget _playAndPauseIconButtons() {
     final style = widget.style.playAndPauseStyle;
     return Center(
-      child: _playAndPause(!isPlaying ? style.playWidget : style.pauseWidget),
+      child: _playAndPause(!_isPlaying ? style.playWidget : style.pauseWidget),
     );
   }
 
@@ -401,7 +405,7 @@ class VideoReadyState extends State<VideoReady> {
       OpacityTransition(
         curve: Curves.ease,
         duration: Duration(milliseconds: 400),
-        visible: _showButtons && !isPlaying,
+        visible: _showButtons && !_isPlaying,
         child: _playAndPauseIconButtons(),
       ),
     ]);
@@ -411,6 +415,7 @@ class VideoReadyState extends State<VideoReady> {
   //BOTTOM PROGRESS BAR//
   //-------------------//
   Widget _settingsIconButton() {
+    double padding = widget.style.progressBarStyle.paddingBeetwen;
     return Align(
       alignment: Alignment.topRight,
       child: GestureDetector(
@@ -418,21 +423,23 @@ class VideoReadyState extends State<VideoReady> {
         child: Container(
           color: Colors.transparent,
           child: widget.style.settingsStyle.settings,
-          padding:
-              Margin.horizontal(widget.style.progressBarStyle.paddingBeetwen) +
-                  Margin.vertical(_progressBarBottomMargin),
+          padding: Margin.horizontal(padding) +
+              Margin.vertical(_progressBarBottomMargin),
         ),
       ),
     );
   }
 
-  Widget _draggingProgress(String position) {
+  Widget _textPositionProgress(String position) {
+    double width = 60;
+    double margin =
+        (_progressScale * _progressBarWidth) + _iconPlayWidth - (width / 2);
     return OpacityTransition(
       visible: _isDraggingProgress,
       child: Container(
-        width: 60,
+        width: width,
         child: Text(position, style: widget.style.textStyle),
-        margin: Margin.left(_draggingProgressPosition - 30),
+        margin: Margin.left(margin < 0 ? 0 : margin),
         padding: Margin.all(5),
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -466,34 +473,36 @@ class VideoReadyState extends State<VideoReady> {
       alignment: Alignment.bottomLeft,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(child: SizedBox()),
-        _draggingProgress(position),
+        _textPositionProgress(position),
         Container(
-          padding: Margin.horizontal(padding),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              tileMode: TileMode.mirror,
               colors: [Colors.transparent, Colors.black.withOpacity(0.2)],
             ),
           ),
           child: Row(children: [
-            _playAndPause(!isPlaying
-                ? widget.style.playAndPauseStyle.play
-                : widget.style.playAndPauseStyle.pause),
-            SizedBox(width: padding),
+            Container(
+              key: _playKey,
+              padding: Margin.horizontal(padding),
+              child: _playAndPause(!_isPlaying
+                  ? widget.style.playAndPauseStyle.play
+                  : widget.style.playAndPauseStyle.pause),
+            ),
             Expanded(
               child: VideoProgressBar(
                 _controller,
                 style: style,
                 verticalPadding: _progressBarBottomMargin,
-                isBuffering: isBuffering,
-                changePosition: (double position) {
+                isBuffering: _isBuffering,
+                changePosition: (double scale, double width) {
                   if (mounted)
                     setState(() {
-                      if (position != null) {
+                      if (scale != null) {
                         _isDraggingProgress = true;
-                        _draggingProgressPosition = position;
+                        _progressScale = scale;
+                        _progressBarWidth = width;
                       } else
                         _isDraggingProgress = false;
                     });
@@ -518,7 +527,7 @@ class VideoReadyState extends State<VideoReady> {
             _settingsIconButton(),
             GestureDetector(
               onTap: () {
-                if (!isFullScreen) {
+                if (!_isFullScreen) {
                   PushRoute.transparentPage(
                     context,
                     FullScreenPage(
@@ -542,11 +551,12 @@ class VideoReadyState extends State<VideoReady> {
                 }
               },
               child: _containerPadding(
-                child: isFullScreen
+                child: _isFullScreen
                     ? widget.style.fullScreenExit
                     : widget.style.fullScreen,
               ),
             ),
+            SizedBox(width: padding),
           ]),
         ),
       ]),
