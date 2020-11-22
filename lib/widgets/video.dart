@@ -66,7 +66,7 @@ class VideoReadyState extends State<VideoReady> {
     _controller = widget.controller;
     _activedSource = widget.activedSource;
     _controller.addListener(_videoListener);
-    _controller.setLooping(true);
+    _controller.setLooping(widget.looping);
     super.initState();
   }
 
@@ -112,13 +112,18 @@ class VideoReadyState extends State<VideoReady> {
 
   void _videoListener() {
     if (mounted) {
-      bool playing = _controller.value.isPlaying;
+      final value = _controller.value;
+      bool playing = value.isPlaying;
       if (playing != isPlaying) setState(() => isPlaying = playing);
       if (_showButtons) {
         if (isPlaying) {
-          if (_timerPosition == null) _createBufferTimer();
-          if (_closeOverlayButtons == null && !_isDraggingProgress)
-            _startCloseOverlayButtons();
+          if (value.position >= value.duration && !widget.looping) {
+            _controller.seekTo(Duration.zero);
+          } else {
+            if (_timerPosition == null) _createBufferTimer();
+            if (_closeOverlayButtons == null && !_isDraggingProgress)
+              _startCloseOverlayButtons();
+          }
         } else if (_isGoingToCloseBufferingWidget) _cancelCloseOverlayButtons();
       }
     }
@@ -459,7 +464,7 @@ class VideoReadyState extends State<VideoReady> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               tileMode: TileMode.mirror,
-              colors: [Colors.transparent, Colors.black.withOpacity(0.4)],
+              colors: [Colors.transparent, Colors.black.withOpacity(0.2)],
             ),
           ),
           child: Row(children: [
@@ -516,6 +521,7 @@ class VideoReadyState extends State<VideoReady> {
                         _changeVideoSource(controller, activedSource, false);
                       },
                     ),
+                    transitionMs: 400,
                   );
                 } else {
                   Misc.setSystemOverlay(SystemOverlay.values);
