@@ -49,6 +49,15 @@ class SettingsMenu extends StatefulWidget {
 class _SettingsMenuState extends State<SettingsMenu> {
   List<bool> show = [false, false];
   bool showMenu = true;
+  TextStyle textStyle;
+  SettingsStyle style;
+
+  @override
+  void initState() {
+    style = widget.style.settingsStyle;
+    textStyle = widget.style.textStyle;
+    super.initState();
+  }
 
   void closeAllAndShowMenu() {
     setState(() {
@@ -115,10 +124,10 @@ class _SettingsMenuState extends State<SettingsMenu> {
             child: settingsItemMenu(
               "Quality",
               widget.activedSource,
-              widget.style.settingsStyle.settings,
+              style.settings,
             ),
           ),
-          SizedBox(width: widget.style.settingsStyle.paddingBetween),
+          SizedBox(width: style.paddingBetween),
           GestureDetector(
             onTap: () {
               setState(() {
@@ -129,7 +138,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
             child: settingsItemMenu(
               "Speed",
               speed == 1.0 ? "Normal" : "x$speed",
-              widget.style.settingsStyle.speed,
+              style.speed,
             ),
           ),
         ],
@@ -145,9 +154,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
         mainAxisSize: MainAxisSize.min,
         children: [
           icon,
-          Text(title, style: widget.style.textStyle),
+          Text(title, style: textStyle),
           Text(subtitle,
-              style: widget.style.textStyle.merge(
+              style: textStyle.merge(
                   TextStyle(fontWeight: FontWeight.normal, fontSize: 10))),
         ],
       ),
@@ -200,8 +209,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
             GestureDetector(
               onTap: closeAllAndShowMenu,
               child: Row(children: [
-                Icon(Icons.chevron_left, color: Colors.white),
-                Text("Settings", style: widget.style.textStyle),
+                style.chevron,
+                Expanded(child: Text("Settings", style: textStyle)),
               ]),
             ),
             ...children,
@@ -228,10 +237,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
       child: Row(children: [
         Expanded(
           child: Text(text,
-              style: widget.style.textStyle
-                  .merge(TextStyle(fontWeight: FontWeight.normal))),
+              style: textStyle.merge(TextStyle(fontWeight: FontWeight.normal))),
         ),
-        if (selected) widget.style.settingsStyle.selected,
+        if (selected) style.selected,
       ]),
     );
   }
