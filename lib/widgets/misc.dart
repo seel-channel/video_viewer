@@ -25,6 +25,7 @@ String secondsFormatter(int seconds) {
 class SettingsMenu extends StatefulWidget {
   SettingsMenu({
     Key key,
+    this.style,
     this.source,
     this.visible,
     this.controller,
@@ -35,6 +36,7 @@ class SettingsMenu extends StatefulWidget {
 
   final bool visible;
   final String activedSource;
+  final VideoViewerStyle style;
   final void Function() changeState;
   final VideoPlayerController controller;
   final Map<String, VideoPlayerController> source;
@@ -78,15 +80,15 @@ class _SettingsMenuState extends State<SettingsMenu> {
             ),
             OpacityTransition(
               visible: showMenu,
-              child: settingsIconsMenu(),
+              child: iconsMainMenu(),
             ),
             OpacityTransition(
               visible: show[0],
-              child: settingsQuality(),
+              child: settingsQualityMenu(),
             ),
             OpacityTransition(
               visible: show[1],
-              child: settingsSpeed(),
+              child: settingsSpeedMenu(),
             ),
           ],
         ),
@@ -94,22 +96,10 @@ class _SettingsMenuState extends State<SettingsMenu> {
     );
   }
 
-  Widget settingsItem(String title, String subtitle, Widget icon) {
-    return Container(
-      color: Colors.transparent,
-      padding: Margin.all(10),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          icon,
-          Text(title, style: TextStyle(color: Colors.white)),
-          Text(subtitle, style: TextStyle(color: Colors.white, fontSize: 10)),
-        ],
-      ),
-    );
-  }
-
-  Widget settingsIconsMenu() {
+  //---------//
+  //MAIN MENU//
+  //---------//
+  Widget iconsMainMenu() {
     double speed = widget.controller.value.playbackSpeed;
     return Center(
       child: Row(
@@ -122,13 +112,13 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 show[0] = true;
               });
             },
-            child: settingsItem(
+            child: settingsItemMenu(
               "Quality",
               widget.activedSource,
-              Icon(Icons.settings, color: Colors.white),
+              widget.style.settingsStyle.settings,
             ),
           ),
-          SizedBox(width: 40),
+          SizedBox(width: widget.style.settingsStyle.paddingBetween),
           GestureDetector(
             onTap: () {
               setState(() {
@@ -136,10 +126,10 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 show[1] = true;
               });
             },
-            child: settingsItem(
+            child: settingsItemMenu(
               "Speed",
               speed == 1.0 ? "Normal" : "x$speed",
-              Icon(Icons.speed, color: Colors.white),
+              widget.style.settingsStyle.speed,
             ),
           ),
         ],
@@ -147,12 +137,63 @@ class _SettingsMenuState extends State<SettingsMenu> {
     );
   }
 
-  Widget changeSettingsContainer(List<Widget> children) {
+  Widget settingsItemMenu(String title, String subtitle, Widget icon) {
+    return Container(
+      color: Colors.transparent,
+      padding: Margin.all(10),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          icon,
+          Text(title, style: widget.style.textStyle),
+          Text(subtitle,
+              style: widget.style.textStyle.merge(
+                  TextStyle(fontWeight: FontWeight.normal, fontSize: 10))),
+        ],
+      ),
+    );
+  }
+
+  //---------------//
+  //SECONDARY MENUS//
+  //---------------//
+  Widget settingsQualityMenu() {
+    return _secondaryMenuContainer([
+      for (MapEntry<String, dynamic> entry in widget.source.entries)
+        _inkWellDesigned(
+          onTap: () {
+            if (entry.key != widget.activedSource)
+              widget.changeSource(entry.value, entry.key);
+            closeAllAndShowMenu();
+          },
+          child: _textDesigned(entry.key, entry.key == widget.activedSource),
+        ),
+    ]);
+  }
+
+  Widget settingsSpeedMenu() {
+    return _secondaryMenuContainer([
+      for (double i = 0.5; i <= 2; i += 0.25)
+        _inkWellDesigned(
+          onTap: () {
+            widget.controller.setPlaybackSpeed(i);
+            closeAllAndShowMenu();
+          },
+          child: _textDesigned(
+            i == 1.0 ? "Normal" : "x$i",
+            i == widget.controller.value.playbackSpeed,
+          ),
+        ),
+    ]);
+  }
+
+  Widget _secondaryMenuContainer(List<Widget> children) {
     return Center(
       child: Container(
         width: 150,
         color: Colors.transparent,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -160,24 +201,13 @@ class _SettingsMenuState extends State<SettingsMenu> {
               onTap: closeAllAndShowMenu,
               child: Row(children: [
                 Icon(Icons.chevron_left, color: Colors.white),
-                Text("Settings", style: TextStyle(color: Colors.white)),
+                Text("Settings", style: widget.style.textStyle),
               ]),
             ),
-            SizedBox(height: 5),
             ...children,
           ],
         ),
       ),
-    );
-  }
-
-  Widget _textSettings(String text, bool selected) {
-    return Padding(
-      padding: Margin.horizontal(8),
-      child: Row(children: [
-        Expanded(child: Text(text, style: TextStyle(color: Colors.white))),
-        if (selected) Icon(Icons.done, color: Colors.white, size: 20),
-      ]),
     );
   }
 
@@ -192,33 +222,18 @@ class _SettingsMenuState extends State<SettingsMenu> {
     );
   }
 
-  Widget settingsQuality() {
-    return changeSettingsContainer([
-      for (MapEntry entry in widget.source.entries)
-        _inkWellDesigned(
-          onTap: () {
-            widget.changeSource(entry.value, entry.key);
-            closeAllAndShowMenu();
-          },
-          child: _textSettings(entry.key, entry.key == widget.activedSource),
+  Widget _textDesigned(String text, bool selected) {
+    return Padding(
+      padding: Margin.horizontal(8),
+      child: Row(children: [
+        Expanded(
+          child: Text(text,
+              style: widget.style.textStyle
+                  .merge(TextStyle(fontWeight: FontWeight.normal))),
         ),
-    ]);
-  }
-
-  Widget settingsSpeed() {
-    return changeSettingsContainer([
-      for (double i = 0.5; i <= 2; i += 0.25)
-        _inkWellDesigned(
-          onTap: () {
-            widget.controller.setPlaybackSpeed(i);
-            closeAllAndShowMenu();
-          },
-          child: _textSettings(
-            i == 1.0 ? "Normal" : "x$i",
-            i == widget.controller.value.playbackSpeed,
-          ),
-        ),
-    ]);
+        if (selected) widget.style.settingsStyle.selected,
+      ]),
+    );
   }
 }
 
@@ -279,18 +294,21 @@ class _FullScreenPageState extends State<FullScreenPage> {
       body: WillPopScope(
         onWillPop: _returnButton,
         child: Center(
-          child: VideoReady(
-            key: key,
-            style: widget.style,
-            source: widget.source,
-            looping: widget.looping,
-            controller: widget.controller,
-            activedSource: widget.activedSource,
-            rewindAmount: widget.rewindAmount,
-            forwardAmount: widget.forwardAmount,
-            defaultAspectRatio: widget.defaultAspectRatio,
-            onChangeSource: (controller, activedSource) =>
-                widget.changeSource(controller, activedSource),
+          child: Hero(
+            tag: "VideoReady",
+            child: VideoReady(
+              key: key,
+              style: widget.style,
+              source: widget.source,
+              looping: widget.looping,
+              controller: widget.controller,
+              activedSource: widget.activedSource,
+              rewindAmount: widget.rewindAmount,
+              forwardAmount: widget.forwardAmount,
+              defaultAspectRatio: widget.defaultAspectRatio,
+              onChangeSource: (controller, activedSource) =>
+                  widget.changeSource(controller, activedSource),
+            ),
           ),
         ),
       ),
