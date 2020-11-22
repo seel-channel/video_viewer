@@ -59,24 +59,20 @@ class _VideoViewerState extends State<VideoViewer> {
   @override
   Widget build(BuildContext context) {
     Widget returnWidget = _controller.value.initialized
-        ? Hero(
-            tag: "VideoReady",
-            child: VideoReady(
-              key: key,
-              style: widget.style,
-              source: widget.source,
-              looping: widget.looping,
-              controller: _controller,
-              activedSource: _activedSource,
-              rewindAmount: widget.rewindAmount,
-              forwardAmount: widget.forwardAmount,
-              defaultAspectRatio: widget.defaultAspectRatio,
-            ),
+        ? VideoReady(
+            key: key,
+            style: widget.style,
+            source: widget.source,
+            looping: widget.looping,
+            controller: _controller,
+            activedSource: _activedSource,
+            rewindAmount: widget.rewindAmount,
+            forwardAmount: widget.forwardAmount,
+            defaultAspectRatio: widget.defaultAspectRatio,
           )
         : AspectRatio(
             aspectRatio: widget.defaultAspectRatio,
-            child: widget.style.loading,
-          );
+            child: widget.style.loading);
     return returnWidget;
   }
 }

@@ -276,6 +276,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
   VideoViewerStyle style;
   GlobalKey<VideoReadyState> key = GlobalKey<VideoReadyState>();
   bool isFullScreen = false;
+  bool showVideo = false;
 
   @override
   void initState() {
@@ -298,14 +299,21 @@ class _FullScreenPageState extends State<FullScreenPage> {
   }
 
   Future<bool> _returnButton() async {
-    await Misc.setSystemOverlay(SystemOverlay.values);
+    await resetOrientationValues();
     return true;
   }
 
+  Future<void> resetOrientationValues() async {
+    setState(() => showVideo = false);
+    await Future.delayed(Duration(milliseconds: 400), () {});
+    await Misc.setSystemOverlay(SystemOverlay.values);
+  }
+
   void fullScreenOrientation() async {
-    key.currentState.fullScreen = true;
     await Misc.setSystemOverlay([]);
     await Misc.setSystemOrientation(SystemOrientation.values);
+    key.currentState.fullScreen = true;
+    setState(() => showVideo = true);
   }
 
   @override
@@ -315,21 +323,33 @@ class _FullScreenPageState extends State<FullScreenPage> {
       body: WillPopScope(
         onWillPop: _returnButton,
         child: Center(
-          child: Hero(
-            tag: "VideoReady",
-            child: VideoReady(
-              key: key,
-              style: style,
-              source: widget.source,
-              looping: widget.looping,
-              controller: widget.controller,
-              activedSource: widget.activedSource,
-              rewindAmount: widget.rewindAmount,
-              forwardAmount: widget.forwardAmount,
-              defaultAspectRatio: widget.defaultAspectRatio,
-              onChangeSource: (controller, activedSource) =>
-                  widget.changeSource(controller, activedSource),
-            ),
+          child: BooleanTween(
+            tween: Tween<double>(begin: 0, end: 1.0),
+            duration: Duration(milliseconds: 200),
+            curve: Curves.ease,
+            animate: showVideo,
+            builder: (value) {
+              return Opacity(
+                opacity: value,
+                child: VideoReady(
+                  key: key,
+                  style: style,
+                  source: widget.source,
+                  looping: widget.looping,
+                  controller: widget.controller,
+                  activedSource: widget.activedSource,
+                  rewindAmount: widget.rewindAmount,
+                  forwardAmount: widget.forwardAmount,
+                  defaultAspectRatio: widget.defaultAspectRatio,
+                  onChangeSource: (controller, activedSource) =>
+                      widget.changeSource(controller, activedSource),
+                  exitFullScreen: () async {
+                    await resetOrientationValues();
+                    Navigator.pop(context);
+                  },
+                ),
+              );
+            },
           ),
         ),
       ),

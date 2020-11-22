@@ -22,6 +22,7 @@ class VideoReady extends StatefulWidget {
     this.forwardAmount,
     this.defaultAspectRatio,
     this.onChangeSource,
+    this.exitFullScreen,
   }) : super(key: key);
 
   final String activedSource;
@@ -32,6 +33,7 @@ class VideoReady extends StatefulWidget {
   final VideoPlayerController controller;
   final Map<String, VideoPlayerController> source;
   final void Function(VideoPlayerController, String) onChangeSource;
+  final void Function() exitFullScreen;
 
   @override
   VideoReadyState createState() => VideoReadyState();
@@ -68,9 +70,9 @@ class VideoReadyState extends State<VideoReady> {
     _activedSource = widget.activedSource;
     _controller.addListener(_videoListener);
     _controller.setLooping(widget.looping);
-    _showThumbnail = widget.style.thumbnail != null;
-    super.initState();
+    _showThumbnail = widget.style.thumbnail == null ? false : true;
     if (!_showThumbnail) Misc.onLayoutRendered(() => _changeIconPlayWidth());
+    super.initState();
   }
 
   @override
@@ -193,7 +195,10 @@ class VideoReadyState extends State<VideoReady> {
   }
 
   void _changeIconPlayWidth() {
-    setState(() => _iconPlayWidth = GetKey.width(_playKey));
+    Misc.delayed(
+      400,
+      () => setState(() => _iconPlayWidth = GetKey.width(_playKey)),
+    );
   }
 
   //------------------//
@@ -255,12 +260,6 @@ class VideoReadyState extends State<VideoReady> {
       _progressBarBottomMargin =
           orientation == Orientation.landscape ? padding : padding / 2;
 
-      if (orientation == Orientation.landscape) {
-        Misc.delayed(100, () => Misc.setSystemOverlay([]));
-      } else if (!_isFullScreen) {
-        Misc.delayed(100, () => Misc.setSystemOverlay(SystemOverlay.values));
-      }
-
       return AspectRatio(
         aspectRatio: _controller.value.aspectRatio,
         child: _globalGesture(
@@ -274,7 +273,7 @@ class VideoReadyState extends State<VideoReady> {
               child: GestureDetector(
                 onTap: () => setState(() {
                   _controller.play();
-                  Misc.delayed(400, () => _changeIconPlayWidth());
+                  _changeIconPlayWidth();
                 }),
                 child: Container(
                   color: Colors.transparent,
@@ -553,8 +552,8 @@ class VideoReadyState extends State<VideoReady> {
             ),
             _settingsIconButton(),
             GestureDetector(
-              onTap: () {
-                if (!_isFullScreen) {
+              onTap: () async {
+                if (!_isFullScreen)
                   PushRoute.transparentPage(
                     context,
                     FullScreenPage(
@@ -570,12 +569,8 @@ class VideoReadyState extends State<VideoReady> {
                         _changeVideoSource(controller, activedSource, false);
                       },
                     ),
-                    transitionMs: 400,
                   );
-                } else {
-                  Misc.setSystemOverlay(SystemOverlay.values);
-                  Navigator.pop(context);
-                }
+                else if (widget.exitFullScreen != null) widget.exitFullScreen();
               },
               child: _containerPadding(
                 child: _isFullScreen ? style.fullScreenExit : style.fullScreen,
