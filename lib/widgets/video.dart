@@ -291,6 +291,7 @@ class VideoReadyState extends State<VideoReady> {
               child: _playAndPauseIconButtons(),
             ),
             SettingsMenu(
+              style: widget.style,
               source: widget.source,
               visible: _showSettings,
               controller: _controller,
@@ -352,14 +353,15 @@ class VideoReadyState extends State<VideoReady> {
   }
 
   Widget _rewindAndForwardIconsIndicator() {
+    final style = widget.style.forwardAndRewindStyle;
     return _rewindAndForwardLayout(
       rewind: OpacityTransition(
         visible: _showAMomentRewindIcons[0],
-        child: Center(child: widget.style.rewind),
+        child: Center(child: style.rewind),
       ),
       forward: OpacityTransition(
         visible: _showAMomentRewindIcons[1],
-        child: Center(child: widget.style.forward),
+        child: Center(child: style.forward),
       ),
     );
   }
@@ -375,7 +377,7 @@ class VideoReadyState extends State<VideoReady> {
           color: style.backgroundColor,
           borderRadius: style.borderRadius,
         ),
-        child: Text(text, style: style.textStyle),
+        child: Text(text, style: widget.style.textStyle),
       ),
     );
   }
@@ -414,21 +416,22 @@ class VideoReadyState extends State<VideoReady> {
       child: GestureDetector(
         onTap: () => setState(() => _showSettings = !_showSettings),
         child: Container(
-          child: widget.style.settings,
+          color: Colors.transparent,
+          child: widget.style.settingsStyle.settings,
           padding:
-              Margin.horizontal(widget.style.progressBarStyle.paddingBeetwen),
+              Margin.horizontal(widget.style.progressBarStyle.paddingBeetwen) +
+                  Margin.vertical(_progressBarBottomMargin),
         ),
       ),
     );
   }
 
   Widget _draggingProgress(String position) {
-    VideoProgressBarStyle style = widget.style.progressBarStyle;
     return OpacityTransition(
       visible: _isDraggingProgress,
       child: Container(
         width: 60,
-        child: Text(position, style: style.textStyle),
+        child: Text(position, style: widget.style.textStyle),
         margin: Margin.left(_draggingProgressPosition - 30),
         padding: Margin.all(5),
         alignment: Alignment.center,
@@ -436,6 +439,14 @@ class VideoReadyState extends State<VideoReady> {
             color: Colors.black.withOpacity(0.2),
             borderRadius: EdgeRadius.all(5)),
       ),
+    );
+  }
+
+  Widget _containerPadding({Widget child}) {
+    return Container(
+      color: Colors.transparent,
+      padding: Margin.vertical(_progressBarBottomMargin),
+      child: child,
     );
   }
 
@@ -457,8 +468,7 @@ class VideoReadyState extends State<VideoReady> {
         Expanded(child: SizedBox()),
         _draggingProgress(position),
         Container(
-          padding: Margin.horizontal(padding) +
-              Margin.vertical(_progressBarBottomMargin),
+          padding: Margin.horizontal(padding),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -476,6 +486,7 @@ class VideoReadyState extends State<VideoReady> {
               child: VideoProgressBar(
                 _controller,
                 style: style,
+                verticalPadding: _progressBarBottomMargin,
                 isBuffering: isBuffering,
                 changePosition: (double position) {
                   if (mounted)
@@ -496,9 +507,11 @@ class VideoReadyState extends State<VideoReady> {
               child: GestureDetector(
                 onTap: () => setState(() => _progressBarTextShowPosition =
                     !_progressBarTextShowPosition),
-                child: Text(
-                  _progressBarTextShowPosition ? position : remaing,
-                  style: style.textStyle,
+                child: _containerPadding(
+                  child: Text(
+                    _progressBarTextShowPosition ? position : remaing,
+                    style: widget.style.textStyle,
+                  ),
                 ),
               ),
             ),
@@ -528,9 +541,11 @@ class VideoReadyState extends State<VideoReady> {
                   Navigator.pop(context);
                 }
               },
-              child: isFullScreen
-                  ? widget.style.fullScreenExit
-                  : widget.style.fullScreen,
+              child: _containerPadding(
+                child: isFullScreen
+                    ? widget.style.fullScreenExit
+                    : widget.style.fullScreen,
+              ),
             ),
           ]),
         ),
