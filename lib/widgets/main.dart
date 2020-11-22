@@ -73,7 +73,10 @@ class _VideoViewerState extends State<VideoViewer> {
               defaultAspectRatio: widget.defaultAspectRatio,
             ),
           )
-        : Center(child: CircularProgressIndicator(strokeWidth: 1.6));
+        : AspectRatio(
+            aspectRatio: widget.defaultAspectRatio,
+            child: widget.style.loading,
+          );
     return returnWidget;
   }
 }
