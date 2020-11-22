@@ -11,8 +11,6 @@ class VideoViewerStyle {
     this.thumbnail,
     Widget loading,
     Widget buffering,
-    Widget fullScreen,
-    Widget fullScreenExit,
     TextStyle textStyle,
   })  : this.loading = loading ??
             Center(
@@ -24,18 +22,6 @@ class VideoViewerStyle {
                 strokeWidth: 1.6,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
-            ),
-        this.fullScreen = fullScreen ??
-            Icon(
-              Icons.fullscreen_outlined,
-              color: Colors.white,
-              size: 24,
-            ),
-        this.fullScreenExit = fullScreenExit ??
-            Icon(
-              Icons.fullscreen_exit_outlined,
-              color: Colors.white,
-              size: 24,
             ),
         this.settingsStyle = settingsStyle ?? SettingsStyle(),
         this.progressBarStyle = progressBarStyle ?? VideoProgressBarStyle(),
@@ -55,13 +41,14 @@ class VideoViewerStyle {
   final Widget thumbnail;
   final Widget loading;
   final Widget buffering;
-  final Widget fullScreen;
-  final Widget fullScreenExit;
+
   final TextStyle textStyle;
 }
 
 class VideoProgressBarStyle {
   VideoProgressBarStyle({
+    Widget fullScreen,
+    Widget fullScreenExit,
     this.height = 5,
     this.dotColor = Colors.white,
     Color activeColor,
@@ -73,7 +60,19 @@ class VideoProgressBarStyle {
   })  : this.activeColor = activeColor ?? Color(0xFF295acc),
         this.bufferedColor = bufferedColor ?? Colors.white.withOpacity(0.3),
         this.backgroundColor = backgroundColor ?? Colors.white.withOpacity(0.2),
-        this.borderRadius = borderRadius ?? EdgeRadius.all(5);
+        this.borderRadius = borderRadius ?? EdgeRadius.all(5),
+        this.fullScreen = fullScreen ??
+            Icon(
+              Icons.fullscreen_outlined,
+              color: Colors.white,
+              size: 24,
+            ),
+        this.fullScreenExit = fullScreenExit ??
+            Icon(
+              Icons.fullscreen_exit_outlined,
+              color: Colors.white,
+              size: 24,
+            );
 
   final double height;
   final double paddingBeetwen;
@@ -81,6 +80,8 @@ class VideoProgressBarStyle {
   final Color activeColor;
   final Color bufferedColor;
   final Color backgroundColor;
+  final Widget fullScreen;
+  final Widget fullScreenExit;
   final EdgeInsetsGeometry margin;
   final BorderRadiusGeometry borderRadius;
 }

@@ -33,7 +33,19 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: SafeArea(child: VideoViewer(source: getNetworkVideoSources(src))),
+      body: SafeArea(
+        child: VideoViewer(
+          source: getNetworkVideoSources(src),
+          style: VideoViewerStyle(
+            thumbnail: Container(
+              color: Colors.blue,
+              child: Center(
+                child: Text("Custom Thumbnail"),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
