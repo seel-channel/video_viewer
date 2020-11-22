@@ -273,15 +273,27 @@ class FullScreenPage extends StatefulWidget {
 }
 
 class _FullScreenPageState extends State<FullScreenPage> {
+  VideoViewerStyle style;
   GlobalKey<VideoReadyState> key = GlobalKey<VideoReadyState>();
   bool isFullScreen = false;
 
   @override
   void initState() {
-    Misc.onLayoutRendered(() {
-      key.currentState.fullScreen = true;
-      fullScreenOrientation();
-    });
+    VideoViewerStyle oldStyle = widget.style;
+    style = oldStyle.thumbnail != null
+        ? VideoViewerStyle(
+            thumbnail: null,
+            loading: oldStyle.loading,
+            buffering: oldStyle.buffering,
+            textStyle: oldStyle.textStyle,
+            settingsStyle: oldStyle.settingsStyle,
+            volumeBarStyle: oldStyle.volumeBarStyle,
+            progressBarStyle: oldStyle.progressBarStyle,
+            playAndPauseStyle: oldStyle.playAndPauseStyle,
+            forwardAndRewindStyle: oldStyle.forwardAndRewindStyle,
+          )
+        : oldStyle;
+    Misc.onLayoutRendered(() => fullScreenOrientation());
     super.initState();
   }
 
@@ -291,6 +303,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
   }
 
   void fullScreenOrientation() async {
+    key.currentState.fullScreen = true;
     await Misc.setSystemOverlay([]);
     await Misc.setSystemOrientation(SystemOrientation.values);
   }
@@ -306,7 +319,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
             tag: "VideoReady",
             child: VideoReady(
               key: key,
-              style: widget.style,
+              style: style,
               source: widget.source,
               looping: widget.looping,
               controller: widget.controller,
