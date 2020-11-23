@@ -10,17 +10,41 @@ class VideoViewer extends StatefulWidget {
     this.source,
     VideoViewerStyle style,
     this.looping = false,
-    this.autoPlay = false,
+    this.autoPlay = true,
     this.rewindAmount = 10,
     this.forwardAmount = 10,
     this.defaultAspectRatio = 16 / 9,
   })  : this.style = style ?? VideoViewerStyle(),
         super(key: key);
 
-  final bool autoPlay, looping;
+  /// Once the video is initialized, it will be played
+  final bool autoPlay;
+
+  ///Sets whether or not the video should loop after playing once.
+  final bool looping;
+
+  /// It is an argument where you can change the design of almost the entire VideoViewer
   final VideoViewerStyle style;
+
+  /// It is the Aspect Ratio that the widget.style.loading will take when the video
+  /// is not initialized yet
   final double defaultAspectRatio;
-  final int rewindAmount, forwardAmount;
+
+  /// It is the amount of seconds that the video will be delayed when double tapping.
+  final int rewindAmount;
+
+  /// It is the amount of seconds that the video will be advanced when double tapping.
+  final int forwardAmount;
+
+  /// Receive a list of all the resources to be played.
+  ///
+  ///SYNTAX EXAMPLE:
+  ///```dart
+  ///{
+  ///    "720p": VideoSource.network("https://github.com/intel-iot-devkit/sample-videos/blob/master/classroom.mp4"),
+  ///    "1080p": VideoSource.network("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"),
+  ///}
+  ///```
   final Map<String, VideoPlayerController> source;
 
   @override
