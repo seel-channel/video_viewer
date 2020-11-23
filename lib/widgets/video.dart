@@ -64,6 +64,7 @@ class VideoReadyState extends State<VideoReady> {
   bool _showVolumeStatus = false, _isAndroid = false;
   int _maxVolume = 1, _onDragStartVolume = 1, _currentVolume = 1;
   Offset _verticalDragStartOffset;
+  Timer _closeVolumeStatus;
 
   //TEXT POSITION ON DRAGGING
   GlobalKey _playKey = GlobalKey();
@@ -204,12 +205,14 @@ class VideoReadyState extends State<VideoReady> {
   //MISC FUNCTIONS//
   //--------------//
   void _onTapPlayAndPause() {
+    final value = _controller.value;
     setState(() {
       if (_isPlaying)
         _controller.pause();
       else {
-        _controller.play();
+        if (value.position >= value.duration) _controller.seekTo(Duration.zero);
         _lastPosition = _lastPosition - 1;
+        _controller.play();
       }
       if (!_showButtons) {
         _showAMomentPlayAndPause = true;
@@ -305,11 +308,12 @@ class VideoReadyState extends State<VideoReady> {
 
   void _volumeDragStart(DragStartDetails details) {
     if (!_showSettings && _isAndroid) {
-      _updateVolumes();
+      _closeVolumeStatus?.cancel();
       setState(() {
         _verticalDragStartOffset = details.globalPosition;
         _showVolumeStatus = true;
       });
+      _updateVolumes();
     }
   }
 
@@ -322,7 +326,12 @@ class VideoReadyState extends State<VideoReady> {
   }
 
   void _volumeDragEnd() {
-    if (!_showSettings && _isAndroid) setState(() => _showVolumeStatus = false);
+    if (!_showSettings && _isAndroid)
+      setState(() {
+        _closeVolumeStatus = Misc.timer(600, () {
+          setState(() => _showVolumeStatus = false);
+        });
+      });
   }
 
   //-----//
@@ -343,6 +352,7 @@ class VideoReadyState extends State<VideoReady> {
         if (_isFullScreen) {
           Misc.setSystemOverlay([]);
           Misc.delayed(400, () => Misc.setSystemOverlay([]));
+          Misc.delayed(800, () => Misc.setSystemOverlay([]));
         }
       }
 
@@ -419,7 +429,8 @@ class VideoReadyState extends State<VideoReady> {
           child: _forwardAmountAlert(),
         ),
         _fadeTransition(
-          visible: _showAMomentPlayAndPause,
+          visible: _showAMomentPlayAndPause ||
+              _controller.value.position >= _controller.value.duration,
           child: _playAndPauseIconButtons(),
         ),
         SettingsMenu(

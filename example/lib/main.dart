@@ -22,6 +22,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String image =
+      "https://rockcontent.com/es/wp-content/uploads/2019/02/thumbnail.png";
   Map<String, String> src = {
     "1080p":
         "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
@@ -37,12 +39,7 @@ class _HomePageState extends State<HomePage> {
         child: VideoViewer(
           source: getNetworkVideoSources(src),
           style: VideoViewerStyle(
-            thumbnail: Container(
-              color: Colors.blue,
-              child: Center(
-                child: Text("Custom Thumbnail"),
-              ),
-            ),
+            thumbnail: Image.network(image),
           ),
         ),
       ),

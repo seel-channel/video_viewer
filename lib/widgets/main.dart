@@ -10,7 +10,7 @@ class VideoViewer extends StatefulWidget {
     this.source,
     VideoViewerStyle style,
     this.looping = false,
-    this.autoPlay = true,
+    this.autoPlay = false,
     this.rewindAmount = 10,
     this.forwardAmount = 10,
     this.defaultAspectRatio = 16 / 9,
