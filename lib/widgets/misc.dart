@@ -23,6 +23,25 @@ String secondsFormatter(int seconds) {
       : "$hoursStr$minutesStr:$secondsStr";
 }
 
+VideoViewerStyle mergeVideoViewerStyle({
+  VideoViewerStyle style,
+  TextStyle textStyle,
+}) {
+  return VideoViewerStyle(
+    thumbnail: null,
+    loading: style.loading,
+    buffering: style.buffering,
+    textStyle: textStyle != null
+        ? style.textStyle.merge(TextStyle(fontSize: textStyle.fontSize + 2))
+        : style.textStyle,
+    settingsStyle: style.settingsStyle,
+    volumeBarStyle: style.volumeBarStyle,
+    progressBarStyle: style.progressBarStyle,
+    playAndPauseStyle: style.playAndPauseStyle,
+    forwardAndRewindStyle: style.forwardAndRewindStyle,
+  );
+}
+
 class SettingsMenu extends StatefulWidget {
   SettingsMenu({
     Key key,
@@ -65,6 +84,16 @@ class _SettingsMenuState extends State<SettingsMenu> {
       showMenu = true;
       show.fillRange(0, show.length, false);
     });
+  }
+
+  //RESPONSIVE TEXT
+  @override
+  void didUpdateWidget(SettingsMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.style.textStyle != textStyle)
+      setState(() {
+        textStyle = widget.style.textStyle;
+      });
   }
 
   @override
@@ -165,9 +194,12 @@ class _SettingsMenuState extends State<SettingsMenu> {
         children: [
           icon,
           Text(title, style: textStyle),
-          Text(subtitle,
-              style: textStyle.merge(
-                  TextStyle(fontWeight: FontWeight.normal, fontSize: 10))),
+          Text(
+            subtitle,
+            style: textStyle.merge(TextStyle(
+                fontWeight: FontWeight.normal,
+                fontSize: textStyle.fontSize - 2)),
+          ),
         ],
       ),
     );
@@ -290,20 +322,9 @@ class _FullScreenPageState extends State<FullScreenPage> {
 
   @override
   void initState() {
-    VideoViewerStyle oldStyle = widget.style;
-    style = oldStyle.thumbnail != null
-        ? VideoViewerStyle(
-            thumbnail: null,
-            loading: oldStyle.loading,
-            buffering: oldStyle.buffering,
-            textStyle: oldStyle.textStyle,
-            settingsStyle: oldStyle.settingsStyle,
-            volumeBarStyle: oldStyle.volumeBarStyle,
-            progressBarStyle: oldStyle.progressBarStyle,
-            playAndPauseStyle: oldStyle.playAndPauseStyle,
-            forwardAndRewindStyle: oldStyle.forwardAndRewindStyle,
-          )
-        : oldStyle;
+    style = widget.style.thumbnail != null
+        ? mergeVideoViewerStyle(style: widget.style)
+        : widget.style;
     Misc.onLayoutRendered(() => fullScreenOrientation());
     super.initState();
   }

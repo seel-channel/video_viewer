@@ -55,22 +55,27 @@ class VideoReadyState extends State<VideoReady> {
   Offset _horizontalDragStartOffset;
   int _lastPosition = 0, _forwardAmount = 0, _transitions = 0;
   double _progressBarMargin = 0;
+
   //TEXT POSITION ON DRAGGING
   bool _isDraggingProgress = false;
   double _progressBarWidth = 0, _progressScale = 0, _iconPlayWidth = 0;
   GlobalKey _playKey = GlobalKey();
+
+  //LANDSCAPE
   Orientation _orientation;
+  VideoViewerStyle _style;
 
   set fullScreen(bool value) => setState(() => _isFullScreen = value);
 
   @override
   void initState() {
-    _transitions = widget.style.transitions;
+    _style = widget.style;
+    _transitions = _style.transitions;
     _controller = widget.controller;
     _activedSource = widget.activedSource;
     _controller.addListener(_videoListener);
     _controller.setLooping(widget.looping);
-    _showThumbnail = widget.style.thumbnail == null ? false : true;
+    _showThumbnail = _style.thumbnail == null ? false : true;
     if (!_showThumbnail) Misc.onLayoutRendered(() => _changeIconPlayWidth());
     super.initState();
   }
@@ -260,8 +265,16 @@ class VideoReadyState extends State<VideoReady> {
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (_, orientation) {
       Orientation landscape = Orientation.landscape;
-      double padding = widget.style.progressBarStyle.paddingBeetwen;
+      double padding = _style.progressBarStyle.paddingBeetwen;
       _progressBarMargin = orientation == landscape ? padding * 2 : padding;
+
+      //RESPONSIVE TEXT
+      _style = orientation == landscape
+          ? mergeVideoViewerStyle(
+              style: widget.style,
+              textStyle:
+                  TextStyle(fontSize: widget.style.textStyle.fontSize + 2))
+          : widget.style;
 
       if (_orientation != orientation) {
         _orientation = orientation;
@@ -304,7 +317,7 @@ class VideoReadyState extends State<VideoReady> {
             }),
             child: Container(
               color: Colors.transparent,
-              child: widget.style.thumbnail,
+              child: _style.thumbnail,
             ),
           ),
         ),
@@ -316,8 +329,8 @@ class VideoReadyState extends State<VideoReady> {
         Center(
           child: _playAndPause(
             Container(
-              height: widget.style.playAndPauseStyle.circleSize * 2,
-              width: widget.style.playAndPauseStyle.circleSize * 2,
+              height: _style.playAndPauseStyle.circleSize * 2,
+              width: _style.playAndPauseStyle.circleSize * 2,
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 shape: BoxShape.circle,
@@ -327,7 +340,7 @@ class VideoReadyState extends State<VideoReady> {
         ),
         _fadeTransition(
           visible: _isBuffering,
-          child: widget.style.buffering,
+          child: _style.buffering,
         ),
         _fadeTransition(
           visible: _showForwardStatus,
@@ -338,7 +351,7 @@ class VideoReadyState extends State<VideoReady> {
           child: _playAndPauseIconButtons(),
         ),
         SettingsMenu(
-          style: widget.style,
+          style: _style,
           source: widget.source,
           visible: _showSettings,
           controller: _controller,
@@ -418,7 +431,7 @@ class VideoReadyState extends State<VideoReady> {
   }
 
   Widget _rewindAndForwardIconsIndicator() {
-    final style = widget.style.forwardAndRewindStyle;
+    final style = _style.forwardAndRewindStyle;
     return _rewindAndForwardLayout(
       rewind: _fadeTransition(
         visible: _showAMomentRewindIcons[0],
@@ -433,7 +446,7 @@ class VideoReadyState extends State<VideoReady> {
 
   Widget _forwardAmountAlert() {
     String text = secondsFormatter(_forwardAmount);
-    final style = widget.style.forwardAndRewindStyle;
+    final style = _style.forwardAndRewindStyle;
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
@@ -442,7 +455,7 @@ class VideoReadyState extends State<VideoReady> {
           color: style.backgroundColor,
           borderRadius: style.borderRadius,
         ),
-        child: Text(text, style: widget.style.textStyle),
+        child: Text(text, style: _style.textStyle),
       ),
     );
   }
@@ -451,7 +464,7 @@ class VideoReadyState extends State<VideoReady> {
   //OVERLAY BUTTONS//
   //---------------//
   Widget _playAndPauseIconButtons() {
-    final style = widget.style.playAndPauseStyle;
+    final style = _style.playAndPauseStyle;
     return Center(
       child: _playAndPause(!_isPlaying ? style.playWidget : style.pauseWidget),
     );
@@ -475,14 +488,14 @@ class VideoReadyState extends State<VideoReady> {
   //BOTTOM PROGRESS BAR//
   //-------------------//
   Widget _settingsIconButton() {
-    double padding = widget.style.progressBarStyle.paddingBeetwen;
+    double padding = _style.progressBarStyle.paddingBeetwen;
     return Align(
       alignment: Alignment.topRight,
       child: GestureDetector(
         onTap: () => setState(() => _showSettings = !_showSettings),
         child: Container(
           color: Colors.transparent,
-          child: widget.style.settingsStyle.settings,
+          child: _style.settingsStyle.settings,
           padding:
               Margin.horizontal(padding) + Margin.vertical(_progressBarMargin),
         ),
@@ -498,7 +511,7 @@ class VideoReadyState extends State<VideoReady> {
       visible: _isDraggingProgress,
       child: Container(
         width: width,
-        child: Text(position, style: widget.style.textStyle),
+        child: Text(position, style: _style.textStyle),
         margin: Margin.left(margin < 0 ? 0 : margin),
         padding: Margin.all(5),
         alignment: Alignment.center,
@@ -510,7 +523,7 @@ class VideoReadyState extends State<VideoReady> {
   }
 
   Widget _bottomProgressBar() {
-    VideoProgressBarStyle style = widget.style.progressBarStyle;
+    VideoProgressBarStyle style = _style.progressBarStyle;
     String position = "00:00", remaing = "-00:00";
     double padding = style.paddingBeetwen;
 
@@ -542,8 +555,8 @@ class VideoReadyState extends State<VideoReady> {
                   vertical: _progressBarMargin,
                 ),
                 child: !_isPlaying
-                    ? widget.style.playAndPauseStyle.play
-                    : widget.style.playAndPauseStyle.pause)),
+                    ? _style.playAndPauseStyle.play
+                    : _style.playAndPauseStyle.pause)),
             Expanded(
               child: VideoProgressBar(
                 _controller,
@@ -577,7 +590,7 @@ class VideoReadyState extends State<VideoReady> {
                 child: _containerPadding(
                   child: Text(
                     _progressBarTextShowPosition ? position : remaing,
-                    style: widget.style.textStyle,
+                    style: _style.textStyle,
                   ),
                 ),
               ),
@@ -589,7 +602,7 @@ class VideoReadyState extends State<VideoReady> {
                   PushRoute.transparentPage(
                     context,
                     FullScreenPage(
-                      style: widget.style,
+                      style: _style,
                       source: widget.source,
                       looping: widget.looping,
                       controller: _controller,
