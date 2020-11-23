@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  volume: ^1.0.1
   helpers: ^1.0.1
   video_player: ^1.0.1
   flutter_cache_manager: ^2.0.0

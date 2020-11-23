@@ -1,5 +1,7 @@
-import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:ui';
+import 'dart:async';
+import 'package:volume/volume.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -55,11 +57,15 @@ class VideoReadyState extends State<VideoReady> {
   int _lastPosition = 0, _forwardAmount = 0, _transitions = 0;
   double _progressBarMargin = 0;
 
+  //VOLUME
+  bool _showVolumeStatus = false, _isAndroid = false;
+  int _maxVolume = 1, _currentVolume = 1, _volumeStatus = 1;
+  Offset _verticalDragStartOffset;
+
   //TEXT POSITION ON DRAGGING
-  bool _isDraggingProgress = false;
-  double _progressBarWidth = 0, _progressScale = 0, _iconPlayWidth = 0;
   GlobalKey _playKey = GlobalKey();
-  bool _switchRemaingText = false;
+  double _progressBarWidth = 0, _progressScale = 0, _iconPlayWidth = 0;
+  bool _isDraggingProgress = false, _switchRemaingText = false;
 
   //LANDSCAPE
   Orientation _orientation;
@@ -73,16 +79,18 @@ class VideoReadyState extends State<VideoReady> {
     _landscapeStyle = mergeVideoViewerStyle(
         style: widget.style,
         textStyle: TextStyle(
-          fontSize: widget.style.textStyle.fontSize +
-              widget.style.inLandscapeEnlargeTheTextBy,
-        ));
-    _transitions = _style.transitions;
+            fontSize: widget.style.textStyle.fontSize +
+                widget.style.inLandscapeEnlargeTheTextBy));
+    _isAndroid = Platform.isAndroid;
     _controller = widget.controller;
+    _transitions = _style.transitions;
     _activedSource = widget.activedSource;
     _controller.addListener(_videoListener);
     _controller.setLooping(widget.looping);
     _showThumbnail = _style.thumbnail == null ? false : true;
     if (!_showThumbnail) Misc.onLayoutRendered(() => _changeIconPlayWidth());
+    _initAudioStreamType();
+    _updateVolumes();
     super.initState();
   }
 
@@ -267,6 +275,52 @@ class VideoReadyState extends State<VideoReady> {
     }
   }
 
+  //------//
+  //VOLUME//
+  //------//
+  void _initAudioStreamType() async {
+    if (_isAndroid) await Volume.controlVolume(AudioManager.STREAM_MUSIC);
+  }
+
+  void _updateVolumes() async {
+    if (_isAndroid) {
+      _currentVolume = await Volume.getVol;
+      _maxVolume = await Volume.getMaxVol;
+      _volumeStatus = _currentVolume;
+      if (mounted) setState(() {});
+    }
+  }
+
+  void _setVolume(int amount) async {
+    if (_isAndroid) {
+      await Volume.setVol(amount, showVolumeUI: ShowVolumeUI.HIDE);
+      _volumeStatus = await Volume.getVol;
+      setState(() {});
+    }
+  }
+
+  void _volumeDragStart(DragStartDetails details) {
+    if (!_showSettings && _isAndroid) {
+      _updateVolumes();
+      setState(() {
+        _verticalDragStartOffset = details.globalPosition;
+        _showVolumeStatus = true;
+      });
+    }
+  }
+
+  void _volumeDragUpdate(DragUpdateDetails details) {
+    if (!_showSettings && _isAndroid) {
+      double diff = _verticalDragStartOffset.dy - details.globalPosition.dy;
+      int volume = (diff / 15).round() + _currentVolume;
+      if (volume <= _maxVolume && volume >= 0) _setVolume(volume);
+    }
+  }
+
+  void _volumeDragEnd() {
+    if (!_showSettings && _isAndroid) setState(() => _showVolumeStatus = false);
+  }
+
   //-----//
   //BUILD//
   //-----//
@@ -347,6 +401,13 @@ class VideoReadyState extends State<VideoReady> {
           child: _style.buffering,
         ),
         _fadeTransition(
+          visible: _showVolumeStatus && _isAndroid,
+          child: VideoVolumeBar(
+            style: widget.style.volumeBarStyle,
+            progress: (_volumeStatus / _maxVolume),
+          ),
+        ),
+        _fadeTransition(
           visible: _showForwardStatus,
           child: _forwardAmountAlert(),
         ),
@@ -391,28 +452,34 @@ class VideoReadyState extends State<VideoReady> {
   //--------//
   //GESTURES//
   //--------//
-  Widget _playAndPause(Widget child) =>
-      GestureDetector(child: child, onTap: _onTapPlayAndPause);
-
   Widget _globalGesture(Widget child) {
     return GestureDetector(
       child: child,
+      //VOLUME
+      onVerticalDragStart: (DragStartDetails details) =>
+          _volumeDragStart(details),
+      onVerticalDragUpdate: (DragUpdateDetails details) =>
+          _volumeDragUpdate(details),
+      onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
+      //FORWARD AND REWIND
       onHorizontalDragStart: (DragStartDetails details) =>
           _forwardDragStart(details),
       onHorizontalDragUpdate: (DragUpdateDetails details) =>
           _forwardDragUpdate(details),
       onHorizontalDragEnd: (DragEndDetails details) => _forwardDragEnd(),
+      //OVERLAY BUTTONS
       onTap: () {
-        if (!_showSettings) {
+        if (!_showSettings)
           setState(() {
             _showButtons = !_showButtons;
-
             if (_showButtons) _isGoingToCloseBufferingWidget = false;
           });
-        }
       },
     );
   }
+
+  Widget _playAndPause(Widget child) =>
+      GestureDetector(child: child, onTap: _onTapPlayAndPause);
 
   //------//
   //REWIND//
