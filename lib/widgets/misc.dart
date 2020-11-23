@@ -187,7 +187,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   Widget settingsItemMenu(String title, String subtitle, Widget icon) {
     return Container(
       color: Colors.transparent,
-      padding: Margin.all(10),
+      padding: Margin.all(style.paddingBetween / 2),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
