@@ -8,8 +8,6 @@ import 'package:video_viewer/utils/styles.dart';
 import 'package:video_viewer/widgets/misc.dart';
 import 'package:video_viewer/widgets/progress.dart';
 
-import '../helpers.dart';
-
 class VideoReady extends StatefulWidget {
   VideoReady({
     Key key,
@@ -56,11 +54,12 @@ class VideoReadyState extends State<VideoReady> {
   String _activedSource;
   Offset _horizontalDragStartOffset;
   int _lastPosition = 0, _forwardAmount = 0, _transitions = 0;
-  double _progressBarBottomMargin = 0;
+  double _progressBarMargin = 0;
   //TEXT POSITION ON DRAGGING
   bool _isDraggingProgress = false;
   double _progressBarWidth = 0, _progressScale = 0, _iconPlayWidth = 0;
   GlobalKey _playKey = GlobalKey();
+  Orientation _orientation;
 
   set fullScreen(bool value) => setState(() => _isFullScreen = value);
 
@@ -143,7 +142,7 @@ class VideoReadyState extends State<VideoReady> {
     if (!_isGoingToCloseBufferingWidget) {
       setState(() {
         _isGoingToCloseBufferingWidget = true;
-        _closeOverlayButtons = Timer(Duration(milliseconds: 3200), () {
+        _closeOverlayButtons = Misc.timer(3200, () {
           setState(() => _showButtons = false);
           _cancelCloseOverlayButtons();
         });
@@ -153,7 +152,7 @@ class VideoReadyState extends State<VideoReady> {
 
   void _createBufferTimer() {
     setState(() {
-      _timerPosition = Timer.periodic(Duration(milliseconds: 1000), (_) {
+      _timerPosition = Misc.periodic(1000, () {
         int position = _controller.value.position.inMilliseconds;
         setState(() {
           if (_isPlaying)
@@ -188,7 +187,7 @@ class VideoReadyState extends State<VideoReady> {
       if (!_showButtons) {
         _showAMomentPlayAndPause = true;
         _hidePlayAndPause?.cancel();
-        _hidePlayAndPause = Timer(Duration(milliseconds: 600), () {
+        _hidePlayAndPause = Misc.timer(600, () {
           setState(() => _showAMomentPlayAndPause = false);
         });
       } else if (_isPlaying) _showButtons = false;
@@ -254,77 +253,102 @@ class VideoReadyState extends State<VideoReady> {
     }
   }
 
+  //-----//
+  //BUILD//
+  //-----//
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (_, orientation) {
+      Orientation landscape = Orientation.landscape;
       double padding = widget.style.progressBarStyle.paddingBeetwen;
-      _progressBarBottomMargin =
-          orientation == Orientation.landscape ? padding : padding / 2;
+      _progressBarMargin = orientation == landscape ? padding * 2 : padding;
 
-      return AspectRatio(
-        aspectRatio: _controller.value.aspectRatio,
-        child: _globalGesture(
-          Stack(children: [
-            _fadeTransition(
-              visible: !_showThumbnail,
-              child: VideoPlayer(_controller),
-            ),
-            _fadeTransition(
-              visible: _showThumbnail,
-              child: GestureDetector(
-                onTap: () => setState(() {
-                  _controller.play();
-                  _changeIconPlayWidth();
-                }),
-                child: Container(
-                  color: Colors.transparent,
-                  child: widget.style.thumbnail,
-                ),
-              ),
-            ),
-            _rewindAndForward(),
-            _fadeTransition(
-              visible: !_showThumbnail,
-              child: _overlayButtons(),
-            ),
-            Center(
-              child: _playAndPause(
-                Container(
-                  height: widget.style.playAndPauseStyle.circleSize * 2,
-                  width: widget.style.playAndPauseStyle.circleSize * 2,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ),
-            _fadeTransition(
-              visible: _isBuffering,
-              child: widget.style.buffering,
-            ),
-            _fadeTransition(
-              visible: _showForwardStatus,
-              child: _forwardAmountAlert(),
-            ),
-            _fadeTransition(
-              visible: _showAMomentPlayAndPause,
-              child: _playAndPauseIconButtons(),
-            ),
-            SettingsMenu(
-              style: widget.style,
-              source: widget.source,
-              visible: _showSettings,
-              controller: _controller,
-              activedSource: _activedSource,
-              changeSource: _changeVideoSource,
-              changeState: () => setState(() => _showSettings = !_showSettings),
-            ),
-            _rewindAndForwardIconsIndicator(),
-          ]),
-        ),
-      );
+      if (_orientation != orientation) {
+        _orientation = orientation;
+        if (_isFullScreen) {
+          Misc.setSystemOverlay([]);
+          Misc.delayed(400, () => Misc.setSystemOverlay([]));
+        }
+      }
+
+      Widget player = _isFullScreen && orientation == landscape
+          ? _player()
+          : _playerAspectRatio(_player());
+
+      return player;
     });
+  }
+
+  Widget _playerAspectRatio(Widget child) {
+    return AspectRatio(
+      aspectRatio: _controller.value.aspectRatio,
+      child: child,
+    );
+  }
+
+  Widget _player() {
+    return _globalGesture(
+      Stack(children: [
+        _fadeTransition(
+          visible: !_showThumbnail,
+          child: _isFullScreen && _orientation == Orientation.landscape
+              ? Center(child: _playerAspectRatio(VideoPlayer(_controller)))
+              : VideoPlayer(_controller),
+        ),
+        _fadeTransition(
+          visible: _showThumbnail,
+          child: GestureDetector(
+            onTap: () => setState(() {
+              _controller.play();
+              _changeIconPlayWidth();
+            }),
+            child: Container(
+              color: Colors.transparent,
+              child: widget.style.thumbnail,
+            ),
+          ),
+        ),
+        _rewindAndForward(),
+        _fadeTransition(
+          visible: !_showThumbnail,
+          child: _overlayButtons(),
+        ),
+        Center(
+          child: _playAndPause(
+            Container(
+              height: widget.style.playAndPauseStyle.circleSize * 2,
+              width: widget.style.playAndPauseStyle.circleSize * 2,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ),
+        _fadeTransition(
+          visible: _isBuffering,
+          child: widget.style.buffering,
+        ),
+        _fadeTransition(
+          visible: _showForwardStatus,
+          child: _forwardAmountAlert(),
+        ),
+        _fadeTransition(
+          visible: _showAMomentPlayAndPause,
+          child: _playAndPauseIconButtons(),
+        ),
+        SettingsMenu(
+          style: widget.style,
+          source: widget.source,
+          visible: _showSettings,
+          controller: _controller,
+          activedSource: _activedSource,
+          changeSource: _changeVideoSource,
+          changeState: () => setState(() => _showSettings = !_showSettings),
+        ),
+        _rewindAndForwardIconsIndicator(),
+      ]),
+    );
   }
 
   //------------//
@@ -333,7 +357,7 @@ class VideoReadyState extends State<VideoReady> {
   Widget _containerPadding({Widget child}) {
     return Container(
       color: Colors.transparent,
-      padding: Margin.vertical(_progressBarBottomMargin),
+      padding: Margin.vertical(_progressBarMargin),
       child: child,
     );
   }
@@ -459,8 +483,8 @@ class VideoReadyState extends State<VideoReady> {
         child: Container(
           color: Colors.transparent,
           child: widget.style.settingsStyle.settings,
-          padding: Margin.horizontal(padding) +
-              Margin.vertical(_progressBarBottomMargin),
+          padding:
+              Margin.horizontal(padding) + Margin.vertical(_progressBarMargin),
         ),
       ),
     );
@@ -511,29 +535,35 @@ class VideoReadyState extends State<VideoReady> {
             ),
           ),
           child: Row(children: [
-            Container(
-              key: _playKey,
-              padding: Margin.horizontal(padding),
-              child: _playAndPause(!_isPlaying
-                  ? widget.style.playAndPauseStyle.play
-                  : widget.style.playAndPauseStyle.pause),
-            ),
+            _playAndPause(Container(
+                key: _playKey,
+                padding: Margin.symmetric(
+                  horizontal: padding,
+                  vertical: _progressBarMargin,
+                ),
+                child: !_isPlaying
+                    ? widget.style.playAndPauseStyle.play
+                    : widget.style.playAndPauseStyle.pause)),
             Expanded(
               child: VideoProgressBar(
                 _controller,
                 style: style,
-                verticalPadding: _progressBarBottomMargin,
+                verticalPadding: _progressBarMargin,
                 isBuffering: _isBuffering,
                 changePosition: (double scale, double width) {
-                  if (mounted)
-                    setState(() {
-                      if (scale != null) {
+                  if (mounted) {
+                    if (scale != null) {
+                      setState(() {
                         _isDraggingProgress = true;
                         _progressScale = scale;
                         _progressBarWidth = width;
-                      } else
-                        _isDraggingProgress = false;
-                    });
+                      });
+                      _cancelCloseOverlayButtons();
+                    } else {
+                      setState(() => _isDraggingProgress = false);
+                      _startCloseOverlayButtons();
+                    }
+                  }
                 },
               ),
             ),
