@@ -9,15 +9,15 @@ class VideoProgressBar extends StatefulWidget {
     this.controller, {
     Key key,
     this.verticalPadding = 0,
-    VideoProgressBarStyle style,
+    ProgressBarStyle style,
     this.isBuffering = false,
     this.changePosition,
-  })  : this.style = style ?? VideoProgressBarStyle(),
+  })  : this.style = style ?? ProgressBarStyle(),
         super(key: key);
 
   final bool isBuffering;
   final double verticalPadding;
-  final VideoProgressBarStyle style;
+  final ProgressBarStyle style;
   final VideoPlayerController controller;
   final void Function(double, double) changePosition;
 
@@ -36,11 +36,11 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 
   @override
   void initState() {
-    backgroundColor = widget.style.backgroundColor;
-    bufferedColor = widget.style.bufferedColor;
-    activeColor = widget.style.activeColor;
+    backgroundColor = widget.style.barBackgroundColor;
+    bufferedColor = widget.style.barBufferedColor;
+    activeColor = widget.style.barActiveColor;
     controller = widget.controller;
-    height = widget.style.height;
+    height = widget.style.barHeight;
     if (controller.value.initialized)
       duration = controller.value.duration.inMilliseconds;
     controller.addListener(progressListener);
@@ -117,7 +117,6 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
           width: width,
           color: Colors.transparent,
           padding: Margin.vertical(widget.verticalPadding),
-          margin: widget.style.margin,
           alignment: Alignment.centerLeft,
           child: controller.value.initialized
               ? Stack(alignment: AlignmentDirectional.centerStart, children: [
@@ -161,7 +160,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
         height: height * 2 * multiplicator,
         width: height * 2 * multiplicator,
         decoration: BoxDecoration(
-          color: widget.style.dotColor.withOpacity(opacity),
+          color: widget.style.barDotColor.withOpacity(opacity),
           shape: BoxShape.circle,
         ),
       ),
@@ -228,14 +227,14 @@ class VideoVolumeBar extends StatelessWidget {
   }) : super(key: key);
 
   final double progress;
-  final VideoVolumeBarStyle style;
+  final VolumeBarStyle style;
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: style.alignment,
       child: Padding(
-        padding: style.padding,
+        padding: style.margin,
         child: ClipRRect(
           borderRadius: style.borderRadius,
           child: Container(

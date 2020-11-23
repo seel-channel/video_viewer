@@ -386,8 +386,8 @@ class VideoReadyState extends State<VideoReady> {
         Center(
           child: _playAndPause(
             Container(
-              height: _style.playAndPauseStyle.circleSize * 2,
-              width: _style.playAndPauseStyle.circleSize * 2,
+              height: _style.playAndPauseStyle.circleRadius * 2,
+              width: _style.playAndPauseStyle.circleRadius * 2,
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 shape: BoxShape.circle,
@@ -399,9 +399,11 @@ class VideoReadyState extends State<VideoReady> {
           visible: _isBuffering,
           child: _style.buffering,
         ),
-        SwipeTransition(
+        _swipeTransition(
           visible: _showVolumeStatus && _isAndroid,
-          direction: SwipeDirection.fromLeft,
+          direction: _style.volumeBarStyle.alignment == Alignment.centerLeft
+              ? SwipeDirection.fromLeft
+              : SwipeDirection.fromRight,
           child: VideoVolumeBar(
             style: widget.style.volumeBarStyle,
             progress: (_currentVolume / _maxVolume),
@@ -444,6 +446,17 @@ class VideoReadyState extends State<VideoReady> {
     return OpacityTransition(
       curve: Curves.ease,
       duration: Duration(milliseconds: _transitions),
+      visible: visible,
+      child: child,
+    );
+  }
+
+  Widget _swipeTransition(
+      {bool visible, Widget child, SwipeDirection direction}) {
+    return SwipeTransition(
+      curve: Curves.ease,
+      duration: Duration(milliseconds: _transitions),
+      direction: direction,
       visible: visible,
       child: child,
     );
@@ -543,8 +556,8 @@ class VideoReadyState extends State<VideoReady> {
 
   Widget _overlayButtons() {
     return Stack(children: [
-      SwipeTransition(
-        duration: Duration(milliseconds: _transitions),
+      _swipeTransition(
+        direction: SwipeDirection.fromBottom,
         visible: _showButtons,
         child: _bottomProgressBar(),
       ),
@@ -587,14 +600,14 @@ class VideoReadyState extends State<VideoReady> {
         padding: Margin.all(5),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.28),
-            borderRadius: EdgeRadius.all(5)),
+            color: _style.progressBarStyle.backgroundColor,
+            borderRadius: _style.progressBarStyle.borderRadius),
       ),
     );
   }
 
   Widget _bottomProgressBar() {
-    VideoProgressBarStyle style = _style.progressBarStyle;
+    ProgressBarStyle style = _style.progressBarStyle;
     String position = "00:00", remaing = "-00:00";
     double padding = style.paddingBeetwen;
 
@@ -615,7 +628,10 @@ class VideoReadyState extends State<VideoReady> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.transparent, Colors.black.withOpacity(0.28)],
+              colors: [
+                Colors.transparent,
+                _style.progressBarStyle.backgroundColor
+              ],
             ),
           ),
           child: Row(children: [

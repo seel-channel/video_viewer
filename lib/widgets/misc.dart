@@ -69,7 +69,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   List<bool> show = [false, false];
   bool showMenu = true;
   TextStyle textStyle;
-  SettingsStyle style;
+  SettingsMenuStyle style;
 
   @override
   void initState() {
@@ -356,9 +356,9 @@ class _FullScreenPageState extends State<FullScreenPage> {
         child: Center(
           child: BooleanTween(
             tween: Tween<double>(begin: 0, end: 1.0),
-            duration: Duration(milliseconds: style.transitions),
             curve: Curves.ease,
             animate: showVideo,
+            duration: Duration(milliseconds: style.transitions),
             builder: (value) {
               return Opacity(
                 opacity: value,
