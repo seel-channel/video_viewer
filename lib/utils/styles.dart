@@ -128,14 +128,14 @@ class SettingsStyle {
     Widget speed,
     Widget selected,
     Widget chevron,
-    this.paddingBetween = 32,
+    this.paddingBetween = 24,
   })  : this.settings = settings ??
             Icon(
               Icons.settings_outlined,
               color: Colors.white,
               size: 20,
             ),
-        this.speed = speed ?? Icon(Icons.speed, color: Colors.white),
+        this.speed = speed ?? Icon(Icons.speed, color: Colors.white, size: 20),
         this.selected =
             selected ?? Icon(Icons.done, color: Colors.white, size: 20),
         this.chevron = chevron ?? Icon(Icons.chevron_left, color: Colors.white);

@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
+
 import 'package:video_player/video_player.dart';
 import 'package:video_viewer/video_viewer.dart';
 import 'package:video_viewer/widgets/video.dart';
@@ -314,7 +315,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
 
   Future<void> resetOrientationValues() async {
     setState(() => showVideo = false);
-    await Future.delayed(Duration(milliseconds: style.transitions), () {});
+    await Misc.wait(style.transitions);
     await Misc.setSystemOverlay(SystemOverlay.values);
   }
 

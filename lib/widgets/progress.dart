@@ -188,7 +188,10 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
         setState(() => dragging = true);
       },
       onHorizontalDragUpdate: (DragUpdateDetails details) {
-        setState(() => animationMS = 0);
+        setState(() {
+          animationMS = 0;
+          dragging = true;
+        });
         seekToRelativePosition(details.localPosition, true);
       },
       onHorizontalDragEnd: (DragEndDetails details) async {
@@ -198,11 +201,9 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
       },
       onTapDown: (TapDownDetails details) {
         pause();
+        changePosition(null, width);
+        setState(() => animationMS = 0);
         seekToRelativePosition(details.localPosition);
-        setState(() {
-          dragging = true;
-          animationMS = 0;
-        });
       },
       onTapUp: (TapUpDetails details) {
         seekToRelativePosition(details.localPosition);
