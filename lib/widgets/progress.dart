@@ -31,7 +31,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   VideoPlayerController controller;
   Duration seekToPosition;
   int animationMS = 500;
-  bool dragging = false;
+  bool isDragging = false;
   double height = 0;
 
   @override
@@ -86,10 +86,18 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
     if (widget.changePosition != null) widget.changePosition(scale, width);
   }
 
+  void startDragging() {
+    setState(() {
+      isDragging = true;
+      animationMS = 0;
+    });
+  }
+
   void progressListener() {
     if (mounted && controller.value.initialized)
       setState(() {
         if (controller.value.isPlaying && animationMS != 500) animationMS = 500;
+        if (isDragging) animationMS = 0;
         maxBuffering = 0;
         position = controller.value.position.inMilliseconds;
         for (DurationRange range in controller.value.buffered) {
@@ -117,7 +125,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
                   _progressBar(
                       (maxBuffering / duration) * width, bufferedColor),
                   _progressBar((position / duration) * width, activeColor),
-                  _dotDragging(width),
+                  _dotisDragging(width),
                   _dotIdentifier(width),
                 ])
               : _progressBar(width, backgroundColor),
@@ -127,12 +135,12 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   }
 
   Widget _dotIdentifier(double maxWidth) => _dot(maxWidth);
-  Widget _dotDragging(double maxWidth) {
+  Widget _dotisDragging(double maxWidth) {
     double widthPos = (position / duration) * maxWidth;
     double widthDot = height * 2;
     return BooleanTween(
       animate:
-          dragging && widthPos > widthDot && widthPos < maxWidth - widthDot,
+          isDragging && widthPos > widthDot && widthPos < maxWidth - widthDot,
       tween: Tween<double>(begin: 0, end: 0.4),
       builder: (value) => _dot(maxWidth, value, 2),
     );
@@ -184,30 +192,28 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
     return GestureDetector(
       child: child,
       behavior: HitTestBehavior.opaque,
-      onHorizontalDragStart: (DragStartDetails details) async {
-        setState(() => dragging = true);
+      onHorizontalDragStart: (DragStartDetails details) {
+        startDragging();
+        pause();
       },
       onHorizontalDragUpdate: (DragUpdateDetails details) {
-        setState(() {
-          animationMS = 0;
-          dragging = true;
-        });
         seekToRelativePosition(details.localPosition, true);
       },
-      onHorizontalDragEnd: (DragEndDetails details) async {
-        setState(() => dragging = false);
+      onHorizontalDragEnd: (DragEndDetails details) {
         changePosition(null, width);
-        play();
+        setState(() => isDragging = false);
+        Misc.delayed(50, () => play());
       },
       onTapDown: (TapDownDetails details) {
-        pause();
+        startDragging();
         changePosition(null, width);
-        setState(() => animationMS = 0);
         seekToRelativePosition(details.localPosition);
+        pause();
       },
       onTapUp: (TapUpDetails details) {
+        changePosition(null, width);
+        setState(() => isDragging = false);
         seekToRelativePosition(details.localPosition);
-        setState(() => dragging = false);
         Misc.delayed(50, () => play());
       },
     );
