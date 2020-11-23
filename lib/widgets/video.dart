@@ -130,8 +130,11 @@ class VideoReadyState extends State<VideoReady> {
     if (mounted) {
       final value = _controller.value;
       final playing = value.isPlaying;
-      if (playing != _isPlaying) setState(() => _isPlaying = playing);
-      if (_isPlaying && _showThumbnail) setState(() => _showThumbnail = false);
+      setState(() {
+        if (playing != _isPlaying) _isPlaying = playing;
+        if (_isPlaying && _showThumbnail) _showThumbnail = false;
+        if (_isPlaying && _isDraggingProgress) _isDraggingProgress = false;
+      });
       if (_showButtons) {
         if (_isPlaying) {
           if (value.position >= value.duration && !widget.looping) {
@@ -207,7 +210,7 @@ class VideoReadyState extends State<VideoReady> {
 
   void _changeIconPlayWidth() {
     Misc.delayed(
-      _transitions,
+      _transitions + 200,
       () => setState(() => _iconPlayWidth = GetKey.width(_playKey)),
     );
   }
@@ -403,7 +406,7 @@ class VideoReadyState extends State<VideoReady> {
         if (!_showSettings) {
           setState(() {
             _showButtons = !_showButtons;
-            if (_isDraggingProgress) _isDraggingProgress = false;
+
             if (_showButtons) _isGoingToCloseBufferingWidget = false;
           });
         }
@@ -517,7 +520,7 @@ class VideoReadyState extends State<VideoReady> {
         padding: Margin.all(5),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withOpacity(0.28),
             borderRadius: EdgeRadius.all(5)),
       ),
     );
@@ -545,7 +548,7 @@ class VideoReadyState extends State<VideoReady> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.transparent, Colors.black.withOpacity(0.2)],
+              colors: [Colors.transparent, Colors.black.withOpacity(0.28)],
             ),
           ),
           child: Row(children: [
