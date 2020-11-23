@@ -31,9 +31,8 @@ VideoViewerStyle mergeVideoViewerStyle({
     thumbnail: null,
     loading: style.loading,
     buffering: style.buffering,
-    textStyle: textStyle != null
-        ? style.textStyle.merge(TextStyle(fontSize: textStyle.fontSize + 2))
-        : style.textStyle,
+    textStyle:
+        textStyle != null ? style.textStyle.merge(textStyle) : style.textStyle,
     settingsStyle: style.settingsStyle,
     volumeBarStyle: style.volumeBarStyle,
     progressBarStyle: style.progressBarStyle,
@@ -198,7 +197,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
             subtitle,
             style: textStyle.merge(TextStyle(
                 fontWeight: FontWeight.normal,
-                fontSize: textStyle.fontSize - 2)),
+                fontSize: textStyle.fontSize -
+                    widget.style.inLandscapeEnlargeTheTextBy)),
           ),
         ],
       ),

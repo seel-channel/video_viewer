@@ -63,13 +63,19 @@ class VideoReadyState extends State<VideoReady> {
 
   //LANDSCAPE
   Orientation _orientation;
-  VideoViewerStyle _style;
+  VideoViewerStyle _style, _landscapeStyle;
 
   set fullScreen(bool value) => setState(() => _isFullScreen = value);
 
   @override
   void initState() {
     _style = widget.style;
+    _landscapeStyle = mergeVideoViewerStyle(
+        style: widget.style,
+        textStyle: TextStyle(
+          fontSize: widget.style.textStyle.fontSize +
+              widget.style.inLandscapeEnlargeTheTextBy,
+        ));
     _transitions = _style.transitions;
     _controller = widget.controller;
     _activedSource = widget.activedSource;
@@ -269,12 +275,7 @@ class VideoReadyState extends State<VideoReady> {
       _progressBarMargin = orientation == landscape ? padding * 2 : padding;
 
       //RESPONSIVE TEXT
-      _style = orientation == landscape
-          ? mergeVideoViewerStyle(
-              style: widget.style,
-              textStyle:
-                  TextStyle(fontSize: widget.style.textStyle.fontSize + 2))
-          : widget.style;
+      _style = orientation == landscape ? _landscapeStyle : widget.style;
 
       if (_orientation != orientation) {
         _orientation = orientation;

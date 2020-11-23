@@ -13,6 +13,7 @@ class VideoViewerStyle {
     Widget buffering,
     TextStyle textStyle,
     this.transitions = 400,
+    this.inLandscapeEnlargeTheTextBy = 2,
   })  : this.loading = loading ??
             Center(
               child: CircularProgressIndicator(strokeWidth: 1.6),
@@ -45,6 +46,7 @@ class VideoViewerStyle {
   final int transitions;
 
   final TextStyle textStyle;
+  final double inLandscapeEnlargeTheTextBy;
 }
 
 class VideoProgressBarStyle {
