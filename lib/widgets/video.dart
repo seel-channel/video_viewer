@@ -47,7 +47,6 @@ class VideoReadyState extends State<VideoReady> {
       _showThumbnail = true,
       _showForwardStatus = false,
       _showAMomentPlayAndPause = false,
-      _progressBarTextShowPosition = false,
       _isGoingToCloseBufferingWidget = false;
   Timer _closeOverlayButtons, _timerPosition, _hidePlayAndPause;
   List<bool> _showAMomentRewindIcons = [false, false];
@@ -60,6 +59,7 @@ class VideoReadyState extends State<VideoReady> {
   bool _isDraggingProgress = false;
   double _progressBarWidth = 0, _progressScale = 0, _iconPlayWidth = 0;
   GlobalKey _playKey = GlobalKey();
+  bool _switchRemaingText = false;
 
   //LANDSCAPE
   Orientation _orientation;
@@ -589,11 +589,13 @@ class VideoReadyState extends State<VideoReady> {
               color: Colors.transparent,
               alignment: Alignment.center,
               child: GestureDetector(
-                onTap: () => setState(() => _progressBarTextShowPosition =
-                    !_progressBarTextShowPosition),
+                onTap: () {
+                  setState(() => _switchRemaingText = !_switchRemaingText);
+                  _cancelCloseOverlayButtons();
+                },
                 child: _containerPadding(
                   child: Text(
-                    _progressBarTextShowPosition ? position : remaing,
+                    _switchRemaingText ? position : remaing,
                     style: _style.textStyle,
                   ),
                 ),
