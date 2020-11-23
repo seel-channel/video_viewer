@@ -59,7 +59,7 @@ class VideoReadyState extends State<VideoReady> {
 
   //VOLUME
   bool _showVolumeStatus = false, _isAndroid = false;
-  int _maxVolume = 1, _currentVolume = 1, _volumeStatus = 1;
+  int _maxVolume = 1, _onDragStartVolume = 1, _currentVolume = 1;
   Offset _verticalDragStartOffset;
 
   //TEXT POSITION ON DRAGGING
@@ -284,18 +284,17 @@ class VideoReadyState extends State<VideoReady> {
 
   void _updateVolumes() async {
     if (_isAndroid) {
-      _currentVolume = await Volume.getVol;
       _maxVolume = await Volume.getMaxVol;
-      _volumeStatus = _currentVolume;
+      _onDragStartVolume = await Volume.getVol;
+      _currentVolume = _onDragStartVolume;
       if (mounted) setState(() {});
     }
   }
 
-  void _setVolume(int amount) async {
+  void _setVolume(int volume) async {
     if (_isAndroid) {
-      await Volume.setVol(amount, showVolumeUI: ShowVolumeUI.HIDE);
-      _volumeStatus = await Volume.getVol;
-      setState(() {});
+      await Volume.setVol(volume, showVolumeUI: ShowVolumeUI.HIDE);
+      setState(() => _currentVolume = volume);
     }
   }
 
@@ -312,7 +311,7 @@ class VideoReadyState extends State<VideoReady> {
   void _volumeDragUpdate(DragUpdateDetails details) {
     if (!_showSettings && _isAndroid) {
       double diff = _verticalDragStartOffset.dy - details.globalPosition.dy;
-      int volume = (diff / 15).round() + _currentVolume;
+      int volume = (diff / 15).round() + _onDragStartVolume;
       if (volume <= _maxVolume && volume >= 0) _setVolume(volume);
     }
   }
@@ -400,11 +399,12 @@ class VideoReadyState extends State<VideoReady> {
           visible: _isBuffering,
           child: _style.buffering,
         ),
-        _fadeTransition(
+        SwipeTransition(
           visible: _showVolumeStatus && _isAndroid,
+          direction: SwipeDirection.fromLeft,
           child: VideoVolumeBar(
             style: widget.style.volumeBarStyle,
-            progress: (_volumeStatus / _maxVolume),
+            progress: (_currentVolume / _maxVolume),
           ),
         ),
         _fadeTransition(
