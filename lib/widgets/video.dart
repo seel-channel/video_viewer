@@ -6,9 +6,11 @@ import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:video_viewer/utils/styles.dart';
-import 'package:video_viewer/widgets/misc.dart';
+import 'package:video_viewer/widgets/settings_menu.dart';
+import 'package:video_viewer/widgets/fullscreen.dart';
 import 'package:video_viewer/widgets/progress.dart';
+import 'package:video_viewer/utils/styles.dart';
+import 'package:video_viewer/utils/misc.dart';
 
 class VideoReady extends StatefulWidget {
   VideoReady({
@@ -47,15 +49,16 @@ class VideoReadyState extends State<VideoReady> {
       _showButtons = false,
       _showSettings = false,
       _showThumbnail = true,
-      _showForwardStatus = false,
       _showAMomentPlayAndPause = false,
       _isGoingToCloseBufferingWidget = false;
   Timer _closeOverlayButtons, _timerPosition, _hidePlayAndPause;
-  List<bool> _showAMomentRewindIcons = [false, false];
   String _activedSource;
+
+  //REWIND AND FORWARD
+  bool _showForwardStatus = false;
   Offset _horizontalDragStartOffset;
+  List<bool> _showAMomentRewindIcons = [false, false];
   int _lastPosition = 0, _forwardAmount = 0, _transitions = 0;
-  double _progressBarMargin = 0;
 
   //VOLUME
   bool _showVolumeStatus = false, _isAndroid = false;
@@ -68,9 +71,11 @@ class VideoReadyState extends State<VideoReady> {
   bool _isDraggingProgress = false, _switchRemaingText = false;
 
   //LANDSCAPE
+  double _progressBarMargin = 0;
   Orientation _orientation;
   VideoViewerStyle _style, _landscapeStyle;
 
+  //ONLY USE ON FULLSCREENPAGE
   set fullScreen(bool value) => setState(() => _isFullScreen = value);
 
   @override
@@ -424,24 +429,16 @@ class VideoReadyState extends State<VideoReady> {
           controller: _controller,
           activedSource: _activedSource,
           changeSource: _changeVideoSource,
-          changeState: () => setState(() => _showSettings = !_showSettings),
+          changeVisible: () => setState(() => _showSettings = !_showSettings),
         ),
         _rewindAndForwardIconsIndicator(),
       ]),
     );
   }
 
-  //------------//
-  //MISC WIDGETS//
-  //------------//
-  Widget _containerPadding({Widget child}) {
-    return Container(
-      color: Colors.transparent,
-      padding: Margin.vertical(_progressBarMargin),
-      child: child,
-    );
-  }
-
+  //------------------//
+  //TRANSITION WIDGETS//
+  //------------------//
   Widget _fadeTransition({bool visible, Widget child}) {
     return OpacityTransition(
       curve: Curves.ease,
@@ -571,6 +568,14 @@ class VideoReadyState extends State<VideoReady> {
   //-------------------//
   //BOTTOM PROGRESS BAR//
   //-------------------//
+  Widget _containerPadding({Widget child}) {
+    return Container(
+      color: Colors.transparent,
+      padding: Margin.vertical(_progressBarMargin),
+      child: child,
+    );
+  }
+
   Widget _settingsIconButton() {
     double padding = _style.progressBarStyle.paddingBeetwen;
     return Align(

@@ -1,5 +1,5 @@
 library video_viewer;
 
-export './utils/misc.dart';
-export './utils/styles.dart';
-export './widgets/main.dart';
+export 'utils/sources.dart';
+export 'utils/styles.dart';
+export 'widgets/main.dart';

@@ -4,42 +4,6 @@ import 'package:flutter/material.dart';
 
 import 'package:video_player/video_player.dart';
 import 'package:video_viewer/video_viewer.dart';
-import 'package:video_viewer/widgets/video.dart';
-
-String secondsFormatter(int seconds) {
-  int secondsBool = seconds;
-  int minutes = (seconds.abs() / 60).floor();
-  seconds = (seconds.abs() - (minutes * 60));
-  int hours = (minutes.abs() / 60).floor();
-  String minutesStr = minutes < 10 ? "0$minutes" : "$minutes";
-  String secondsStr = seconds < 10 ? "0$seconds" : "$seconds";
-  String hoursStr = hours == 0
-      ? ""
-      : hours < 10
-          ? "0$hours:"
-          : "$hours:";
-  return secondsBool < 0
-      ? "-$hoursStr$minutesStr:$secondsStr"
-      : "$hoursStr$minutesStr:$secondsStr";
-}
-
-VideoViewerStyle mergeVideoViewerStyle({
-  VideoViewerStyle style,
-  TextStyle textStyle,
-}) {
-  return VideoViewerStyle(
-    thumbnail: null,
-    loading: style.loading,
-    buffering: style.buffering,
-    textStyle:
-        textStyle != null ? style.textStyle.merge(textStyle) : style.textStyle,
-    settingsStyle: style.settingsStyle,
-    volumeBarStyle: style.volumeBarStyle,
-    progressBarStyle: style.progressBarStyle,
-    playAndPauseStyle: style.playAndPauseStyle,
-    forwardAndRewindStyle: style.forwardAndRewindStyle,
-  );
-}
 
 class SettingsMenu extends StatefulWidget {
   SettingsMenu({
@@ -48,7 +12,7 @@ class SettingsMenu extends StatefulWidget {
     this.source,
     this.visible,
     this.controller,
-    this.changeState,
+    this.changeVisible,
     this.changeSource,
     this.activedSource,
   }) : super(key: key);
@@ -56,7 +20,7 @@ class SettingsMenu extends StatefulWidget {
   final bool visible;
   final String activedSource;
   final VideoViewerStyle style;
-  final void Function() changeState;
+  final void Function() changeVisible;
   final VideoPlayerController controller;
   final Map<String, VideoPlayerController> source;
   final void Function(VideoPlayerController, String) changeSource;
@@ -90,9 +54,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   void didUpdateWidget(SettingsMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.style.textStyle != textStyle)
-      setState(() {
-        textStyle = widget.style.textStyle;
-      });
+      setState(() => textStyle = widget.style.textStyle);
   }
 
   @override
@@ -106,7 +68,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
         child: Stack(
           children: [
             GestureDetector(
-              onTap: widget.changeState,
+              onTap: widget.changeVisible,
               child: Container(color: Colors.black.withOpacity(0.32)),
             ),
             _fadeTransition(
@@ -283,107 +245,6 @@ class _SettingsMenuState extends State<SettingsMenu> {
         ),
         if (selected) style.selected,
       ]),
-    );
-  }
-}
-
-class FullScreenPage extends StatefulWidget {
-  FullScreenPage({
-    Key key,
-    this.controller,
-    this.style,
-    this.source,
-    this.activedSource,
-    this.looping,
-    this.rewindAmount,
-    this.forwardAmount,
-    this.defaultAspectRatio,
-    this.changeSource,
-  }) : super(key: key);
-
-  final String activedSource;
-  final bool looping;
-  final VideoViewerStyle style;
-  final double defaultAspectRatio;
-  final int rewindAmount, forwardAmount;
-  final VideoPlayerController controller;
-  final Map<String, VideoPlayerController> source;
-  final void Function(VideoPlayerController, String) changeSource;
-
-  @override
-  _FullScreenPageState createState() => _FullScreenPageState();
-}
-
-class _FullScreenPageState extends State<FullScreenPage> {
-  VideoViewerStyle style;
-  GlobalKey<VideoReadyState> key = GlobalKey<VideoReadyState>();
-  bool isFullScreen = false;
-  bool showVideo = false;
-
-  @override
-  void initState() {
-    style = widget.style.thumbnail != null
-        ? mergeVideoViewerStyle(style: widget.style)
-        : widget.style;
-    Misc.onLayoutRendered(() => fullScreenOrientation());
-    super.initState();
-  }
-
-  Future<bool> _returnButton() async {
-    await resetOrientationValues();
-    return true;
-  }
-
-  Future<void> resetOrientationValues() async {
-    setState(() => showVideo = false);
-    await Misc.wait(style.transitions);
-    await Misc.setSystemOverlay(SystemOverlay.values);
-  }
-
-  void fullScreenOrientation() async {
-    await Misc.setSystemOverlay([]);
-    await Misc.setSystemOrientation(SystemOrientation.values);
-    key.currentState.fullScreen = true;
-    setState(() => showVideo = true);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: WillPopScope(
-        onWillPop: _returnButton,
-        child: Center(
-          child: BooleanTween(
-            tween: Tween<double>(begin: 0, end: 1.0),
-            curve: Curves.ease,
-            animate: showVideo,
-            duration: Duration(milliseconds: style.transitions),
-            builder: (value) {
-              return Opacity(
-                opacity: value,
-                child: VideoReady(
-                  key: key,
-                  style: style,
-                  source: widget.source,
-                  looping: widget.looping,
-                  controller: widget.controller,
-                  activedSource: widget.activedSource,
-                  rewindAmount: widget.rewindAmount,
-                  forwardAmount: widget.forwardAmount,
-                  defaultAspectRatio: widget.defaultAspectRatio,
-                  onChangeSource: (controller, activedSource) =>
-                      widget.changeSource(controller, activedSource),
-                  exitFullScreen: () async {
-                    await resetOrientationValues();
-                    Navigator.pop(context);
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-      ),
     );
   }
 }
