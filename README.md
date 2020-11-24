@@ -1,14 +1,68 @@
 # video_viewer
 
-A new Flutter package project.
+## My other APIs
 
-## Getting Started
+- [Scroll Navigation](https://pub.dev/packages/scroll_navigation)
+- [Helpers](https://pub.dev/packages/helpers)
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
+<br>
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+## Features
+
+- Amazing UI / UX
+- Fully customizable
+- Fancy animations
+- Easy and powerful implementation! :)
+
+<br>
+
+---
+
+<br>
+
+## Controls
+
+|             Playing              |             Paused              |
+| :------------------------------: | :-----------------------------: |
+| ![](./assets/readme/playing.jpg) | ![](./assets/readme/paused.jpg) |
+
+<br><br>
+
+## Rewind and Forward
+
+|             Rewind              |             Forward              |
+| :-----------------------------: | :------------------------------: |
+| ![](./assets/readme/rewind.jpg) | ![](./assets/readme/forward.jpg) |
+
+<br><br>
+
+## Fullscreen
+
+|                   Portrait                   |                   Landscape                   |
+| :------------------------------------------: | :-------------------------------------------: |
+| ![](./assets/readme/fullscreen_portrait.jpg) | ![](./assets/readme/fullscreen_landscape.jpg) |
+
+<br><br>
+
+## Extras
+
+|             Settings Menu              |  Volume Bar (Only Android Support)  |
+| :------------------------------------: | :---------------------------------: |
+| ![](./assets/readme/settings_menu.jpg) | ![](./assets/readme/volume_bar.jpg) |
+
+<br>
+
+---
+
+<br>
+
+## Global Gestures
+
+- **One Tap:** Show or hide the overlay that contains the PlayAndPauseWidget and the ProgressBar
+- **Double tap:**
+  - Left: Double tapping on the left side of the VideoViewer will do the **rewind**. Default 10 seconds.
+  - Right: Double-tapping on the right side of the VideoViewer will **forward**. Default 10 seconds.
+- **Horizontal Drag:**
+  - Left: Making a horizontal movement to the left will make a **rewind** proportional to the distance traveled.
+  - Right: Making a horizontal movement to the right will make a **forward** proportional to the distance traveled.
+- **Vertical Drag:** Scrolling vertically will activate the VolumeBar and change the volume of the device. **Only available on Android**
