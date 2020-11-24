@@ -10,11 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  volume: ^1.0.1
   helpers: ^1.0.1
-  pedantic: ^1.9.2
   video_player: ^1.0.1
-  flutter_cache_manager: ^2.0.0
 
 dev_dependencies:
   flutter_test:

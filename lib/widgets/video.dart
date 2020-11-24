@@ -1,7 +1,7 @@
-import 'dart:io' show Platform;
+//import 'dart:io' show Platform;
+//import 'package:volume/volume.dart';
 import 'dart:ui';
 import 'dart:async';
-import 'package:volume/volume.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -61,10 +61,10 @@ class VideoReadyState extends State<VideoReady> {
   int _lastPosition = 0, _forwardAmount = 0, _transitions = 0;
 
   //VOLUME
-  bool _showVolumeStatus = false, _isAndroid = false;
-  int _maxVolume = 1, _onDragStartVolume = 1, _currentVolume = 1;
-  Offset _verticalDragStartOffset;
-  Timer _closeVolumeStatus;
+  //bool _showVolumeStatus = false, _isAndroid = false;
+  // int _maxVolume = 1, _onDragStartVolume = 1, _currentVolume = 1;
+  // Offset _verticalDragStartOffset;
+  // Timer _closeVolumeStatus;
 
   //TEXT POSITION ON DRAGGING
   GlobalKey _playKey = GlobalKey();
@@ -87,7 +87,6 @@ class VideoReadyState extends State<VideoReady> {
         textStyle: TextStyle(
             fontSize: widget.style.textStyle.fontSize +
                 widget.style.inLandscapeEnlargeTheTextBy));
-    _isAndroid = Platform.isAndroid;
     _controller = widget.controller;
     _transitions = _style.transitions;
     _activedSource = widget.activedSource;
@@ -95,8 +94,9 @@ class VideoReadyState extends State<VideoReady> {
     _controller.setLooping(widget.looping);
     _showThumbnail = _style.thumbnail == null ? false : true;
     if (!_showThumbnail) Misc.onLayoutRendered(() => _changeIconPlayWidth());
-    _initAudioStreamType();
-    _updateVolumes();
+    //_isAndroid = Platform.isAndroid;
+    //_initAudioStreamType();
+    //_updateVolumes();
     super.initState();
   }
 
@@ -286,53 +286,53 @@ class VideoReadyState extends State<VideoReady> {
   //------//
   //VOLUME//
   //------//
-  void _initAudioStreamType() async {
-    if (_isAndroid) await Volume.controlVolume(AudioManager.STREAM_MUSIC);
-  }
+  // void _initAudioStreamType() async {
+  //   if (_isAndroid) await Volume.controlVolume(AudioManager.STREAM_MUSIC);
+  // }
 
-  void _updateVolumes() async {
-    if (_isAndroid) {
-      _maxVolume = await Volume.getMaxVol;
-      _onDragStartVolume = await Volume.getVol;
-      _currentVolume = _onDragStartVolume;
-      if (mounted) setState(() {});
-    }
-  }
+  // void _updateVolumes() async {
+  //   if (_isAndroid) {
+  //     _maxVolume = await Volume.getMaxVol;
+  //     _onDragStartVolume = await Volume.getVol;
+  //     _currentVolume = _onDragStartVolume;
+  //     if (mounted) setState(() {});
+  //   }
+  // }
 
-  void _setVolume(int volume) async {
-    if (_isAndroid) {
-      await Volume.setVol(volume, showVolumeUI: ShowVolumeUI.HIDE);
-      setState(() => _currentVolume = volume);
-    }
-  }
+  // void _setVolume(int volume) async {
+  //   if (_isAndroid) {
+  //     await Volume.setVol(volume, showVolumeUI: ShowVolumeUI.HIDE);
+  //     setState(() => _currentVolume = volume);
+  //   }
+  // }
 
-  void _volumeDragStart(DragStartDetails details) {
-    if (!_showSettings && _isAndroid) {
-      _closeVolumeStatus?.cancel();
-      setState(() {
-        _verticalDragStartOffset = details.globalPosition;
-        _showVolumeStatus = true;
-      });
-      _updateVolumes();
-    }
-  }
+  // void _volumeDragStart(DragStartDetails details) {
+  //   if (!_showSettings && _isAndroid) {
+  //     _closeVolumeStatus?.cancel();
+  //     setState(() {
+  //       _verticalDragStartOffset = details.globalPosition;
+  //       _showVolumeStatus = true;
+  //     });
+  //     _updateVolumes();
+  //   }
+  // }
 
-  void _volumeDragUpdate(DragUpdateDetails details) {
-    if (!_showSettings && _isAndroid) {
-      double diff = _verticalDragStartOffset.dy - details.globalPosition.dy;
-      int volume = (diff / 15).round() + _onDragStartVolume;
-      if (volume <= _maxVolume && volume >= 0) _setVolume(volume);
-    }
-  }
+  // void _volumeDragUpdate(DragUpdateDetails details) {
+  //   if (!_showSettings && _isAndroid) {
+  //     double diff = _verticalDragStartOffset.dy - details.globalPosition.dy;
+  //     int volume = (diff / 15).round() + _onDragStartVolume;
+  //     if (volume <= _maxVolume && volume >= 0) _setVolume(volume);
+  //   }
+  // }
 
-  void _volumeDragEnd() {
-    if (!_showSettings && _isAndroid)
-      setState(() {
-        _closeVolumeStatus = Misc.timer(600, () {
-          setState(() => _showVolumeStatus = false);
-        });
-      });
-  }
+  // void _volumeDragEnd() {
+  //   if (!_showSettings && _isAndroid)
+  //     setState(() {
+  //       _closeVolumeStatus = Misc.timer(600, () {
+  //         setState(() => _showVolumeStatus = false);
+  //       });
+  //     });
+  // }
 
   //-----//
   //BUILD//
@@ -414,16 +414,16 @@ class VideoReadyState extends State<VideoReady> {
           visible: _isBuffering,
           child: _style.buffering,
         ),
-        _swipeTransition(
-          visible: _showVolumeStatus && _isAndroid,
-          direction: _style.volumeBarStyle.alignment == Alignment.centerLeft
-              ? SwipeDirection.fromLeft
-              : SwipeDirection.fromRight,
-          child: VideoVolumeBar(
-            style: widget.style.volumeBarStyle,
-            progress: (_currentVolume / _maxVolume),
-          ),
-        ),
+        // _swipeTransition(
+        //   visible: _showVolumeStatus && _isAndroid,
+        //   direction: _style.volumeBarStyle.alignment == Alignment.centerLeft
+        //       ? SwipeDirection.fromLeft
+        //       : SwipeDirection.fromRight,
+        //   child: VideoVolumeBar(
+        //     style: widget.style.volumeBarStyle,
+        //     progress: (_currentVolume / _maxVolume),
+        //   ),
+        // ),
         _fadeTransition(
           visible: _showForwardStatus,
           child: _forwardAmountAlert(),
@@ -477,11 +477,11 @@ class VideoReadyState extends State<VideoReady> {
     return GestureDetector(
       child: child,
       //VOLUME
-      onVerticalDragStart: (DragStartDetails details) =>
-          _volumeDragStart(details),
-      onVerticalDragUpdate: (DragUpdateDetails details) =>
-          _volumeDragUpdate(details),
-      onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
+      // onVerticalDragStart: (DragStartDetails details) =>
+      //     _volumeDragStart(details),
+      // onVerticalDragUpdate: (DragUpdateDetails details) =>
+      //     _volumeDragUpdate(details),
+      // onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
       //FORWARD AND REWIND
       onHorizontalDragStart: (DragStartDetails details) =>
           _forwardDragStart(details),

@@ -1,5 +1,7 @@
 # video_viewer
 
+<br>
+
 ## My other APIs
 
 - [Scroll Navigation](https://pub.dev/packages/scroll_navigation)
@@ -12,16 +14,61 @@
 - Amazing UI / UX
 - Fully customizable
 - Fancy animations
-- Cached Videos Support (beta)
 - Easy and powerful implementation! :)
 
-<br>
+<br><br>
 
----
+## **Installation**
 
-<br>
+First, add `video_viewer` as a dependency in your **pubspec.yaml.**
 
-## Controls
+```yaml
+dependencies:
+  video_viewer: ^1.0.1
+```
+
+### Android
+
+Add _android.permission.INTERNET_ and _usesCleartextTraffic_ in your **Android Manifest** file, located in `<project_root>/android/app/src/main/AndroidManifest.xml`
+
+```xml
+<manifest>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <application android:usesCleartextTraffic="true"></aplication>
+</manifest>
+```
+
+### iOS
+
+Add the following entry to your **Info.plist** file, located in `<project_root>/ios/Runner/Info.plist`
+
+```xml
+<key>NSAppTransportSecurity</key>
+<dict>
+  <key>NSAllowsArbitraryLoads</key>
+  <true/>
+</dict>
+```
+
+**Warning:** The video player is not functional on **iOS simulators.** An iOS device must be used during development/testing.
+
+<br><br>
+
+## Global Gestures
+
+- **One Tap:** Show or hide the overlay that contains the PlayAndPauseWidget and the ProgressBar
+- **Double tap:**
+  - Left: Double tapping on the left side of the VideoViewer will do the **rewind**. Default 10 seconds.
+  - Right: Double-tapping on the right side of the VideoViewer will **forward**. Default 10 seconds.
+- **Horizontal Drag:**
+  - Left: Making a horizontal movement to the left will make a **rewind** proportional to the distance traveled.
+  - Right: Making a horizontal movement to the right will make a **forward** proportional to the distance traveled.
+
+ <!---- **Vertical Drag:** Scrolling vertically will activate the VolumeBar and change the **volume** of the device. **Only available on Android**  -->
+
+<br><br>
+
+## Overlay buttons
 
 |             Playing              |             Paused              |
 | :------------------------------: | :-----------------------------: |
@@ -45,25 +92,8 @@
 
 <br><br>
 
-## Extras
+## Settings Menu
 
-|             Settings Menu              |  Volume Bar (Only Android Support)  |
-| :------------------------------------: | :---------------------------------: |
-| ![](./assets/readme/settings_menu.jpg) | ![](./assets/readme/volume_bar.jpg) |
-
-<br>
-
----
-
-<br>
-
-## Global Gestures
-
-- **One Tap:** Show or hide the overlay that contains the PlayAndPauseWidget and the ProgressBar
-- **Double tap:**
-  - Left: Double tapping on the left side of the VideoViewer will do the **rewind**. Default 10 seconds.
-  - Right: Double-tapping on the right side of the VideoViewer will **forward**. Default 10 seconds.
-- **Horizontal Drag:**
-  - Left: Making a horizontal movement to the left will make a **rewind** proportional to the distance traveled.
-  - Right: Making a horizontal movement to the right will make a **forward** proportional to the distance traveled.
-- **Vertical Drag:** Scrolling vertically will activate the VolumeBar and change the **volume** of the device. **Only available on Android**
+|             Principal Menu             |             Quality Menu              |
+| :------------------------------------: | :-----------------------------------: |
+| ![](./assets/readme/settings_menu.jpg) | ![](./assets/readme/quality_menu.jpg) |
