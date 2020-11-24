@@ -30,7 +30,7 @@
 
 ## Rewind and Forward
 
-|             Rewind              |             Forward              |
+|        Double Tap Rewind        |        Double Tap Forward        |
 | :-----------------------------: | :------------------------------: |
 | ![](./assets/readme/rewind.jpg) | ![](./assets/readme/forward.jpg) |
 
@@ -65,4 +65,4 @@
 - **Horizontal Drag:**
   - Left: Making a horizontal movement to the left will make a **rewind** proportional to the distance traveled.
   - Right: Making a horizontal movement to the right will make a **forward** proportional to the distance traveled.
-- **Vertical Drag:** Scrolling vertically will activate the VolumeBar and change the volume of the device. **Only available on Android**
+- **Vertical Drag:** Scrolling vertically will activate the VolumeBar and change the **volume** of the device. **Only available on Android**
