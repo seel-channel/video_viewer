@@ -12,6 +12,7 @@
 - Amazing UI / UX
 - Fully customizable
 - Fancy animations
+- Cached Videos Support (beta)
 - Easy and powerful implementation! :)
 
 <br>
