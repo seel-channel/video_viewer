@@ -45,16 +45,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  // Widget videoWithCacheSources() {
-  //   return FutureBuilder<Map<String, dynamic>>(
-  //     future: getCachedVideoSources(src),
-  //     builder: (_, AsyncSnapshot<Map<String, dynamic>> snapshot) {
-  //       if (snapshot.hasData)
-  //         return VideoViewer(source: snapshot.data);
-  //       else
-  //         return CircularProgressIndicator();
-  //     },
-  //   );
-  // }
 }
