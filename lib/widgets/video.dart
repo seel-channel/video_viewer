@@ -24,6 +24,7 @@ class VideoReady extends StatefulWidget {
     this.defaultAspectRatio,
     this.onChangeSource,
     this.exitFullScreen,
+    this.onFullscreenFixLandscape,
   }) : super(key: key);
 
   final String activedSource;
@@ -35,6 +36,7 @@ class VideoReady extends StatefulWidget {
   final Map<String, VideoPlayerController> source;
   final void Function(VideoPlayerController, String) onChangeSource;
   final void Function() exitFullScreen;
+  final bool onFullscreenFixLandscape;
 
   @override
   VideoReadyState createState() => VideoReadyState();
@@ -66,13 +68,12 @@ class VideoReadyState extends State<VideoReady> {
   // Timer _closeVolumeStatus;
 
   //TEXT POSITION ON DRAGGING
-  GlobalKey _playKey = GlobalKey();
+  final GlobalKey _playKey = GlobalKey();
   double _progressBarWidth = 0, _progressScale = 0, _iconPlayWidth = 0;
   bool _isDraggingProgress = false, _switchRemaingText = false;
 
   //LANDSCAPE
   double _progressBarMargin = 0;
-  Orientation _orientation;
   VideoViewerStyle _style, _landscapeStyle;
 
   //ONLY USE ON FULLSCREENPAGE
@@ -348,6 +349,7 @@ class VideoReadyState extends State<VideoReady> {
           rewindAmount: widget.rewindAmount,
           forwardAmount: widget.forwardAmount,
           activedSource: _activedSource,
+          fixedLandscape: widget.onFullscreenFixLandscape,
           defaultAspectRatio: widget.defaultAspectRatio,
           changeSource: (controller, activedSource) {
             _changeVideoSource(controller, activedSource, false);
@@ -366,29 +368,13 @@ class VideoReadyState extends State<VideoReady> {
     return OrientationBuilder(builder: (_, orientation) {
       Orientation landscape = Orientation.landscape;
       double padding = _style.progressBarStyle.paddingBeetwen;
-      _progressBarMargin = orientation == landscape ? padding * 2 : padding;
 
-      //RESPONSIVE TEXT
+      _progressBarMargin = orientation == landscape ? padding * 2 : padding;
       _style = orientation == landscape ? _landscapeStyle : widget.style;
 
-      if (_orientation != orientation) {
-        _orientation = orientation;
-        if (_isFullScreen && orientation == landscape) {
-          Misc.setSystemOverlay([]);
-          Misc.delayed(400, () => Misc.setSystemOverlay([]));
-          Misc.delayed(800, () => Misc.setSystemOverlay([]));
-        }
-        if (!_isFullScreen && orientation == landscape && mounted) {
-          _isFullScreen = true;
-          _toFullScreen();
-        }
-      }
-
-      Widget player = _isFullScreen && orientation == landscape
-          ? _player()
-          : _playerAspectRatio(_player());
-
-      return player;
+      return _isFullScreen && orientation == landscape
+          ? _player(orientation)
+          : _playerAspectRatio(_player(orientation));
     });
   }
 
@@ -399,12 +385,12 @@ class VideoReadyState extends State<VideoReady> {
     );
   }
 
-  Widget _player() {
+  Widget _player(Orientation orientation) {
     return _globalGesture(
       Stack(children: [
         _fadeTransition(
           visible: !_showThumbnail,
-          child: _isFullScreen && _orientation == Orientation.landscape
+          child: _isFullScreen && orientation == Orientation.landscape
               ? Center(child: _playerAspectRatio(VideoPlayer(_controller)))
               : VideoPlayer(_controller),
         ),

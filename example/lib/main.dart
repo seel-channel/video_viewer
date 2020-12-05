@@ -34,11 +34,16 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: SafeArea(
-        child: VideoViewer(
-          source: getNetworkVideoSources(src),
-          style: VideoViewerStyle(
-            thumbnail: Image.network(image),
-          ),
+        child: ListView.builder(
+          itemCount: 1,
+          itemBuilder: (_, __) {
+            return VideoViewer(
+              source: getNetworkVideoSources(src),
+              style: VideoViewerStyle(
+                thumbnail: Image.network(image),
+              ),
+            );
+          },
         ),
       ),
     );

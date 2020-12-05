@@ -14,6 +14,7 @@ class VideoViewer extends StatefulWidget {
     this.rewindAmount = 10,
     this.forwardAmount = 10,
     this.defaultAspectRatio = 16 / 9,
+    this.onFullscreenFixLandscape = true,
   })  : this.style = style ?? VideoViewerStyle(),
         super(key: key);
 
@@ -46,6 +47,11 @@ class VideoViewer extends StatefulWidget {
   ///}
   ///```
   final Map<String, VideoPlayerController> source;
+
+  ///If it is `true`, when entering the fullscreen it will be fixed
+  ///in landscape mode and it will not be possible to rotate it in portrait.
+  ///If it is `false`, you can rotate the entire screen in any position.
+  final bool onFullscreenFixLandscape;
 
   @override
   _VideoViewerState createState() => _VideoViewerState();
@@ -93,6 +99,7 @@ class _VideoViewerState extends State<VideoViewer> {
             rewindAmount: widget.rewindAmount,
             forwardAmount: widget.forwardAmount,
             defaultAspectRatio: widget.defaultAspectRatio,
+            onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
           )
         : AspectRatio(
             aspectRatio: widget.defaultAspectRatio,

@@ -18,6 +18,7 @@ class FullScreenPage extends StatefulWidget {
     this.forwardAmount,
     this.defaultAspectRatio,
     this.changeSource,
+    this.fixedLandscape = true,
   }) : super(key: key);
 
   final String activedSource;
@@ -26,6 +27,7 @@ class FullScreenPage extends StatefulWidget {
   final double defaultAspectRatio;
   final int rewindAmount, forwardAmount;
   final VideoPlayerController controller;
+  final bool fixedLandscape;
   final Map<String, VideoPlayerController> source;
   final void Function(VideoPlayerController, String) changeSource;
 
@@ -34,14 +36,15 @@ class FullScreenPage extends StatefulWidget {
 }
 
 class _FullScreenPageState extends State<FullScreenPage> {
-  VideoViewerStyle style;
-  GlobalKey<VideoReadyState> key = GlobalKey<VideoReadyState>();
-  bool isFullScreen = false;
-  bool showVideo = false;
+  final GlobalKey<VideoReadyState> key = GlobalKey<VideoReadyState>();
+  VideoViewerStyle _style;
+  Orientation _orientation;
+  bool _showVideo = false;
+  bool _isClosing = false;
 
   @override
   void initState() {
-    style = widget.style.thumbnail != null
+    _style = widget.style.thumbnail != null
         ? mergeVideoViewerStyle(style: widget.style)
         : widget.style;
     Misc.onLayoutRendered(() => fullScreenOrientation());
@@ -54,8 +57,11 @@ class _FullScreenPageState extends State<FullScreenPage> {
   }
 
   Future<void> resetOrientationValues() async {
-    setState(() => showVideo = false);
-    await Misc.wait(style.transitions);
+    setState(() {
+      _showVideo = false;
+      _isClosing = true;
+    });
+    await Misc.wait(_style.transitions);
     await Misc.setSystemOrientation(SystemOrientation.portraitUp);
     await Misc.setSystemOverlay(SystemOverlay.values);
     Misc.delayed(4000, () {
@@ -65,48 +71,62 @@ class _FullScreenPageState extends State<FullScreenPage> {
 
   void fullScreenOrientation() async {
     key.currentState.fullScreen = true;
-    await Misc.setSystemOverlay([]);
-    await Misc.setSystemOrientation(SystemOrientation.values);
-    setState(() => showVideo = true);
+    await Misc.setSystemOrientation(widget.fixedLandscape
+        ? [
+            ...SystemOrientation.landscapeLeft,
+            ...SystemOrientation.landscapeRight
+          ]
+        : SystemOrientation.values);
+    setState(() => _showVideo = true);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: WillPopScope(
-        onWillPop: _returnButton,
-        child: Center(
-          child: BooleanTween(
-            tween: Tween<double>(begin: 0, end: 1.0),
-            curve: Curves.ease,
-            animate: showVideo,
-            duration: Duration(milliseconds: style.transitions),
-            builder: (value) {
-              return Opacity(
-                opacity: value,
-                child: VideoReady(
-                  key: key,
-                  style: style,
-                  source: widget.source,
-                  looping: widget.looping,
-                  controller: widget.controller,
-                  activedSource: widget.activedSource,
-                  rewindAmount: widget.rewindAmount,
-                  forwardAmount: widget.forwardAmount,
-                  defaultAspectRatio: widget.defaultAspectRatio,
-                  onChangeSource: (controller, activedSource) =>
-                      widget.changeSource(controller, activedSource),
-                  exitFullScreen: () async {
-                    await resetOrientationValues();
-                    Navigator.of(context).pop();
-                  },
-                ),
-              );
-            },
+    return OrientationBuilder(
+      builder: (_, orientation) {
+        if (_orientation != orientation && !_isClosing) {
+          _orientation = orientation;
+          Misc.setSystemOverlay([]);
+          Misc.delayed(400, () => Misc.setSystemOverlay([]));
+          Misc.delayed(800, () => Misc.setSystemOverlay([]));
+        }
+        return Scaffold(
+          backgroundColor: Colors.black,
+          body: WillPopScope(
+            onWillPop: _returnButton,
+            child: Center(
+              child: BooleanTween(
+                tween: Tween<double>(begin: 0, end: 1.0),
+                curve: Curves.ease,
+                animate: _showVideo,
+                duration: Duration(milliseconds: _style.transitions),
+                builder: (value) {
+                  return Opacity(
+                    opacity: value,
+                    child: VideoReady(
+                      key: key,
+                      style: _style,
+                      source: widget.source,
+                      looping: widget.looping,
+                      controller: widget.controller,
+                      activedSource: widget.activedSource,
+                      rewindAmount: widget.rewindAmount,
+                      forwardAmount: widget.forwardAmount,
+                      defaultAspectRatio: widget.defaultAspectRatio,
+                      onChangeSource: (controller, activedSource) =>
+                          widget.changeSource(controller, activedSource),
+                      exitFullScreen: () async {
+                        await resetOrientationValues();
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
