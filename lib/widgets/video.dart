@@ -62,7 +62,7 @@ class VideoReadyState extends State<VideoReady> {
   int _lastPosition = 0, _forwardAmount = 0, _transitions = 0;
 
   //VOLUME
-  //bool _showVolumeStatus = false, _isAndroid = false;
+  //bool _showVolumeS tatus = false, _isAndroid = false;
   // int _maxVolume = 1, _onDragStartVolume = 1, _currentVolume = 1;
   // Offset _verticalDragStartOffset;
   // Timer _closeVolumeStatus;
@@ -144,56 +144,62 @@ class VideoReadyState extends State<VideoReady> {
   }
 
   void _videoListener() {
-    if (mounted) {
-      final value = _controller.value;
-      final playing = value.isPlaying;
+    if (mounted)
       setState(() {
+        final value = _controller.value;
+        final playing = value.isPlaying;
+
         if (playing != _isPlaying) _isPlaying = playing;
         if (_isPlaying && _showThumbnail) _showThumbnail = false;
         if (_isPlaying && _isDraggingProgress) _isDraggingProgress = false;
+
+        if (_showButtons) {
+          if (_isPlaying) {
+            if (value.position >= value.duration && !widget.looping) {
+              _controller.seekTo(Duration.zero);
+            } else {
+              if (_timerPosition == null) _createBufferTimer();
+              if (_closeOverlayButtons == null && !_isDraggingProgress)
+                _startCloseOverlayButtons();
+            }
+          } else if (_isGoingToCloseBufferingWidget)
+            _cancelCloseOverlayButtons();
+        }
       });
-      if (_showButtons) {
-        if (_isPlaying) {
-          if (value.position >= value.duration && !widget.looping) {
-            _controller.seekTo(Duration.zero);
-          } else {
-            if (_timerPosition == null) _createBufferTimer();
-            if (_closeOverlayButtons == null && !_isDraggingProgress)
-              _startCloseOverlayButtons();
-          }
-        } else if (_isGoingToCloseBufferingWidget) _cancelCloseOverlayButtons();
-      }
-    }
   }
 
   //-----//
   //TIMER//
   //-----//
   void _startCloseOverlayButtons() {
-    if (!_isGoingToCloseBufferingWidget) {
+    if (!_isGoingToCloseBufferingWidget && mounted) {
       setState(() {
         _isGoingToCloseBufferingWidget = true;
         _closeOverlayButtons = Misc.timer(3200, () {
-          setState(() => _showButtons = false);
-          _cancelCloseOverlayButtons();
+          if (mounted) {
+            setState(() => _showButtons = false);
+            _cancelCloseOverlayButtons();
+          }
         });
       });
     }
   }
 
   void _createBufferTimer() {
-    setState(() {
-      _timerPosition = Misc.periodic(1000, () {
-        int position = _controller.value.position.inMilliseconds;
-        setState(() {
-          if (_isPlaying)
-            _isBuffering = _lastPosition != position ? false : true;
-          else
-            _isBuffering = false;
-          _lastPosition = position;
+    if (mounted)
+      setState(() {
+        _timerPosition = Misc.periodic(1000, () {
+          int position = _controller.value.position.inMilliseconds;
+          if (mounted)
+            setState(() {
+              if (_isPlaying)
+                _isBuffering = _lastPosition != position ? false : true;
+              else
+                _isBuffering = false;
+              _lastPosition = position;
+            });
         });
       });
-    });
   }
 
   void _cancelCloseOverlayButtons() {
@@ -337,8 +343,8 @@ class VideoReadyState extends State<VideoReady> {
   //     });
   // }
 
-  void _toFullScreen() async {
-    await Navigator.push(
+  void toFullScreen() {
+    Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => FullScreenPage(
@@ -357,7 +363,6 @@ class VideoReadyState extends State<VideoReady> {
         ),
       ),
     );
-    setState(() => _isFullScreen = false);
   }
 
   //-----//
@@ -718,7 +723,7 @@ class VideoReadyState extends State<VideoReady> {
             GestureDetector(
               onTap: () async {
                 if (!_isFullScreen)
-                  _toFullScreen();
+                  toFullScreen();
                 else if (widget.exitFullScreen != null) widget.exitFullScreen();
               },
               child: _containerPadding(

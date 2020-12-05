@@ -23,11 +23,11 @@ class FullScreenPage extends StatefulWidget {
 
   final String activedSource;
   final bool looping;
+  final bool fixedLandscape;
   final VideoViewerStyle style;
   final double defaultAspectRatio;
   final int rewindAmount, forwardAmount;
   final VideoPlayerController controller;
-  final bool fixedLandscape;
   final Map<String, VideoPlayerController> source;
   final void Function(VideoPlayerController, String) changeSource;
 
@@ -47,6 +47,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
     _style = widget.style.thumbnail != null
         ? mergeVideoViewerStyle(style: widget.style)
         : widget.style;
+    changeOrientation();
     Misc.onLayoutRendered(() => fullScreenOrientation());
     super.initState();
   }
@@ -64,19 +65,22 @@ class _FullScreenPageState extends State<FullScreenPage> {
     await Misc.wait(_style.transitions);
     await Misc.setSystemOrientation(SystemOrientation.portraitUp);
     await Misc.setSystemOverlay(SystemOverlay.values);
-    Misc.delayed(4000, () {
+    Misc.delayed(3200, () {
       Misc.setSystemOrientation(SystemOrientation.values);
     });
   }
 
-  void fullScreenOrientation() async {
-    key.currentState.fullScreen = true;
-    await Misc.setSystemOrientation(widget.fixedLandscape
+  void changeOrientation() {
+    Misc.setSystemOrientation(widget.fixedLandscape
         ? [
             ...SystemOrientation.landscapeLeft,
             ...SystemOrientation.landscapeRight
           ]
         : SystemOrientation.values);
+  }
+
+  void fullScreenOrientation() {
+    key.currentState.fullScreen = true;
     setState(() => _showVideo = true);
   }
 
@@ -84,12 +88,16 @@ class _FullScreenPageState extends State<FullScreenPage> {
   Widget build(BuildContext context) {
     return OrientationBuilder(
       builder: (_, orientation) {
-        if (_orientation != orientation && !_isClosing) {
-          _orientation = orientation;
-          Misc.setSystemOverlay([]);
-          Misc.delayed(400, () => Misc.setSystemOverlay([]));
-          Misc.delayed(800, () => Misc.setSystemOverlay([]));
+        if (!_isClosing) {
+          if (_orientation != orientation) {
+            Misc.setSystemOverlay([]);
+            Misc.delayed(400, () => Misc.setSystemOverlay([]));
+            Misc.delayed(800, () => Misc.setSystemOverlay([]));
+            _orientation = orientation;
+          }
+          if (widget.fixedLandscape) changeOrientation();
         }
+
         return Scaffold(
           backgroundColor: Colors.black,
           body: WillPopScope(
