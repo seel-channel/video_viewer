@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:video_player/video_player.dart';
 //import 'package:pedantic/pedantic.dart';
 //import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -16,7 +15,7 @@ class VideoSource {
 
   ///Constructs a [VideoPlayerController] playing a video from a file.
   ///This will load the file from the file-URI given by: 'file://${file.path}'.
-  static VideoPlayerController file(File file) {
+  static VideoPlayerController file(dynamic file) {
     return VideoPlayerController.file(file);
   }
 
