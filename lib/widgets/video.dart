@@ -76,7 +76,10 @@ class VideoReadyState extends State<VideoReady> {
   VideoViewerStyle _style, _landscapeStyle;
 
   //ONLY USE ON FULLSCREENPAGE
-  set fullScreen(bool value) => setState(() => _isFullScreen = value);
+  set fullScreen(bool value) {
+    _isFullScreen = value;
+    if (mounted) setState(() {});
+  }
 
   @override
   void initState() {
@@ -225,7 +228,7 @@ class VideoReadyState extends State<VideoReady> {
 
   void _changeIconPlayWidth() {
     Misc.delayed(
-      _transitions + 200,
+      800,
       () => setState(() => _iconPlayWidth = GetKey.width(_playKey)),
     );
   }
@@ -333,6 +336,28 @@ class VideoReadyState extends State<VideoReady> {
   //     });
   // }
 
+  void _toFullScreen() async {
+    await Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => FullScreenPage(
+          style: _style,
+          source: widget.source,
+          looping: widget.looping,
+          controller: _controller,
+          rewindAmount: widget.rewindAmount,
+          forwardAmount: widget.forwardAmount,
+          activedSource: _activedSource,
+          defaultAspectRatio: widget.defaultAspectRatio,
+          changeSource: (controller, activedSource) {
+            _changeVideoSource(controller, activedSource, false);
+          },
+        ),
+      ),
+    );
+    setState(() => _isFullScreen = false);
+  }
+
   //-----//
   //BUILD//
   //-----//
@@ -348,10 +373,14 @@ class VideoReadyState extends State<VideoReady> {
 
       if (_orientation != orientation) {
         _orientation = orientation;
-        if (_isFullScreen) {
+        if (_isFullScreen && orientation == landscape) {
           Misc.setSystemOverlay([]);
           Misc.delayed(400, () => Misc.setSystemOverlay([]));
           Misc.delayed(800, () => Misc.setSystemOverlay([]));
+        }
+        if (!_isFullScreen && orientation == landscape && mounted) {
+          _isFullScreen = true;
+          _toFullScreen();
         }
       }
 
@@ -663,7 +692,7 @@ class VideoReadyState extends State<VideoReady> {
               child: VideoProgressBar(
                 _controller,
                 style: style,
-                verticalPadding: _progressBarMargin,
+                padding: Margin.vertical(_progressBarMargin),
                 isBuffering: _isBuffering,
                 changePosition: (double scale, double width) {
                   if (mounted) {
@@ -703,22 +732,7 @@ class VideoReadyState extends State<VideoReady> {
             GestureDetector(
               onTap: () async {
                 if (!_isFullScreen)
-                  PushRoute.transparentPage(
-                    context,
-                    FullScreenPage(
-                      style: _style,
-                      source: widget.source,
-                      looping: widget.looping,
-                      controller: _controller,
-                      rewindAmount: widget.rewindAmount,
-                      forwardAmount: widget.forwardAmount,
-                      activedSource: _activedSource,
-                      defaultAspectRatio: widget.defaultAspectRatio,
-                      changeSource: (controller, activedSource) {
-                        _changeVideoSource(controller, activedSource, false);
-                      },
-                    ),
-                  );
+                  _toFullScreen();
                 else if (widget.exitFullScreen != null) widget.exitFullScreen();
               },
               child: _containerPadding(

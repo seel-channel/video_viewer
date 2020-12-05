@@ -56,13 +56,17 @@ class _FullScreenPageState extends State<FullScreenPage> {
   Future<void> resetOrientationValues() async {
     setState(() => showVideo = false);
     await Misc.wait(style.transitions);
+    await Misc.setSystemOrientation(SystemOrientation.portraitUp);
     await Misc.setSystemOverlay(SystemOverlay.values);
+    Misc.delayed(4000, () {
+      Misc.setSystemOrientation(SystemOrientation.values);
+    });
   }
 
   void fullScreenOrientation() async {
+    key.currentState.fullScreen = true;
     await Misc.setSystemOverlay([]);
     await Misc.setSystemOrientation(SystemOrientation.values);
-    key.currentState.fullScreen = true;
     setState(() => showVideo = true);
   }
 
@@ -95,7 +99,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
                       widget.changeSource(controller, activedSource),
                   exitFullScreen: () async {
                     await resetOrientationValues();
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                   },
                 ),
               );

@@ -8,7 +8,7 @@ class VideoProgressBar extends StatefulWidget {
   VideoProgressBar(
     this.controller, {
     Key key,
-    this.verticalPadding = 0,
+    this.padding,
     ProgressBarStyle style,
     this.isBuffering = false,
     this.changePosition,
@@ -16,8 +16,8 @@ class VideoProgressBar extends StatefulWidget {
         super(key: key);
 
   final bool isBuffering;
-  final double verticalPadding;
   final ProgressBarStyle style;
+  final EdgeInsetsGeometry padding;
   final VideoPlayerController controller;
   final void Function(double, double) changePosition;
 
@@ -116,7 +116,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
         child: Container(
           width: width,
           color: Colors.transparent,
-          padding: Margin.vertical(widget.verticalPadding),
+          padding: widget.padding,
           alignment: Alignment.centerLeft,
           child: controller.value.initialized
               ? Stack(alignment: AlignmentDirectional.centerStart, children: [
