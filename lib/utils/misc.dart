@@ -26,8 +26,7 @@ VideoViewerStyle mergeVideoViewerStyle({
     thumbnail: null,
     loading: style.loading,
     buffering: style.buffering,
-    textStyle:
-        textStyle != null ? style.textStyle.merge(textStyle) : style.textStyle,
+    textStyle: textStyle ?? style.textStyle,
     settingsStyle: style.settingsStyle,
     volumeBarStyle: style.volumeBarStyle,
     progressBarStyle: style.progressBarStyle,

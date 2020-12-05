@@ -1,9 +1,10 @@
-//import 'dart:io' show Platform;
 //import 'package:volume/volume.dart';
+import 'dart:html' as html;
 import 'dart:async';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:video_viewer/widgets/settings_menu.dart';
 import 'package:video_viewer/widgets/fullscreen.dart';
@@ -85,18 +86,17 @@ class VideoReadyState extends State<VideoReady> {
   @override
   void initState() {
     _style = widget.style;
-    _landscapeStyle = mergeVideoViewerStyle(
-        style: widget.style,
-        textStyle: TextStyle(
-            fontSize: widget.style.textStyle.fontSize +
-                widget.style.inLandscapeEnlargeTheTextBy));
+    _landscapeStyle = _getResponsiveText();
     _controller = widget.controller;
     _transitions = _style.transitions;
     _activedSource = widget.activedSource;
     _controller.addListener(_videoListener);
     _controller.setLooping(widget.looping);
     _showThumbnail = _style.thumbnail == null ? false : true;
-    if (!_showThumbnail) Misc.onLayoutRendered(() => _changeIconPlayWidth());
+    if (!_showThumbnail)
+      Misc.onLayoutRendered(() {
+        _changeIconPlayWidth();
+      });
     //_isAndroid = Platform.isAndroid;
     //_initAudioStreamType();
     //_updateVolumes();
@@ -343,26 +343,40 @@ class VideoReadyState extends State<VideoReady> {
   //     });
   // }
 
-  void toFullScreen() {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (_, __, ___) => FullScreenPage(
-          style: _style,
-          source: widget.source,
-          looping: widget.looping,
-          controller: _controller,
-          rewindAmount: widget.rewindAmount,
-          forwardAmount: widget.forwardAmount,
-          activedSource: _activedSource,
-          fixedLandscape: widget.onFullscreenFixLandscape,
-          defaultAspectRatio: widget.defaultAspectRatio,
-          changeSource: (controller, activedSource) {
-            _changeVideoSource(controller, activedSource, false);
-          },
+  //----------//
+  //FULLSCREEN//
+  //----------//
+  void toFullscreen() {
+    if (kIsWeb) {
+      html.document.documentElement.requestFullscreen();
+      setState(() => _isFullScreen = true);
+    } else
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => FullScreenPage(
+            style: _style,
+            source: widget.source,
+            looping: widget.looping,
+            controller: _controller,
+            rewindAmount: widget.rewindAmount,
+            forwardAmount: widget.forwardAmount,
+            activedSource: _activedSource,
+            fixedLandscape: widget.onFullscreenFixLandscape,
+            defaultAspectRatio: widget.defaultAspectRatio,
+            changeSource: (controller, activedSource) {
+              _changeVideoSource(controller, activedSource, false);
+            },
+          ),
         ),
-      ),
-    );
+      );
+  }
+
+  void _exitFullscreen() {
+    if (kIsWeb) {
+      html.document.exitFullscreen();
+      setState(() => _isFullScreen = false);
+    } else if (widget.exitFullScreen != null) widget.exitFullScreen();
   }
 
   //-----//
@@ -370,12 +384,21 @@ class VideoReadyState extends State<VideoReady> {
   //-----//
   @override
   Widget build(BuildContext context) {
+    final double width = GetContext.width(context);
+
     return OrientationBuilder(builder: (_, orientation) {
       Orientation landscape = Orientation.landscape;
       double padding = _style.progressBarStyle.paddingBeetwen;
 
       _progressBarMargin = orientation == landscape ? padding * 2 : padding;
-      _style = orientation == landscape ? _landscapeStyle : widget.style;
+      _style = kIsWeb
+          ? width > 1600
+              ? _getResponsiveText(
+                  widget.style.inLandscapeEnlargeTheTextBy * (width / 1600) * 2)
+              : _landscapeStyle
+          : orientation == landscape
+              ? _landscapeStyle
+              : widget.style;
 
       return _isFullScreen && orientation == landscape
           ? _player(orientation)
@@ -399,6 +422,17 @@ class VideoReadyState extends State<VideoReady> {
               ? Center(child: _playerAspectRatio(VideoPlayer(_controller)))
               : VideoPlayer(_controller),
         ),
+        GestureDetector(
+          onTap: () {
+            if (!_showSettings)
+              setState(() {
+                _showButtons = !_showButtons;
+                if (_showButtons) _isGoingToCloseBufferingWidget = false;
+              });
+            print(_showButtons);
+          },
+          child: Container(color: Colors.transparent),
+        ),
         _fadeTransition(
           visible: _showThumbnail,
           child: GestureDetector(
@@ -420,8 +454,8 @@ class VideoReadyState extends State<VideoReady> {
         Center(
           child: _playAndPause(
             Container(
-              height: _style.playAndPauseStyle.circleRadius * 2,
-              width: _style.playAndPauseStyle.circleRadius * 2,
+              height: GetContext.height(context) * 0.2,
+              width: GetContext.width(context) * 0.2,
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 shape: BoxShape.circle,
@@ -466,6 +500,16 @@ class VideoReadyState extends State<VideoReady> {
     );
   }
 
+  VideoViewerStyle _getResponsiveText([double multiplier = 1]) {
+    return mergeVideoViewerStyle(
+      style: widget.style,
+      textStyle: TextStyle(
+        fontSize: widget.style.textStyle.fontSize +
+            widget.style.inLandscapeEnlargeTheTextBy * multiplier,
+      ),
+    );
+  }
+
   //------------------//
   //TRANSITION WIDGETS//
   //------------------//
@@ -495,26 +539,18 @@ class VideoReadyState extends State<VideoReady> {
   Widget _globalGesture(Widget child) {
     return GestureDetector(
       child: child,
-      //VOLUME
-      // onVerticalDragStart: (DragStartDetails details) =>
-      //     _volumeDragStart(details),
-      // onVerticalDragUpdate: (DragUpdateDetails details) =>
-      //     _volumeDragUpdate(details),
-      // onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
       //FORWARD AND REWIND
       onHorizontalDragStart: (DragStartDetails details) =>
           _forwardDragStart(details),
       onHorizontalDragUpdate: (DragUpdateDetails details) =>
           _forwardDragUpdate(details),
       onHorizontalDragEnd: (DragEndDetails details) => _forwardDragEnd(),
-      //OVERLAY BUTTONS
-      onTap: () {
-        if (!_showSettings)
-          setState(() {
-            _showButtons = !_showButtons;
-            if (_showButtons) _isGoingToCloseBufferingWidget = false;
-          });
-      },
+      //VOLUME
+      // onVerticalDragStart: (DragStartDetails details) =>
+      //     _volumeDragStart(details),
+      // onVerticalDragUpdate: (DragUpdateDetails details) =>
+      //     _volumeDragUpdate(details),
+      // onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
     );
   }
 
@@ -723,8 +759,9 @@ class VideoReadyState extends State<VideoReady> {
             GestureDetector(
               onTap: () async {
                 if (!_isFullScreen)
-                  toFullScreen();
-                else if (widget.exitFullScreen != null) widget.exitFullScreen();
+                  toFullscreen();
+                else
+                  _exitFullscreen();
               },
               child: _containerPadding(
                 child: _isFullScreen ? style.fullScreenExit : style.fullScreen,

@@ -62,7 +62,7 @@ class VideoViewerState extends State<VideoViewer> {
   VideoPlayerController _controller;
   String _activedSource;
 
-  void toFullscreen() => video.currentState.toFullScreen();
+  void toFullscreen() => video.currentState.toFullscreen();
 
   @override
   void initState() {
