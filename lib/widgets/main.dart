@@ -54,13 +54,15 @@ class VideoViewer extends StatefulWidget {
   final bool onFullscreenFixLandscape;
 
   @override
-  _VideoViewerState createState() => _VideoViewerState();
+  VideoViewerState createState() => VideoViewerState();
 }
 
-class _VideoViewerState extends State<VideoViewer> {
-  GlobalKey<VideoReadyState> key = GlobalKey<VideoReadyState>();
+class VideoViewerState extends State<VideoViewer> {
+  GlobalKey<VideoReadyState> video = GlobalKey<VideoReadyState>();
   VideoPlayerController _controller;
   String _activedSource;
+
+  void toFullscreen() => video.currentState.toFullScreen();
 
   @override
   void initState() {
@@ -90,7 +92,7 @@ class _VideoViewerState extends State<VideoViewer> {
   Widget build(BuildContext context) {
     Widget returnWidget = _controller.value.initialized
         ? VideoReady(
-            key: key,
+            key: video,
             style: widget.style,
             source: widget.source,
             looping: widget.looping,
