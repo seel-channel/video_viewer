@@ -1,3 +1,12 @@
-## [1.0.1] - Multiplatform Support.
+## [1.0.2]
 
-## [1.0.0] - Initial Release on My Birthday.
+- Web Support.
+- Orientation bugs fixed.
+
+## [1.0.1]
+
+- iOS Support.
+
+## [1.0.0]
+
+- Initial Release on My Birthday.

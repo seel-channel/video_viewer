@@ -1,10 +1,10 @@
 //import 'package:volume/volume.dart';
-import 'dart:html' as html;
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:video_viewer/widgets/settings_menu.dart';
@@ -181,7 +181,7 @@ class VideoReadyState extends State<VideoReady> {
       setState(() {
         _isGoingToCloseBufferingWidget = true;
         _closeOverlayButtons = Misc.timer(3200, () {
-          if (mounted) {
+          if (mounted && _isPlaying) {
             setState(() => _showButtons = false);
             _cancelCloseOverlayButtons();
           }
@@ -246,11 +246,10 @@ class VideoReadyState extends State<VideoReady> {
   }
 
   void _showAndHideOverlay([bool show]) {
-    if (!_showSettings)
-      setState(() {
-        _showButtons = show ?? !_showButtons;
-        if (_showButtons) _isGoingToCloseBufferingWidget = false;
-      });
+    setState(() {
+      _showButtons = show ?? !_showButtons;
+      if (_showButtons) _isGoingToCloseBufferingWidget = false;
+    });
     if (!_focusRawKeyboard.hasFocus)
       FocusScope.of(context).requestFocus(_focusRawKeyboard);
   }
@@ -433,15 +432,20 @@ class VideoReadyState extends State<VideoReady> {
               ? Center(child: _playerAspectRatio(VideoPlayer(_controller)))
               : VideoPlayer(_controller),
         ),
-        MouseRegion(
-          onHover: (_) {
-            if (!_showButtons && _isPlaying) _showAndHideOverlay(true);
-          },
-          child: GestureDetector(
-            onTap: _showAndHideOverlay,
-            child: Container(color: Colors.transparent),
-          ),
-        ),
+        kIsWeb
+            ? MouseRegion(
+                onHover: (_) {
+                  if (!_showButtons) _showAndHideOverlay(true);
+                },
+                child: GestureDetector(
+                  onTap: _showAndHideOverlay,
+                  child: Container(color: Colors.transparent),
+                ),
+              )
+            : GestureDetector(
+                onTap: _showAndHideOverlay,
+                child: Container(color: Colors.transparent),
+              ),
         _fadeTransition(
           visible: _showThumbnail,
           child: GestureDetector(

@@ -36,6 +36,7 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: ListView(children: [
           VideoViewer(
+            onFullscreenFixLandscape: false,
             source: getNetworkVideoSources(src),
             style: VideoViewerStyle(
               thumbnail: Image.network(image),

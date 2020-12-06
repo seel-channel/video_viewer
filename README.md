@@ -11,9 +11,10 @@
 
 ## Features
 
-- Amazing UI / UX
-- Fully customizable
-- Fancy animations
+- Amazing UI / UX.
+- Fully customizable.
+- Fancy animations.
+- Multiplataform support.
 - Easy and powerful implementation! :)
 
 <br><br>
@@ -68,32 +69,62 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Overlay buttons
+## Android and iOS
 
-|             Playing              |             Paused              |
-| :------------------------------: | :-----------------------------: |
-| ![](./assets/readme/playing.jpg) | ![](./assets/readme/paused.jpg) |
+|                Playing                 |                Paused                 |
+| :------------------------------------: | :-----------------------------------: |
+| ![](./assets/readme/movil/playing.jpg) | ![](./assets/readme/movil/paused.jpg) |
 
 <br><br>
 
 ## Rewind and Forward
 
-|        Double Tap Rewind        |        Double Tap Forward        |
-| :-----------------------------: | :------------------------------: |
-| ![](./assets/readme/rewind.jpg) | ![](./assets/readme/forward.jpg) |
+|           Double Tap Rewind           |           Double Tap Forward           |
+| :-----------------------------------: | :------------------------------------: |
+| ![](./assets/readme/movil/rewind.jpg) | ![](./assets/readme/movil/forward.jpg) |
 
 <br><br>
 
 ## Fullscreen
 
-|                   Portrait                   |                   Landscape                   |
-| :------------------------------------------: | :-------------------------------------------: |
-| ![](./assets/readme/fullscreen_portrait.jpg) | ![](./assets/readme/fullscreen_landscape.jpg) |
+|                      Portrait                      |                      Landscape                      |
+| :------------------------------------------------: | :-------------------------------------------------: |
+| ![](./assets/readme/movil/fullscreen_portrait.jpg) | ![](./assets/readme/movil/fullscreen_landscape.jpg) |
 
 <br><br>
 
 ## Settings Menu
 
-|             Principal Menu             |             Quality Menu              |
-| :------------------------------------: | :-----------------------------------: |
-| ![](./assets/readme/settings_menu.jpg) | ![](./assets/readme/quality_menu.jpg) |
+|                Principal Menu                |                Quality Menu                 |
+| :------------------------------------------: | :-----------------------------------------: |
+| ![](./assets/readme/movil/settings_menu.jpg) | ![](./assets/readme/movil/quality_menu.jpg) |
+
+<br><br>
+
+## Web
+
+|               Playing                |               Paused                |
+| :----------------------------------: | :---------------------------------: |
+| ![](./assets/readme/web/playing.jpg) | ![](./assets/readme/web/paused.jpg) |
+
+<br><br>
+
+## Rewind and Forward
+
+| Double Tap and Keyboard.arrowLeft Rewind | Double Tap and Keyboard.arrowRight Forward |
+| :--------------------------------------: | :----------------------------------------: |
+|   ![](./assets/readme/web/rewind.jpg)    |    ![](./assets/readme/web/forward.jpg)    |
+
+<br><br>
+
+## Settings Menu
+
+|               Principal Menu               |               Speed Menu                |
+| :----------------------------------------: | :-------------------------------------: |
+| ![](./assets/readme/web/settings_menu.jpg) | ![](./assets/readme/web/speed_menu.jpg) |
+
+<br><br>
+
+## Fullscreen
+
+![](./assets/readme/web/fullscreen.jpg)
