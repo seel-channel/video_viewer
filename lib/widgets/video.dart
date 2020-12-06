@@ -1,6 +1,7 @@
 //import 'package:volume/volume.dart';
 import 'dart:html' as html;
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -77,6 +78,9 @@ class VideoReadyState extends State<VideoReady> {
   double _progressBarMargin = 0;
   VideoViewerStyle _style, _landscapeStyle;
 
+  //WEB
+  final FocusNode _focusRawKeyboard = FocusNode();
+
   //ONLY USE ON FULLSCREENPAGE
   set fullScreen(bool value) {
     _isFullScreen = value;
@@ -86,10 +90,10 @@ class VideoReadyState extends State<VideoReady> {
   @override
   void initState() {
     _style = widget.style;
-    _landscapeStyle = _getResponsiveText();
     _controller = widget.controller;
     _transitions = _style.transitions;
     _activedSource = widget.activedSource;
+    _landscapeStyle = _getResponsiveText();
     _controller.addListener(_videoListener);
     _controller.setLooping(widget.looping);
     _showThumbnail = _style.thumbnail == null ? false : true;
@@ -105,15 +109,41 @@ class VideoReadyState extends State<VideoReady> {
 
   @override
   void dispose() {
-    super.dispose();
+    _focusRawKeyboard.dispose();
     _timerPosition?.cancel();
     _hidePlayAndPause?.cancel();
     _closeOverlayButtons?.cancel();
+    super.dispose();
   }
 
   //----------------//
   //VIDEO CONTROLLER//
   //----------------//
+  void _videoListener() {
+    if (mounted)
+      setState(() {
+        final value = _controller.value;
+        final playing = value.isPlaying;
+
+        if (playing != _isPlaying) _isPlaying = playing;
+        if (_isPlaying && _showThumbnail) _showThumbnail = false;
+        if (_isPlaying && _isDraggingProgress) _isDraggingProgress = false;
+
+        if (_showButtons) {
+          if (_isPlaying) {
+            if (value.position >= value.duration && !widget.looping) {
+              _controller.seekTo(Duration.zero);
+            } else {
+              if (_timerPosition == null) _createBufferTimer();
+              if (_closeOverlayButtons == null && !_isDraggingProgress)
+                _startCloseOverlayButtons();
+            }
+          } else if (_isGoingToCloseBufferingWidget)
+            _cancelCloseOverlayButtons();
+        }
+      });
+  }
+
   void _changeVideoSource(VideoPlayerController source, String activedSource,
       [bool initialize = true]) {
     double speed = _controller.value.playbackSpeed;
@@ -141,31 +171,6 @@ class VideoReadyState extends State<VideoReady> {
     _controller.play();
     if (widget.onChangeSource != null) //Only used in fullscreenpage
       widget.onChangeSource(_controller, _activedSource);
-  }
-
-  void _videoListener() {
-    if (mounted)
-      setState(() {
-        final value = _controller.value;
-        final playing = value.isPlaying;
-
-        if (playing != _isPlaying) _isPlaying = playing;
-        if (_isPlaying && _showThumbnail) _showThumbnail = false;
-        if (_isPlaying && _isDraggingProgress) _isDraggingProgress = false;
-
-        if (_showButtons) {
-          if (_isPlaying) {
-            if (value.position >= value.duration && !widget.looping) {
-              _controller.seekTo(Duration.zero);
-            } else {
-              if (_timerPosition == null) _createBufferTimer();
-              if (_closeOverlayButtons == null && !_isDraggingProgress)
-                _startCloseOverlayButtons();
-            }
-          } else if (_isGoingToCloseBufferingWidget)
-            _cancelCloseOverlayButtons();
-        }
-      });
   }
 
   //-----//
@@ -240,9 +245,22 @@ class VideoReadyState extends State<VideoReady> {
     );
   }
 
+  void _showAndHideOverlay([bool show]) {
+    if (!_showSettings)
+      setState(() {
+        _showButtons = show ?? !_showButtons;
+        if (_showButtons) _isGoingToCloseBufferingWidget = false;
+      });
+    if (!_focusRawKeyboard.hasFocus)
+      FocusScope.of(context).requestFocus(_focusRawKeyboard);
+  }
+
   //------------------//
   //FORWARD AND REWIND//
   //------------------//
+  void _rewind() => _showRewindAndForward(0, -widget.rewindAmount);
+  void _forward() => _showRewindAndForward(1, widget.forwardAmount);
+
   void _controllerSeekTo(int amount) async {
     int seconds = _controller.value.position.inSeconds;
     await _controller.seekTo(Duration(seconds: seconds + amount));
@@ -290,6 +308,42 @@ class VideoReadyState extends State<VideoReady> {
             seconds + amount > 0) _forwardAmount = amount;
       });
     }
+  }
+
+  //----------//
+  //FULLSCREEN//
+  //----------//
+  void toFullscreen() {
+    if (kIsWeb) {
+      html.document.documentElement.requestFullscreen();
+      setState(() => _isFullScreen = true);
+    } else
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => FullScreenPage(
+            style: _style,
+            source: widget.source,
+            looping: widget.looping,
+            controller: _controller,
+            rewindAmount: widget.rewindAmount,
+            forwardAmount: widget.forwardAmount,
+            activedSource: _activedSource,
+            fixedLandscape: widget.onFullscreenFixLandscape,
+            defaultAspectRatio: widget.defaultAspectRatio,
+            changeSource: (controller, activedSource) {
+              _changeVideoSource(controller, activedSource, false);
+            },
+          ),
+        ),
+      );
+  }
+
+  void _exitFullscreen() {
+    if (kIsWeb) {
+      html.document.exitFullscreen();
+      setState(() => _isFullScreen = false);
+    } else if (widget.exitFullScreen != null) widget.exitFullScreen();
   }
 
   //------//
@@ -343,42 +397,6 @@ class VideoReadyState extends State<VideoReady> {
   //     });
   // }
 
-  //----------//
-  //FULLSCREEN//
-  //----------//
-  void toFullscreen() {
-    if (kIsWeb) {
-      html.document.documentElement.requestFullscreen();
-      setState(() => _isFullScreen = true);
-    } else
-      Navigator.push(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => FullScreenPage(
-            style: _style,
-            source: widget.source,
-            looping: widget.looping,
-            controller: _controller,
-            rewindAmount: widget.rewindAmount,
-            forwardAmount: widget.forwardAmount,
-            activedSource: _activedSource,
-            fixedLandscape: widget.onFullscreenFixLandscape,
-            defaultAspectRatio: widget.defaultAspectRatio,
-            changeSource: (controller, activedSource) {
-              _changeVideoSource(controller, activedSource, false);
-            },
-          ),
-        ),
-      );
-  }
-
-  void _exitFullscreen() {
-    if (kIsWeb) {
-      html.document.exitFullscreen();
-      setState(() => _isFullScreen = false);
-    } else if (widget.exitFullScreen != null) widget.exitFullScreen();
-  }
-
   //-----//
   //BUILD//
   //-----//
@@ -392,9 +410,9 @@ class VideoReadyState extends State<VideoReady> {
 
       _progressBarMargin = orientation == landscape ? padding * 2 : padding;
       _style = kIsWeb
-          ? width > 1600
+          ? width > 1400
               ? _getResponsiveText(
-                  widget.style.inLandscapeEnlargeTheTextBy * (width / 1600) * 2)
+                  widget.style.inLandscapeEnlargeTheTextBy * (width / 1400))
               : _landscapeStyle
           : orientation == landscape
               ? _landscapeStyle
@@ -406,13 +424,6 @@ class VideoReadyState extends State<VideoReady> {
     });
   }
 
-  Widget _playerAspectRatio(Widget child) {
-    return AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: child,
-    );
-  }
-
   Widget _player(Orientation orientation) {
     return _globalGesture(
       Stack(children: [
@@ -422,16 +433,14 @@ class VideoReadyState extends State<VideoReady> {
               ? Center(child: _playerAspectRatio(VideoPlayer(_controller)))
               : VideoPlayer(_controller),
         ),
-        GestureDetector(
-          onTap: () {
-            if (!_showSettings)
-              setState(() {
-                _showButtons = !_showButtons;
-                if (_showButtons) _isGoingToCloseBufferingWidget = false;
-              });
-            print(_showButtons);
+        MouseRegion(
+          onHover: (_) {
+            if (!_showButtons && _isPlaying) _showAndHideOverlay(true);
           },
-          child: Container(color: Colors.transparent),
+          child: GestureDetector(
+            onTap: _showAndHideOverlay,
+            child: Container(color: Colors.transparent),
+          ),
         ),
         _fadeTransition(
           visible: _showThumbnail,
@@ -467,6 +476,15 @@ class VideoReadyState extends State<VideoReady> {
           visible: _isBuffering,
           child: _style.buffering,
         ),
+        _fadeTransition(
+          visible: _showForwardStatus,
+          child: _forwardAmountAlert(),
+        ),
+        _fadeTransition(
+          visible: _showAMomentPlayAndPause ||
+              _controller.value.position >= _controller.value.duration,
+          child: _playAndPauseIconButtons(),
+        ),
         // _swipeTransition(
         //   visible: _showVolumeStatus && _isAndroid,
         //   direction: _style.volumeBarStyle.alignment == Alignment.centerLeft
@@ -477,15 +495,6 @@ class VideoReadyState extends State<VideoReady> {
         //     progress: (_currentVolume / _maxVolume),
         //   ),
         // ),
-        _fadeTransition(
-          visible: _showForwardStatus,
-          child: _forwardAmountAlert(),
-        ),
-        _fadeTransition(
-          visible: _showAMomentPlayAndPause ||
-              _controller.value.position >= _controller.value.duration,
-          child: _playAndPauseIconButtons(),
-        ),
         SettingsMenu(
           style: _style,
           source: widget.source,
@@ -501,12 +510,22 @@ class VideoReadyState extends State<VideoReady> {
   }
 
   VideoViewerStyle _getResponsiveText([double multiplier = 1]) {
+    final style = widget.style;
     return mergeVideoViewerStyle(
-      style: widget.style,
-      textStyle: TextStyle(
-        fontSize: widget.style.textStyle.fontSize +
-            widget.style.inLandscapeEnlargeTheTextBy * multiplier,
+      style: style,
+      textStyle: style.textStyle.merge(
+        TextStyle(
+          fontSize: style.textStyle.fontSize +
+              style.inLandscapeEnlargeTheTextBy * multiplier,
+        ),
       ),
+    );
+  }
+
+  Widget _playerAspectRatio(Widget child) {
+    return AspectRatio(
+      aspectRatio: _controller.value.aspectRatio,
+      child: child,
     );
   }
 
@@ -537,35 +556,46 @@ class VideoReadyState extends State<VideoReady> {
   //GESTURES//
   //--------//
   Widget _globalGesture(Widget child) {
-    return GestureDetector(
-      child: child,
-      //FORWARD AND REWIND
-      onHorizontalDragStart: (DragStartDetails details) =>
-          _forwardDragStart(details),
-      onHorizontalDragUpdate: (DragUpdateDetails details) =>
-          _forwardDragUpdate(details),
-      onHorizontalDragEnd: (DragEndDetails details) => _forwardDragEnd(),
-      //VOLUME
-      // onVerticalDragStart: (DragStartDetails details) =>
-      //     _volumeDragStart(details),
-      // onVerticalDragUpdate: (DragUpdateDetails details) =>
-      //     _volumeDragUpdate(details),
-      // onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
+    return RawKeyboardListener(
+      focusNode: _focusRawKeyboard,
+      onKey: (e) {
+        final key = e.logicalKey;
+        if (e.runtimeType.toString() == 'RawKeyDownEvent') {
+          if (key == LogicalKeyboardKey.space) _onTapPlayAndPause();
+          if (key == LogicalKeyboardKey.arrowLeft) _rewind();
+          if (key == LogicalKeyboardKey.arrowRight) _forward();
+        }
+      },
+      child: GestureDetector(
+        //VOLUME
+        // onVerticalDragStart: (DragStartDetails details) =>
+        //     _volumeDragStart(details),
+        // onVerticalDragUpdate: (DragUpdateDetails details) =>
+        //     _volumeDragUpdate(details),
+        // onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
+        //FORWARD AND REWINDR
+        onHorizontalDragStart: (DragStartDetails details) =>
+            _forwardDragStart(details),
+        onHorizontalDragUpdate: (DragUpdateDetails details) =>
+            _forwardDragUpdate(details),
+        onHorizontalDragEnd: (DragEndDetails details) => _forwardDragEnd(),
+        child: child,
+      ),
     );
   }
 
-  Widget _playAndPause(Widget child) =>
-      GestureDetector(child: child, onTap: _onTapPlayAndPause);
+  Widget _playAndPause(Widget child) {
+    return GestureDetector(child: child, onTap: _onTapPlayAndPause);
+  }
 
   //------//
   //REWIND//
   //------//
+
   Widget _rewindAndForward() {
     return _rewindAndForwardLayout(
-      rewind: GestureDetector(
-          onDoubleTap: () => _showRewindAndForward(0, -widget.rewindAmount)),
-      forward: GestureDetector(
-          onDoubleTap: () => _showRewindAndForward(1, widget.forwardAmount)),
+      rewind: GestureDetector(onDoubleTap: _rewind),
+      forward: GestureDetector(onDoubleTap: () => _forward),
     );
   }
 

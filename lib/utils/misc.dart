@@ -21,16 +21,21 @@ String secondsFormatter(int seconds) {
 VideoViewerStyle mergeVideoViewerStyle({
   VideoViewerStyle style,
   TextStyle textStyle,
+  ProgressBarStyle progressBarStyle,
+  PlayAndPauseWidgetStyle playAndPauseStyle,
+  SettingsMenuStyle settingsStyle,
+  ForwardAndRewindStyle forwardAndRewindStyle,
+  VolumeBarStyle volumeBarStyle,
 }) {
   return VideoViewerStyle(
     thumbnail: null,
     loading: style.loading,
     buffering: style.buffering,
     textStyle: textStyle ?? style.textStyle,
-    settingsStyle: style.settingsStyle,
-    volumeBarStyle: style.volumeBarStyle,
-    progressBarStyle: style.progressBarStyle,
-    playAndPauseStyle: style.playAndPauseStyle,
-    forwardAndRewindStyle: style.forwardAndRewindStyle,
+    settingsStyle: settingsStyle ?? style.settingsStyle,
+    volumeBarStyle: volumeBarStyle ?? style.volumeBarStyle,
+    progressBarStyle: progressBarStyle ?? style.progressBarStyle,
+    playAndPauseStyle: playAndPauseStyle ?? style.playAndPauseStyle,
+    forwardAndRewindStyle: forwardAndRewindStyle ?? style.forwardAndRewindStyle,
   );
 }
