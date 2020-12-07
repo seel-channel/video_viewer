@@ -55,7 +55,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Global Gestures
+## **Global Gestures**
 
 - **One Tap:** Show or hide the overlay that contains the PlayAndPauseWidget and the ProgressBar
 - **Double tap:**
@@ -70,7 +70,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Android and iOS
+## **Android and iOS**
 
 |                Playing                 |                Paused                 |
 | :------------------------------------: | :-----------------------------------: |
@@ -94,13 +94,6 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Volume Bar
-
-![](./assets/readme/movil/volume_bar.jpg)
-
-<br><br>
-<br><br>
-
 ## Settings Menu
 
 |                Principal Menu                |                Quality Menu                 |
@@ -109,7 +102,14 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Web
+## Volume Bar
+
+![](./assets/readme/movil/volume_bar.jpg)
+
+<br><br>
+<br><br>
+
+## **Web**
 
 |               Playing                |               Paused                |
 | :----------------------------------: | :---------------------------------: |
