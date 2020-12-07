@@ -568,6 +568,8 @@ class VideoReadyState extends State<VideoReady> {
           if (key == LogicalKeyboardKey.space) _onTapPlayAndPause();
           if (key == LogicalKeyboardKey.arrowLeft) _rewind();
           if (key == LogicalKeyboardKey.arrowRight) _forward();
+          if (key == LogicalKeyboardKey.escape && _isFullScreen)
+            setState(() => _isFullScreen = false);
         }
       },
       child: GestureDetector(
