@@ -64,8 +64,9 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 - **Horizontal Drag:**
   - Left: Making a horizontal movement to the left will make a **rewind** proportional to the distance traveled.
   - Right: Making a horizontal movement to the right will make a **forward** proportional to the distance traveled.
-
- <!---- **Vertical Drag:** Scrolling vertically will activate the VolumeBar and change the **volume** of the device. **Only available on Android**  -->
+- **Vertical Drag:**
+  - Up: **Increase** video **volume** proportional to the distance traveled.
+  - Down: **Decrease** video **volume** proportional to the distance traveled.
 
 <br><br>
 
@@ -91,6 +92,13 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 | :------------------------------------------------: | :-------------------------------------------------: |
 | ![](./assets/readme/movil/fullscreen_portrait.jpg) | ![](./assets/readme/movil/fullscreen_landscape.jpg) |
 
+<br><br>
+
+## Volume Bar
+
+![](./assets/readme/movil/volume_bar.jpg)
+
+<br><br>
 <br><br>
 
 ## Settings Menu
@@ -125,6 +133,12 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Fullscreen
+## FullScreen
 
 ![](./assets/readme/web/fullscreen.jpg)
+
+<br><br>
+
+## Volume Bar
+
+![](./assets/readme/web/volume_bar.jpg)

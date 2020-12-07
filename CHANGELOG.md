@@ -1,3 +1,8 @@
+## [1.0.3]
+
+- Hide SystemUIOverlays on fullscreen.
+- VolumeBar added: Change the video volume onVerticalDrag (Android and iOS) or on ArrowUp and ArrowDown (Web).
+
 ## [1.0.2]
 
 - Web Support.
