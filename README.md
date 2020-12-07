@@ -107,6 +107,9 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 ![](./assets/readme/movil/volume_bar.jpg)
 
 <br><br>
+
+---
+
 <br><br>
 
 ### **Web**
