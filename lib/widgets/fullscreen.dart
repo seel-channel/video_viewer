@@ -48,6 +48,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
         ? mergeVideoViewerStyle(style: widget.style)
         : widget.style;
     changeOrientation();
+    Misc.setSystemOverlay([]);
     Misc.onLayoutRendered(() => fullScreenOrientation());
     super.initState();
   }
