@@ -311,8 +311,10 @@ class VideoReadyState extends State<VideoReady> {
   //----------//
   void toFullscreen() {
     if (kIsWeb) {
+      html.document.documentElement.onFullscreenChange.listen((_) {
+        setState(() => _isFullScreen = html.document.fullscreenElement != null);
+      });
       html.document.documentElement.requestFullscreen();
-      setState(() => _isFullScreen = true);
     } else
       Navigator.push(
         context,
@@ -338,7 +340,6 @@ class VideoReadyState extends State<VideoReady> {
   void _exitFullscreen() {
     if (kIsWeb) {
       html.document.exitFullscreen();
-      setState(() => _isFullScreen = false);
     } else if (widget.exitFullScreen != null) widget.exitFullScreen();
   }
 
@@ -385,9 +386,20 @@ class VideoReadyState extends State<VideoReady> {
     if (!_showSettings)
       setState(() {
         _closeVolumeStatus = Misc.timer(600, () {
-          setState(() => _showVolumeStatus = false);
+          setState(() {
+            _closeVolumeStatus?.cancel();
+            _closeVolumeStatus = null;
+            _showVolumeStatus = false;
+          });
         });
       });
+  }
+
+  void _onKeypressVolume(bool isArrowUp) {
+    _showVolumeStatus = true;
+    _closeVolumeStatus?.cancel();
+    _setVolume(_currentVolume + (isArrowUp ? 0.1 : -0.1));
+    _volumeDragEnd();
   }
 
   //-------------//
@@ -578,29 +590,6 @@ class VideoReadyState extends State<VideoReady> {
     );
   }
 
-  //------------------//
-  //TRANSITION WIDGETS//
-  //------------------//
-  Widget _fadeTransition({bool visible, Widget child}) {
-    return OpacityTransition(
-      curve: Curves.ease,
-      duration: Duration(milliseconds: _transitions),
-      visible: visible,
-      child: child,
-    );
-  }
-
-  Widget _swipeTransition(
-      {bool visible, Widget child, SwipeDirection direction}) {
-    return SwipeTransition(
-      curve: Curves.ease,
-      duration: Duration(milliseconds: _transitions),
-      direction: direction,
-      visible: visible,
-      child: child,
-    );
-  }
-
   //--------//
   //GESTURES//
   //--------//
@@ -610,11 +599,16 @@ class VideoReadyState extends State<VideoReady> {
       onKey: (e) {
         final key = e.logicalKey;
         if (e.runtimeType.toString() == 'RawKeyDownEvent') {
-          if (key == LogicalKeyboardKey.space) _onTapPlayAndPause();
-          if (key == LogicalKeyboardKey.arrowLeft) _rewind();
-          if (key == LogicalKeyboardKey.arrowRight) _forward();
-          if (key == LogicalKeyboardKey.escape && _isFullScreen)
-            setState(() => _isFullScreen = false);
+          if (key == LogicalKeyboardKey.space)
+            _onTapPlayAndPause();
+          else if (key == LogicalKeyboardKey.arrowLeft)
+            _rewind();
+          else if (key == LogicalKeyboardKey.arrowRight)
+            _forward();
+          else if (key == LogicalKeyboardKey.arrowUp)
+            _onKeypressVolume(true);
+          else if (key == LogicalKeyboardKey.arrowDown)
+            _onKeypressVolume(false);
         }
       },
       child: GestureDetector(
@@ -637,6 +631,29 @@ class VideoReadyState extends State<VideoReady> {
 
   Widget _playAndPause(Widget child) {
     return GestureDetector(child: child, onTap: _onTapPlayAndPause);
+  }
+
+  //------------------//
+  //TRANSITION WIDGETS//
+  //------------------//
+  Widget _fadeTransition({bool visible, Widget child}) {
+    return OpacityTransition(
+      curve: Curves.ease,
+      duration: Duration(milliseconds: _transitions),
+      visible: visible,
+      child: child,
+    );
+  }
+
+  Widget _swipeTransition(
+      {bool visible, Widget child, SwipeDirection direction}) {
+    return SwipeTransition(
+      curve: Curves.ease,
+      duration: Duration(milliseconds: _transitions),
+      direction: direction,
+      visible: visible,
+      child: child,
+    );
   }
 
   //------//
