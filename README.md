@@ -78,7 +78,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Rewind and Forward
+#### Rewind and Forward
 
 |           Double Tap Rewind           |           Double Tap Forward           |
 | :-----------------------------------: | :------------------------------------: |
@@ -86,7 +86,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Fullscreen
+### Fullscreen
 
 |                      Portrait                      |                      Landscape                      |
 | :------------------------------------------------: | :-------------------------------------------------: |
@@ -94,7 +94,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Settings Menu
+### Settings Menu
 
 |                Principal Menu                |                Quality Menu                 |
 | :------------------------------------------: | :-----------------------------------------: |
@@ -102,14 +102,14 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Volume Bar
+### Volume Bar
 
 ![](./assets/readme/movil/volume_bar.jpg)
 
 <br><br>
 <br><br>
 
-## **Web**
+### **Web**
 
 |               Playing                |               Paused                |
 | :----------------------------------: | :---------------------------------: |
@@ -117,7 +117,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Rewind and Forward
+### Rewind and Forward
 
 | Double Tap and Keyboard.arrowLeft Rewind | Double Tap and Keyboard.arrowRight Forward |
 | :--------------------------------------: | :----------------------------------------: |
@@ -125,7 +125,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## Settings Menu
+### Settings Menu
 
 |               Principal Menu               |               Speed Menu                |
 | :----------------------------------------: | :-------------------------------------: |
@@ -133,12 +133,12 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## FullScreen
+### FullScreen
 
 ![](./assets/readme/web/fullscreen.jpg)
 
 <br><br>
 
-## Volume Bar
+### Volume Bar
 
 ![](./assets/readme/web/volume_bar.jpg)
