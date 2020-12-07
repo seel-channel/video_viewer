@@ -64,10 +64,10 @@ class VideoReadyState extends State<VideoReady> {
   int _lastPosition = 0, _forwardAmount = 0, _transitions = 0;
 
   //VOLUME
-  //bool _showVolumeS tatus = false, _isAndroid = false;
-  // int _maxVolume = 1, _onDragStartVolume = 1, _currentVolume = 1;
-  // Offset _verticalDragStartOffset;
-  // Timer _closeVolumeStatus;
+  bool _showVolumeStatus = false;
+  double _maxVolume = 1, _onDragStartVolume = 1, _currentVolume = 1;
+  Offset _verticalDragStartOffset;
+  Timer _closeVolumeStatus;
 
   //TEXT POSITION ON DRAGGING
   final GlobalKey _playKey = GlobalKey();
@@ -101,7 +101,6 @@ class VideoReadyState extends State<VideoReady> {
       Misc.onLayoutRendered(() {
         _changeIconPlayWidth();
       });
-    //_isAndroid = Platform.isAndroid;
     //_initAudioStreamType();
     //_updateVolumes();
     super.initState();
@@ -120,28 +119,26 @@ class VideoReadyState extends State<VideoReady> {
   //VIDEO CONTROLLER//
   //----------------//
   void _videoListener() {
-    if (mounted)
-      setState(() {
-        final value = _controller.value;
-        final playing = value.isPlaying;
+    if (mounted) {
+      final value = _controller.value;
+      final playing = value.isPlaying;
 
-        if (playing != _isPlaying) _isPlaying = playing;
-        if (_isPlaying && _showThumbnail) _showThumbnail = false;
-        if (_isPlaying && _isDraggingProgress) _isDraggingProgress = false;
-
-        if (_showButtons) {
-          if (_isPlaying) {
-            if (value.position >= value.duration && !widget.looping) {
-              _controller.seekTo(Duration.zero);
-            } else {
-              if (_timerPosition == null) _createBufferTimer();
-              if (_closeOverlayButtons == null && !_isDraggingProgress)
-                _startCloseOverlayButtons();
-            }
-          } else if (_isGoingToCloseBufferingWidget)
-            _cancelCloseOverlayButtons();
-        }
-      });
+      if (playing != _isPlaying) _isPlaying = playing;
+      if (_isPlaying && _showThumbnail) _showThumbnail = false;
+      if (_isPlaying && _isDraggingProgress) _isDraggingProgress = false;
+      if (_showButtons) {
+        if (_isPlaying) {
+          if (value.position >= value.duration && !widget.looping) {
+            _controller.seekTo(Duration.zero);
+          } else {
+            if (_timerPosition == null) _createBufferTimer();
+            if (_closeOverlayButtons == null && !_isDraggingProgress)
+              _startCloseOverlayButtons();
+          }
+        } else if (_isGoingToCloseBufferingWidget) _cancelCloseOverlayButtons();
+      }
+      setState(() {});
+    }
   }
 
   void _changeVideoSource(VideoPlayerController source, String activedSource,
@@ -345,9 +342,57 @@ class VideoReadyState extends State<VideoReady> {
     } else if (widget.exitFullScreen != null) widget.exitFullScreen();
   }
 
-  //------//
-  //VOLUME//
-  //------//
+  //-----------------//
+  //VOLUME CONTROLLER//
+  //-----------------//
+  void _updateVolumes() {
+    _maxVolume = 1.0;
+    _onDragStartVolume = _controller.value.volume;
+    _currentVolume = _onDragStartVolume;
+    if (mounted) setState(() {});
+  }
+
+  void _setVolume(double volume) async {
+    if (volume <= _maxVolume && volume >= 0) {
+      final double fractional = _maxVolume * 0.05;
+      if (volume >= _maxVolume - fractional) volume = _maxVolume;
+      if (volume <= fractional) volume = 0.0;
+      await _controller.setVolume(volume);
+      setState(() => _currentVolume = volume);
+    }
+  }
+
+  void _volumeDragStart(DragStartDetails details) {
+    if (!_showSettings) {
+      _closeVolumeStatus?.cancel();
+      setState(() {
+        _verticalDragStartOffset = details.globalPosition;
+        _showVolumeStatus = true;
+      });
+      _updateVolumes();
+    }
+  }
+
+  void _volumeDragUpdate(DragUpdateDetails details) {
+    if (!_showSettings) {
+      double diff = _verticalDragStartOffset.dy - details.globalPosition.dy;
+      double volume = (diff / 100) + _onDragStartVolume;
+      _setVolume(volume);
+    }
+  }
+
+  void _volumeDragEnd() {
+    if (!_showSettings)
+      setState(() {
+        _closeVolumeStatus = Misc.timer(600, () {
+          setState(() => _showVolumeStatus = false);
+        });
+      });
+  }
+
+  //-------------//
+  //VOLUME NATIVE//
+  //-------------//
   // void _initAudioStreamType() async {
   //   if (_isAndroid) await Volume.controlVolume(AudioManager.STREAM_MUSIC);
   // }
@@ -489,16 +534,16 @@ class VideoReadyState extends State<VideoReady> {
               _controller.value.position >= _controller.value.duration,
           child: _playAndPauseIconButtons(),
         ),
-        // _swipeTransition(
-        //   visible: _showVolumeStatus && _isAndroid,
-        //   direction: _style.volumeBarStyle.alignment == Alignment.centerLeft
-        //       ? SwipeDirection.fromLeft
-        //       : SwipeDirection.fromRight,
-        //   child: VideoVolumeBar(
-        //     style: widget.style.volumeBarStyle,
-        //     progress: (_currentVolume / _maxVolume),
-        //   ),
-        // ),
+        _swipeTransition(
+          visible: _showVolumeStatus,
+          direction: _style.volumeBarStyle.alignment == Alignment.centerLeft
+              ? SwipeDirection.fromLeft
+              : SwipeDirection.fromRight,
+          child: VideoVolumeBar(
+            style: widget.style.volumeBarStyle,
+            progress: (_currentVolume / _maxVolume),
+          ),
+        ),
         SettingsMenu(
           style: _style,
           source: widget.source,
@@ -574,11 +619,11 @@ class VideoReadyState extends State<VideoReady> {
       },
       child: GestureDetector(
         //VOLUME
-        // onVerticalDragStart: (DragStartDetails details) =>
-        //     _volumeDragStart(details),
-        // onVerticalDragUpdate: (DragUpdateDetails details) =>
-        //     _volumeDragUpdate(details),
-        // onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
+        onVerticalDragStart: (DragStartDetails details) =>
+            _volumeDragStart(details),
+        onVerticalDragUpdate: (DragUpdateDetails details) =>
+            _volumeDragUpdate(details),
+        onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
         //FORWARD AND REWINDR
         onHorizontalDragStart: (DragStartDetails details) =>
             _forwardDragStart(details),

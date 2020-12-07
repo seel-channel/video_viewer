@@ -244,8 +244,7 @@ class VideoVolumeBar extends StatelessWidget {
               alignment: AlignmentDirectional.bottomCenter,
               children: [
                 Container(color: style.backgroundColor),
-                AnimatedContainer(
-                  duration: Duration(milliseconds: 200),
+                Container(
                   height: progress * style.height,
                   decoration: BoxDecoration(
                     color: style.color,
