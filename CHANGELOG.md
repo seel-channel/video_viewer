@@ -1,3 +1,7 @@
+## [1.0.3+1]
+
+- README.md fixed.
+
 ## [1.0.3]
 
 - Hide SystemUIOverlays on fullscreen.

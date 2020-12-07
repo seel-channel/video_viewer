@@ -25,7 +25,7 @@ First, add `video_viewer` as a dependency in your **pubspec.yaml.**
 
 ```yaml
 dependencies:
-  video_viewer: ^1.0.1
+  video_viewer: ^1.0.3
 ```
 
 ### Android
