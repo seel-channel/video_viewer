@@ -668,7 +668,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   //------//
   //REWIND//
   //------//
-
   Widget _rewindAndForward() {
     return _rewindAndForwardLayout(
       rewind: GestureDetector(onDoubleTap: _rewind),
@@ -725,7 +724,13 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   Widget _overlayButtons() {
+    final Widget header = widget.style.header;
     return Stack(children: [
+      if (header != null)
+        Align(
+          alignment: Alignment.topLeft,
+          child: _gradientBackground(child: header),
+        ),
       _swipeTransition(
         direction: SwipeDirection.fromBottom,
         visible: _showButtons,
@@ -736,6 +741,19 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
         child: _playAndPauseIconButtons(),
       ),
     ]);
+  }
+
+  Widget _gradientBackground({Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.transparent, _style.progressBarStyle.backgroundColor],
+        ),
+      ),
+      child: child,
+    );
   }
 
   //-------------------//
@@ -801,17 +819,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(child: SizedBox()),
         _textPositionProgress(position),
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.transparent,
-                _style.progressBarStyle.backgroundColor
-              ],
-            ),
-          ),
+        _gradientBackground(
           child: Row(children: [
             _playAndPause(Container(
                 key: _playKey,

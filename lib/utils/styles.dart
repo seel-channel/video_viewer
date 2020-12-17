@@ -10,6 +10,7 @@ class VideoViewerStyle {
     SettingsMenuStyle settingsStyle,
     ForwardAndRewindStyle forwardAndRewindStyle,
     VolumeBarStyle volumeBarStyle,
+    this.header,
     this.thumbnail,
     Widget loading,
     Widget buffering,
@@ -60,6 +61,9 @@ class VideoViewerStyle {
   /// It is a thumbnail that appears when the video is loaded for the first time, once
   /// given play or pressing on it will disappear.
   final Widget thumbnail;
+
+  /// It is the widget header shows on the top when you tap the video viewer and it shows the progress bar
+  final Widget header;
 
   /// It is the NotNull-Widget that appears when the video is loading.
   ///

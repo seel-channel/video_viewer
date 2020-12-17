@@ -55,7 +55,7 @@ class VideoViewer extends StatefulWidget {
   ///If it is `false`, you can rotate the entire screen in any position.
   final bool onFullscreenFixLandscape;
 
-  ///Is the custom language can you set to the VideoViewer.
+  ///It's the custom language can you set to the VideoViewer.
   ///```dart
   /// language: VideoViewerLanguage.es
   /// language: VideoViewerLanguage(quality: "Calidad", speed: "Velocidad", ...)
