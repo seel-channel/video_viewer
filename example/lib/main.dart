@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:video_viewer/video_viewer.dart';
 
 void main() => runApp(App());
@@ -6,6 +7,8 @@ void main() => runApp(App());
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light));
     return MaterialApp(
       home: HomePage(),
       title: 'Video Viewer Example',
@@ -33,33 +36,31 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: SafeArea(
-        child: ListView(children: [
-          VideoViewer(
-            onFullscreenFixLandscape: false,
-            language: VideoViewerLanguage.es,
-            source: getNetworkVideoSources(src),
-            style: VideoViewerStyle(
-              thumbnail: Image.network(image),
-              header: Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("MY AMAZING VIDEO",
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white)),
-                    Text("YES!", style: TextStyle(color: Colors.white)),
-                  ],
-                ),
+      body: Center(
+        child: VideoViewer(
+          onFullscreenFixLandscape: false,
+          language: VideoViewerLanguage.es,
+          source: getNetworkVideoSources(src),
+          style: VideoViewerStyle(
+            thumbnail: Image.network(image),
+            header: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("MY AMAZING VIDEO",
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
+                  Text("YES!", style: TextStyle(color: Colors.white)),
+                ],
               ),
             ),
           ),
-        ]),
+        ),
       ),
     );
   }

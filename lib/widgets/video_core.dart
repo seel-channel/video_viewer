@@ -82,11 +82,17 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   final GlobalKey _playKey = GlobalKey();
   double _progressBarWidth = 0, _progressScale = 0, _iconPlayWidth = 0;
   bool _isDraggingProgress = false, _switchRemaingText = false;
-  int _pointers = 0;
 
   //LANDSCAPE
   double _progressBarMargin = 0;
   VideoViewerStyle _style, _landscapeStyle;
+
+  //VIDEO ZOOM
+  int _pointers = 0;
+  double _scale = 1.0;
+  double _initialScale = 1.0;
+  double _maxScale = 1.0;
+  double _minScale = 1.0;
 
   //WEB
   final FocusNode _focusRawKeyboard = FocusNode();
@@ -473,6 +479,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     return OrientationBuilder(builder: (_, orientation) {
       Orientation landscape = Orientation.landscape;
       double padding = _style.progressBarStyle.paddingBeetwen;
+      bool fullScreenLandscape = _isFullScreen && orientation == landscape;
 
       _progressBarMargin = orientation == landscape ? padding * 2 : padding;
       _style = kIsWeb
@@ -484,19 +491,23 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
               ? _landscapeStyle
               : widget.style;
 
-      return _isFullScreen && orientation == landscape
-          ? _player(orientation)
-          : _playerAspectRatio(_player(orientation));
+      return fullScreenLandscape
+          ? _player(orientation, fullScreenLandscape)
+          : _playerAspectRatio(_player(orientation, fullScreenLandscape));
     });
   }
 
-  Widget _player(Orientation orientation) {
+  Widget _player(Orientation orientation, bool fullScreenLandscape) {
     return _globalGesture(
       Stack(children: [
         _fadeTransition(
           visible: !_showThumbnail,
-          child: _isFullScreen && orientation == Orientation.landscape
-              ? Center(child: _playerAspectRatio(VideoPlayer(_controller)))
+          child: fullScreenLandscape
+              ? Transform.scale(
+                  scale: _scale,
+                  child: Center(
+                    child: _playerAspectRatio(VideoPlayer(_controller)),
+                  ))
               : VideoPlayer(_controller),
         ),
         kIsWeb
@@ -511,6 +522,22 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
               )
             : GestureDetector(
                 onTap: _showAndHideOverlay,
+                onScaleStart: fullScreenLandscape
+                    ? (_) => setState(() {
+                          final Size size = GetContext.size(context);
+                          final double aspectWidth =
+                              size.height * _controller.value.aspectRatio;
+                          _initialScale = _scale;
+                          _maxScale = size.width / aspectWidth;
+                        })
+                    : null,
+                onScaleUpdate: fullScreenLandscape
+                    ? (details) {
+                        final double newScale = _initialScale * details.scale;
+                        if (newScale >= _minScale && newScale <= _maxScale)
+                          setState(() => _scale = newScale);
+                      }
+                    : null,
                 child: Container(color: Colors.transparent),
               ),
         _fadeTransition(
