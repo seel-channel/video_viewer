@@ -296,15 +296,8 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
       });
   }
 
-  void _forwardDragEnd() {
-    if (!_showSettings) {
-      setState(() => _showForwardStatus = false);
-      _controllerSeekTo(_forwardAmount);
-    }
-  }
-
   void _forwardDragUpdate(DragUpdateDetails details) {
-    if (!_showSettings) {
+    if (!_showSettings && _pointers == 1) {
       double diff = _horizontalDragStartOffset.dx - details.globalPosition.dx;
       double multiplicator = (diff.abs() / 50);
       int seconds = _controller.value.position.inSeconds;
@@ -313,6 +306,13 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
         if (seconds + amount < _controller.value.duration.inSeconds &&
             seconds + amount > 0) _forwardAmount = amount;
       });
+    }
+  }
+
+  void _forwardDragEnd() {
+    if (!_showSettings && _showForwardStatus) {
+      setState(() => _showForwardStatus = false);
+      _controllerSeekTo(_forwardAmount);
     }
   }
 
@@ -337,7 +337,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   void _volumeDragStart(DragStartDetails details) {
-    if (!_showSettings) {
+    if (!_showSettings && _pointers == 1) {
       _closeVolumeStatus?.cancel();
       setState(() {
         _verticalDragStartOffset = details.globalPosition;
@@ -356,7 +356,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   void _volumeDragEnd() {
-    if (!_showSettings)
+    if (!_showSettings && _showVolumeStatus)
       setState(() {
         _closeVolumeStatus = Misc.timer(600, () {
           setState(() {
@@ -627,17 +627,13 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
         onPointerUp: (event) => _pointers--,
         child: GestureDetector(
           //VOLUME
-          onVerticalDragStart: (DragStartDetails details) =>
-              _volumeDragStart(details),
-          onVerticalDragUpdate: (DragUpdateDetails details) =>
-              _volumeDragUpdate(details),
-          onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
+          onVerticalDragStart: _volumeDragStart,
+          onVerticalDragUpdate: _volumeDragUpdate,
+          onVerticalDragEnd: (_) => _volumeDragEnd(),
           //FORWARD AND REWIND
-          onHorizontalDragStart: (DragStartDetails details) =>
-              _forwardDragStart(details),
-          onHorizontalDragUpdate: (DragUpdateDetails details) =>
-              _forwardDragUpdate(details),
-          onHorizontalDragEnd: (DragEndDetails details) => _forwardDragEnd(),
+          onHorizontalDragStart: _forwardDragStart,
+          onHorizontalDragUpdate: _forwardDragUpdate,
+          onHorizontalDragEnd: (_) => _forwardDragEnd(),
           child: child,
         ),
       ),
