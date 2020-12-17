@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
@@ -81,6 +82,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   final GlobalKey _playKey = GlobalKey();
   double _progressBarWidth = 0, _progressScale = 0, _iconPlayWidth = 0;
   bool _isDraggingProgress = false, _switchRemaingText = false;
+  int _pointers = 0;
 
   //LANDSCAPE
   double _progressBarMargin = 0;
@@ -287,7 +289,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   void _forwardDragStart(DragStartDetails details) {
-    if (!_showSettings)
+    if (!_showSettings && _pointers == 1)
       setState(() {
         _horizontalDragStartOffset = details.globalPosition;
         _showForwardStatus = true;
@@ -312,6 +314,65 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
             seconds + amount > 0) _forwardAmount = amount;
       });
     }
+  }
+
+  //-----------------//
+  //CONTROLLER VOLUME//
+  //-----------------//
+  void _updateVolumes() {
+    _maxVolume = 1.0;
+    _onDragStartVolume = _controller.value.volume;
+    _currentVolume = _onDragStartVolume;
+    if (mounted) setState(() {});
+  }
+
+  void _setVolume(double volume) async {
+    if (volume <= _maxVolume && volume >= 0) {
+      final double fractional = _maxVolume * 0.05;
+      if (volume >= _maxVolume - fractional) volume = _maxVolume;
+      if (volume <= fractional) volume = 0.0;
+      await _controller.setVolume(volume);
+      setState(() => _currentVolume = volume);
+    }
+  }
+
+  void _volumeDragStart(DragStartDetails details) {
+    if (!_showSettings) {
+      _closeVolumeStatus?.cancel();
+      setState(() {
+        _verticalDragStartOffset = details.globalPosition;
+        _showVolumeStatus = true;
+      });
+      _updateVolumes();
+    }
+  }
+
+  void _volumeDragUpdate(DragUpdateDetails details) {
+    if (!_showSettings && _pointers == 1) {
+      double diff = _verticalDragStartOffset.dy - details.globalPosition.dy;
+      double volume = (diff / 125) + _onDragStartVolume;
+      _setVolume(volume);
+    }
+  }
+
+  void _volumeDragEnd() {
+    if (!_showSettings)
+      setState(() {
+        _closeVolumeStatus = Misc.timer(600, () {
+          setState(() {
+            _closeVolumeStatus?.cancel();
+            _closeVolumeStatus = null;
+            _showVolumeStatus = false;
+          });
+        });
+      });
+  }
+
+  void _onKeypressVolume(bool isArrowUp) {
+    _showVolumeStatus = true;
+    _closeVolumeStatus?.cancel();
+    _setVolume(_currentVolume + (isArrowUp ? 0.1 : -0.1));
+    _volumeDragEnd();
   }
 
   //----------//
@@ -351,67 +412,8 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     } else if (widget.exitFullScreen != null) widget.exitFullScreen();
   }
 
-  //-----------------//
-  //VOLUME CONTROLLER//
-  //-----------------//
-  void _updateVolumes() {
-    _maxVolume = 1.0;
-    _onDragStartVolume = _controller.value.volume;
-    _currentVolume = _onDragStartVolume;
-    if (mounted) setState(() {});
-  }
-
-  void _setVolume(double volume) async {
-    if (volume <= _maxVolume && volume >= 0) {
-      final double fractional = _maxVolume * 0.05;
-      if (volume >= _maxVolume - fractional) volume = _maxVolume;
-      if (volume <= fractional) volume = 0.0;
-      await _controller.setVolume(volume);
-      setState(() => _currentVolume = volume);
-    }
-  }
-
-  void _volumeDragStart(DragStartDetails details) {
-    if (!_showSettings) {
-      _closeVolumeStatus?.cancel();
-      setState(() {
-        _verticalDragStartOffset = details.globalPosition;
-        _showVolumeStatus = true;
-      });
-      _updateVolumes();
-    }
-  }
-
-  void _volumeDragUpdate(DragUpdateDetails details) {
-    if (!_showSettings) {
-      double diff = _verticalDragStartOffset.dy - details.globalPosition.dy;
-      double volume = (diff / 100) + _onDragStartVolume;
-      _setVolume(volume);
-    }
-  }
-
-  void _volumeDragEnd() {
-    if (!_showSettings)
-      setState(() {
-        _closeVolumeStatus = Misc.timer(600, () {
-          setState(() {
-            _closeVolumeStatus?.cancel();
-            _closeVolumeStatus = null;
-            _showVolumeStatus = false;
-          });
-        });
-      });
-  }
-
-  void _onKeypressVolume(bool isArrowUp) {
-    _showVolumeStatus = true;
-    _closeVolumeStatus?.cancel();
-    _setVolume(_currentVolume + (isArrowUp ? 0.1 : -0.1));
-    _volumeDragEnd();
-  }
-
   //-------------//
-  //VOLUME NATIVE//
+  //NATIVE VOLUME//
   //-------------//
   // void _initAudioStreamType() async {
   //   if (_isAndroid) await Volume.controlVolume(AudioManager.STREAM_MUSIC);
@@ -620,20 +622,24 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
             _onKeypressVolume(false);
         }
       },
-      child: GestureDetector(
-        //VOLUME
-        onVerticalDragStart: (DragStartDetails details) =>
-            _volumeDragStart(details),
-        onVerticalDragUpdate: (DragUpdateDetails details) =>
-            _volumeDragUpdate(details),
-        onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
-        //FORWARD AND REWINDR
-        onHorizontalDragStart: (DragStartDetails details) =>
-            _forwardDragStart(details),
-        onHorizontalDragUpdate: (DragUpdateDetails details) =>
-            _forwardDragUpdate(details),
-        onHorizontalDragEnd: (DragEndDetails details) => _forwardDragEnd(),
-        child: child,
+      child: Listener(
+        onPointerDown: (event) => _pointers++,
+        onPointerUp: (event) => _pointers--,
+        child: GestureDetector(
+          //VOLUME
+          onVerticalDragStart: (DragStartDetails details) =>
+              _volumeDragStart(details),
+          onVerticalDragUpdate: (DragUpdateDetails details) =>
+              _volumeDragUpdate(details),
+          onVerticalDragEnd: (DragEndDetails details) => _volumeDragEnd(),
+          //FORWARD AND REWIND
+          onHorizontalDragStart: (DragStartDetails details) =>
+              _forwardDragStart(details),
+          onHorizontalDragUpdate: (DragUpdateDetails details) =>
+              _forwardDragUpdate(details),
+          onHorizontalDragEnd: (DragEndDetails details) => _forwardDragEnd(),
+          child: child,
+        ),
       ),
     );
   }
