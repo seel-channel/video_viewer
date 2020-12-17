@@ -2,20 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:video_viewer/utils/styles.dart';
 
 String secondsFormatter(int seconds) {
-  int secondsBool = seconds;
-  int minutes = (seconds.abs() / 60).floor();
-  seconds = (seconds.abs() - (minutes * 60));
-  int hours = (minutes.abs() / 60).floor();
-  String minutesStr = minutes < 10 ? "0$minutes" : "$minutes";
-  String secondsStr = seconds < 10 ? "0$seconds" : "$seconds";
-  String hoursStr = hours == 0
-      ? ""
-      : hours < 10
-          ? "0$hours:"
-          : "$hours:";
-  return secondsBool < 0
-      ? "-$hoursStr$minutesStr:$secondsStr"
-      : "$hoursStr$minutesStr:$secondsStr";
+  final Duration duration = Duration(seconds: seconds);
+  final int hours = duration.inHours;
+  final String formatter = [if (hours != 0) hours, duration.inMinutes, seconds]
+      .map((seg) => seg.abs().remainder(60).toString().padLeft(2, '0'))
+      .join(':');
+  return seconds < 0 ? "-$formatter" : formatter;
 }
 
 VideoViewerStyle mergeVideoViewerStyle({
@@ -29,6 +21,7 @@ VideoViewerStyle mergeVideoViewerStyle({
 }) {
   return VideoViewerStyle(
     thumbnail: null,
+    header: style.header,
     loading: style.loading,
     buffering: style.buffering,
     textStyle: textStyle ?? style.textStyle,
