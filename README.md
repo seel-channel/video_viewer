@@ -67,6 +67,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 - **Vertical Drag:**
   - Up: **Increase** video **volume** proportional to the distance traveled.
   - Down: **Decrease** video **volume** proportional to the distance traveled.
+- **Scale Drag:** When the VideoViewer is on fullscreen and landscape mode you can zoom to video for completing the screen width.
 
 <br><br>
 

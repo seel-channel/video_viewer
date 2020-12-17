@@ -1,3 +1,10 @@
+## [1.0.4]
+
+- Added custom VideoViewerLanguage
+- Added HeaderWidget
+- Added Video Zoom on fullscreen and landscape
+- Fixed Bugs
+
 ## [1.0.3+1]
 
 - README.md fixed.

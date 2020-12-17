@@ -223,7 +223,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.3+1"
+    version: "1.0.4"
   zone_local:
     dependency: transitive
     description:
