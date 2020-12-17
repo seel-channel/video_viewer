@@ -101,6 +101,7 @@ class VideoViewerState extends State<VideoViewer> {
             style: widget.style,
             source: widget.source,
             looping: widget.looping,
+            language: widget.language,
             controller: _controller,
             activedSource: _activedSource,
             rewindAmount: widget.rewindAmount,

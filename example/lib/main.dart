@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
               thumbnail: Image.network(image),
               header: Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(10),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,

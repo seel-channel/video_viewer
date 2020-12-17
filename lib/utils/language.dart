@@ -22,10 +22,9 @@ class VideoViewerLanguage {
 
   ///**SPANISH LANGUAGE**
   static const VideoViewerLanguage es = VideoViewerLanguage(
-    settings: "Configuración",
+    settings: "Regresar",
     quality: "Calidad",
     speed: "Velocidad",
-    normalSpeed: "Normal",
   );
 
   ///**ENGLISH LANGUAGE**
@@ -33,6 +32,5 @@ class VideoViewerLanguage {
     settings: "Settings",
     quality: "Quality",
     speed: "Speed",
-    normalSpeed: "Normal",
   );
 }
