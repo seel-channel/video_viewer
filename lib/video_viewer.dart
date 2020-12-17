@@ -1,5 +1,6 @@
 library video_viewer;
 
-export 'utils/sources.dart';
-export 'utils/styles.dart';
 export 'widgets/main.dart';
+export 'utils/styles.dart';
+export 'utils/sources.dart';
+export 'utils/language.dart';

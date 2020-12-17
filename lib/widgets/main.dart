@@ -8,7 +8,7 @@ import 'package:video_viewer/widgets/video_core.dart';
 class VideoViewer extends StatefulWidget {
   VideoViewer({
     Key key,
-    this.source,
+    @required this.source,
     VideoViewerStyle style,
     this.looping = false,
     this.autoPlay = false,
@@ -55,6 +55,11 @@ class VideoViewer extends StatefulWidget {
   ///If it is `false`, you can rotate the entire screen in any position.
   final bool onFullscreenFixLandscape;
 
+  ///Is the custom language can you set to the VideoViewer.
+  ///```dart
+  /// language: VideoViewerLanguage.es
+  /// language: VideoViewerLanguage(quality: "Calidad", speed: "Velocidad", ...)
+  /// ```
   final VideoViewerLanguage language;
 
   @override

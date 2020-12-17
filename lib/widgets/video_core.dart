@@ -14,11 +14,12 @@ import 'package:video_viewer/utils/styles.dart';
 import 'package:video_viewer/utils/misc.dart';
 
 class VideoViewerCore extends StatefulWidget {
+  ///IS THE VIDEOVIEWER CORE
   VideoViewerCore({
     Key key,
-    this.controller,
-    this.style,
-    this.source,
+    @required this.controller,
+    @required this.source,
+    VideoViewerStyle style,
     this.activedSource,
     this.looping,
     this.rewindAmount,
@@ -28,7 +29,8 @@ class VideoViewerCore extends StatefulWidget {
     this.exitFullScreen,
     this.onFullscreenFixLandscape,
     this.language = VideoViewerLanguage.en,
-  }) : super(key: key);
+  })  : this.style = style ?? VideoViewerStyle(),
+        super(key: key);
 
   final String activedSource;
   final bool looping;
@@ -38,9 +40,13 @@ class VideoViewerCore extends StatefulWidget {
   final VideoViewerLanguage language;
   final VideoPlayerController controller;
   final Map<String, VideoPlayerController> source;
-  final void Function(VideoPlayerController, String) onChangeSource;
-  final void Function() exitFullScreen;
   final bool onFullscreenFixLandscape;
+
+  ///USE INSIDE THE SETTINGS MENU
+  final void Function(VideoPlayerController, String) onChangeSource;
+
+  ///USE INSIDE FULLSCREEN
+  final void Function() exitFullScreen;
 
   @override
   VideoViewerCoreState createState() => VideoViewerCoreState();

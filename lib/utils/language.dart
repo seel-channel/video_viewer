@@ -4,6 +4,7 @@ class VideoViewerLanguage {
   final String settings;
   final String normalSpeed;
 
+  ///CUSTOM LANGUAGE FOR VIDEO VIEWER
   const VideoViewerLanguage({
     this.settings = "Settings",
     this.quality = "Quality",
@@ -11,11 +12,15 @@ class VideoViewerLanguage {
     this.normalSpeed = "Normal",
   });
 
-  static fromString(String language) {
+  ///ENTER A STRING AND RETURN THE LANGUAGE OBJECT
+  /// - "es" = Spanish Language
+  /// - "en" = English Language
+  static VideoViewerLanguage fromString(String language) {
     if (language == "es") return es;
-    if (language == "en") return en;
+    return en;
   }
 
+  ///**SPANISH LANGUAGE**
   static const VideoViewerLanguage es = VideoViewerLanguage(
     settings: "Configuración",
     quality: "Calidad",
@@ -23,6 +28,7 @@ class VideoViewerLanguage {
     normalSpeed: "Normal",
   );
 
+  ///**ENGLISH LANGUAGE**
   static const VideoViewerLanguage en = VideoViewerLanguage(
     settings: "Settings",
     quality: "Quality",
