@@ -56,9 +56,15 @@ class VideoViewer extends StatefulWidget {
   final bool onFullscreenFixLandscape;
 
   ///It's the custom language can you set to the VideoViewer.
+  ///
+  ///**EXAMPLE:** SETTING THE SPANISH LANGUAGE TO THE VIDEOVIEWER
   ///```dart
+  /// //WAY 1
   /// language: VideoViewerLanguage.es
+  /// //WAY 2
   /// language: VideoViewerLanguage(quality: "Calidad", speed: "Velocidad", ...)
+  /// //WAY 3
+  /// language: VideoViewerLanguage.fromString("es")
   /// ```
   final VideoViewerLanguage language;
 
