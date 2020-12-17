@@ -121,7 +121,7 @@ class ProgressBarStyle {
         this.barBackgroundColor =
             barBackgroundColor ?? Colors.white.withOpacity(0.2),
         this.backgroundColor =
-            backgroundColor ?? Colors.black.withOpacity(0.28),
+            backgroundColor ?? Colors.black.withOpacity(0.36),
         this.borderRadius = borderRadius ?? BorderRadius.circular(5),
         this.fullScreen = fullScreen ??
             Icon(

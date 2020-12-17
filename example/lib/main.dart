@@ -37,9 +37,26 @@ class _HomePageState extends State<HomePage> {
         child: ListView(children: [
           VideoViewer(
             onFullscreenFixLandscape: false,
+            language: VideoViewerLanguage.es,
             source: getNetworkVideoSources(src),
             style: VideoViewerStyle(
               thumbnail: Image.network(image),
+              header: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(10),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("MY AMAZING VIDEO",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white)),
+                    Text("YES!", style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ),
             ),
           ),
         ]),

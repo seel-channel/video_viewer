@@ -671,7 +671,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   Widget _rewindAndForward() {
     return _rewindAndForwardLayout(
       rewind: GestureDetector(onDoubleTap: _rewind),
-      forward: GestureDetector(onDoubleTap: () => _forward),
+      forward: GestureDetector(onDoubleTap: _forward),
     );
   }
 
@@ -727,9 +727,13 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     final Widget header = widget.style.header;
     return Stack(children: [
       if (header != null)
-        Align(
-          alignment: Alignment.topLeft,
-          child: _gradientBackground(child: header),
+        _swipeTransition(
+          direction: SwipeDirection.fromTop,
+          visible: _showButtons,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: _gradientBackground(child: header, onBottom: false),
+          ),
         ),
       _swipeTransition(
         direction: SwipeDirection.fromBottom,
@@ -743,13 +747,17 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     ]);
   }
 
-  Widget _gradientBackground({Widget child}) {
+  Widget _gradientBackground({Widget child, bool onBottom = true}) {
+    List<Color> colors = [
+      Colors.transparent,
+      _style.progressBarStyle.backgroundColor,
+    ];
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Colors.transparent, _style.progressBarStyle.backgroundColor],
+          colors: onBottom ? colors : colors.reversed.toList(),
         ),
       ),
       child: child,
