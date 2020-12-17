@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 
+import 'package:video_viewer/utils/language.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_viewer/video_viewer.dart';
 
@@ -15,6 +16,7 @@ class SettingsMenu extends StatefulWidget {
     this.changeVisible,
     this.changeSource,
     this.activedSource,
+    this.language,
   }) : super(key: key);
 
   final bool visible;
@@ -23,6 +25,7 @@ class SettingsMenu extends StatefulWidget {
   final void Function() changeVisible;
   final VideoPlayerController controller;
   final Map<String, VideoPlayerController> source;
+  final VideoViewerLanguage language;
   final void Function(VideoPlayerController, String) changeSource;
 
   @override
@@ -122,7 +125,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               });
             },
             child: settingsItemMenu(
-              "Quality",
+              widget.language.quality,
               widget.activedSource,
               style.settings,
             ),
@@ -136,8 +139,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
               });
             },
             child: settingsItemMenu(
-              "Speed",
-              speed == 1.0 ? "Normal" : "x$speed",
+              widget.language.speed,
+              speed == 1.0 ? widget.language.normalSpeed : "x$speed",
               style.speed,
             ),
           ),
@@ -193,7 +196,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
             closeAllAndShowMenu();
           },
           child: _textDesigned(
-            i == 1.0 ? "Normal" : "x$i",
+            i == 1.0 ? widget.language.normalSpeed : "x$i",
             i == widget.controller.value.playbackSpeed,
           ),
         ),
@@ -214,7 +217,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
               onTap: closeAllAndShowMenu,
               child: Row(children: [
                 style.chevron,
-                Expanded(child: Text("Settings", style: textStyle)),
+                Expanded(
+                  child: Text(widget.language.settings, style: textStyle),
+                ),
               ]),
             ),
             ...children,
@@ -240,8 +245,10 @@ class _SettingsMenuState extends State<SettingsMenu> {
       padding: Margin.horizontal(8),
       child: Row(children: [
         Expanded(
-          child: Text(text,
-              style: textStyle.merge(TextStyle(fontWeight: FontWeight.normal))),
+          child: Text(
+            text,
+            style: textStyle.merge(TextStyle(fontWeight: FontWeight.normal)),
+          ),
         ),
         if (selected) style.selected,
       ]),

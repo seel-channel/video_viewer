@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_viewer/utils/language.dart';
 
 import 'package:video_viewer/video_viewer.dart';
-import 'package:video_viewer/widgets/video.dart';
+import 'package:video_viewer/widgets/video_core.dart';
 
 class VideoViewer extends StatefulWidget {
   VideoViewer({
@@ -15,6 +16,7 @@ class VideoViewer extends StatefulWidget {
     this.forwardAmount = 10,
     this.defaultAspectRatio = 16 / 9,
     this.onFullscreenFixLandscape = true,
+    this.language = VideoViewerLanguage.en,
   })  : this.style = style ?? VideoViewerStyle(),
         super(key: key);
 
@@ -53,16 +55,15 @@ class VideoViewer extends StatefulWidget {
   ///If it is `false`, you can rotate the entire screen in any position.
   final bool onFullscreenFixLandscape;
 
+  final VideoViewerLanguage language;
+
   @override
   VideoViewerState createState() => VideoViewerState();
 }
 
 class VideoViewerState extends State<VideoViewer> {
-  GlobalKey<VideoReadyState> video = GlobalKey<VideoReadyState>();
   VideoPlayerController _controller;
   String _activedSource;
-
-  void toFullscreen() => video.currentState.toFullscreen();
 
   @override
   void initState() {
@@ -91,8 +92,7 @@ class VideoViewerState extends State<VideoViewer> {
   @override
   Widget build(BuildContext context) {
     Widget returnWidget = _controller.value.initialized
-        ? VideoReady(
-            key: video,
+        ? VideoViewerCore(
             style: widget.style,
             source: widget.source,
             looping: widget.looping,

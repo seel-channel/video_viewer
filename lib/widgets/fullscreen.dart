@@ -3,7 +3,7 @@ import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:video_viewer/widgets/video.dart';
+import 'package:video_viewer/widgets/video_core.dart';
 import 'package:video_viewer/utils/styles.dart';
 import 'package:video_viewer/utils/misc.dart';
 
@@ -37,7 +37,7 @@ class FullScreenPage extends StatefulWidget {
 }
 
 class _FullScreenPageState extends State<FullScreenPage> {
-  final GlobalKey<VideoReadyState> key = GlobalKey<VideoReadyState>();
+  final GlobalKey<VideoViewerCoreState> key = GlobalKey<VideoViewerCoreState>();
   VideoViewerStyle _style;
   bool _showVideo = false;
   Timer _closeOverlay;
@@ -107,7 +107,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
             builder: (value) {
               return Opacity(
                 opacity: value,
-                child: VideoReady(
+                child: VideoViewerCore(
                   key: key,
                   style: _style,
                   source: widget.source,

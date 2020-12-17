@@ -1,4 +1,3 @@
-//import 'package:volume/volume.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:helpers/helpers.dart';
@@ -10,11 +9,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_viewer/widgets/settings_menu.dart';
 import 'package:video_viewer/widgets/fullscreen.dart';
 import 'package:video_viewer/widgets/progress.dart';
+import 'package:video_viewer/utils/language.dart';
 import 'package:video_viewer/utils/styles.dart';
 import 'package:video_viewer/utils/misc.dart';
 
-class VideoReady extends StatefulWidget {
-  VideoReady({
+class VideoViewerCore extends StatefulWidget {
+  VideoViewerCore({
     Key key,
     this.controller,
     this.style,
@@ -27,6 +27,7 @@ class VideoReady extends StatefulWidget {
     this.onChangeSource,
     this.exitFullScreen,
     this.onFullscreenFixLandscape,
+    this.language = VideoViewerLanguage.en,
   }) : super(key: key);
 
   final String activedSource;
@@ -34,6 +35,7 @@ class VideoReady extends StatefulWidget {
   final double defaultAspectRatio;
   final int rewindAmount, forwardAmount;
   final VideoViewerStyle style;
+  final VideoViewerLanguage language;
   final VideoPlayerController controller;
   final Map<String, VideoPlayerController> source;
   final void Function(VideoPlayerController, String) onChangeSource;
@@ -41,10 +43,10 @@ class VideoReady extends StatefulWidget {
   final bool onFullscreenFixLandscape;
 
   @override
-  VideoReadyState createState() => VideoReadyState();
+  VideoViewerCoreState createState() => VideoViewerCoreState();
 }
 
-class VideoReadyState extends State<VideoReady> {
+class VideoViewerCoreState extends State<VideoViewerCore> {
   VideoPlayerController _controller;
   bool _isPlaying = false,
       _isBuffering = false,
@@ -560,6 +562,7 @@ class VideoReadyState extends State<VideoReady> {
           style: _style,
           source: widget.source,
           visible: _showSettings,
+          language: widget.language,
           controller: _controller,
           activedSource: _activedSource,
           changeSource: _changeVideoSource,
