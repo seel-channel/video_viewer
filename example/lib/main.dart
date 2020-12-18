@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> {
   //USE path_provider AND dart.io (Only available on Android and iOS)
   Future<Map<String, VideoPlayerController>> createFiles(String url) async {
     final Directory directory = await getApplicationDocumentsDirectory();
-    final Map<String, String> files = await getHLSVideoSources(url);
+    final Map<String, String> files = await getm3u8VideoFileData(url); //STAAAR
     Map<String, VideoPlayerController> sources = {
       "Auto": VideoPlayerController.network(url)
     };
