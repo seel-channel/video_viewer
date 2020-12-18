@@ -15,8 +15,10 @@ class VideoViewerLanguage {
   ///ENTER A STRING AND RETURN THE LANGUAGE OBJECT
   /// - "es" = Spanish Language
   /// - "en" = English Language
+  /// - "as" = Arabic Language
   static VideoViewerLanguage fromString(String language) {
     if (language == "es") return es;
+    if (language == "ar") return ar;
     return en;
   }
 
@@ -32,5 +34,13 @@ class VideoViewerLanguage {
     settings: "Settings",
     quality: "Quality",
     speed: "Speed",
+  );
+
+  ///**ARABIC LANGUAGE**
+  static const VideoViewerLanguage ar = VideoViewerLanguage(
+    settings: "إعدادات",
+    quality: "الجودة",
+    speed: "السرعة",
+    normalSpeed: "طبيعي",
   );
 }
