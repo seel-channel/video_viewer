@@ -6,6 +6,7 @@
 
 - [Scroll Navigation](https://pub.dev/packages/scroll_navigation)
 - [Helpers](https://pub.dev/packages/helpers)
+- [Video Editor](https://pub.dev/packages/video_editor)
 
 <br>
 
@@ -15,6 +16,7 @@
 - Fully customizable.
 - Fancy animations.
 - Multiplataform support.
+- HLS (m3u8) format support.
 - Easy and powerful implementation! :)
 
 <br><br>
@@ -25,7 +27,7 @@ First, add `video_viewer` as a dependency in your **pubspec.yaml.**
 
 ```yaml
 dependencies:
-  video_viewer: ^1.0.3
+  video_viewer: ^1.0.5
 ```
 
 ### Android

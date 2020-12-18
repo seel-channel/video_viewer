@@ -1,8 +1,13 @@
+## [1.0.5]
+
+- Arabic Lenguage added.
+- HLS (m3u8) format support added.
+
 ## [1.0.4]
 
-- Added custom VideoViewerLanguage
-- Added HeaderWidget
-- Added Video Zoom on fullscreen and landscape
+- Custom VideoViewerLanguage added.
+- HeaderWidget added.
+- Video Zoom on fullscreen and landscape mode added.
 - Fixed Bugs
 
 ## [1.0.3+1]
