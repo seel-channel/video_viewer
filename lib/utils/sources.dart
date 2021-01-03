@@ -35,7 +35,8 @@ Map<String, VideoPlayerController> getNetworkVideoSources(
 ///
 ///EXAMPLE:
 ///```dart
-///Future<Map<String, VideoPlayerController>> createFiles(String url) async {
+///Future<Map<String, VideoPlayerController>> videoFrom3u8() async {
+///   final String url = "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8";
 ///   final Directory directory = await getApplicationDocumentsDirectory();
 ///   final Map<String, String> files = await getm3u8VideoFileData(url);
 ///   Map<String, VideoPlayerController> sources = {
@@ -76,34 +77,36 @@ Future<Map<String, String>> getm3u8VideoFileData(String m3u8) async {
   List<RegExpMatch> audioMatches = regExpAudio.allMatches(content).toList();
 
   matches.forEach((RegExpMatch regExpMatch) {
-    final String sourceurl = (regExpMatch.group(3)).toString();
-    final String quality = (regExpMatch.group(1)).toString();
-    final bool isNetwork = netRegx.hasMatch(sourceurl);
     final RegExpMatch match = netRegx2.firstMatch(m3u8);
-    String audio = "";
-    String file = "";
-    String url = sourceurl;
+    final String sourceURL = (regExpMatch.group(3)).toString();
+    final String quality = (regExpMatch.group(1)).toString();
+    final bool isNetwork = netRegx.hasMatch(sourceURL);
+    String url = sourceURL;
 
     if (!isNetwork) {
-      final dataurl = match.group(0);
-      url = "$dataurl$sourceurl";
+      final String dataURL = match.group(0);
+      url = "$dataURL$sourceURL";
     }
 
     audioMatches.forEach((RegExpMatch regExpMatch2) {
-      final String audiourl = (regExpMatch2.group(1)).toString();
-      final bool isNetwork = netRegx.hasMatch(audiourl);
       final RegExpMatch match = netRegx2.firstMatch(m3u8);
-      String auurl = audiourl;
+      final String audioURL = (regExpMatch2.group(1)).toString();
+      final bool isNetwork = netRegx.hasMatch(audioURL);
+      String audio = audioURL;
+
       if (!isNetwork) {
-        final String audataurl = match.group(0);
-        auurl = "$audataurl$audiourl";
+        final String audioDataURL = match.group(0);
+        audio = "$audioDataURL$audioURL";
       }
-      audioList.add(auurl);
+      audioList.add(audio);
     });
 
-    if (audioList.length != 0)
+    String audio = "";
+    String file = "";
+    if (audioList.length != 0) {
       audio =
           """#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio-medium",NAME="audio",AUTOSELECT=YES,DEFAULT=YES,CHANNELS="2",URI="${audioList.last}"\n""";
+    }
 
     file =
         """#EXTM3U\n#EXT-X-INDEPENDENT-SEGMENTS\n$audio#EXT-X-STREAM-INF:CLOSED-CAPTIONS=NONE,BANDWIDTH=1469712,RESOLUTION=$quality,FRAME-RATE=30.000\n$url""";
