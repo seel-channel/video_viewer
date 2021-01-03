@@ -73,9 +73,9 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   int _lastPosition = 0, _forwardAmount = 0, _transitions = 0;
 
   //VOLUME
-  bool _showVolumeStatus = false;
   double _maxVolume = 1, _onDragStartVolume = 1, _currentVolume = 1;
   Offset _verticalDragStartOffset;
+  bool _showVolumeStatus = false;
   Timer _closeVolumeStatus;
 
   //TEXT POSITION ON DRAGGING
@@ -84,15 +84,12 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   bool _isDraggingProgress = false, _switchRemaingText = false;
 
   //LANDSCAPE
-  double _progressBarMargin = 0;
   VideoViewerStyle _style, _landscapeStyle;
+  double _progressBarMargin = 0;
 
   //VIDEO ZOOM
+  double _scale = 1.0, _maxScale = 1.0, _minScale = 1.0, _initialScale = 1.0;
   int _pointers = 0;
-  double _scale = 1.0;
-  double _initialScale = 1.0;
-  double _maxScale = 1.0;
-  double _minScale = 1.0;
 
   //WEB
   final FocusNode _focusRawKeyboard = FocusNode();
@@ -254,7 +251,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   void _changeIconPlayWidth() {
     Misc.delayed(
       800,
-      () => setState(() => _iconPlayWidth = GetKey.width(_playKey)),
+      () => setState(() => _iconPlayWidth = GetKey(_playKey).width),
     );
   }
 
@@ -418,63 +415,12 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     } else if (widget.exitFullScreen != null) widget.exitFullScreen();
   }
 
-  //-------------//
-  //NATIVE VOLUME//
-  //-------------//
-  // void _initAudioStreamType() async {
-  //   if (_isAndroid) await Volume.controlVolume(AudioManager.STREAM_MUSIC);
-  // }
-
-  // void _updateVolumes() async {
-  //   if (_isAndroid) {
-  //     _maxVolume = await Volume.getMaxVol;
-  //     _onDragStartVolume = await Volume.getVol;
-  //     _currentVolume = _onDragStartVolume;
-  //     if (mounted) setState(() {});
-  //   }
-  // }
-
-  // void _setVolume(int volume) async {
-  //   if (_isAndroid) {
-  //     await Volume.setVol(volume, showVolumeUI: ShowVolumeUI.HIDE);
-  //     setState(() => _currentVolume = volume);
-  //   }
-  // }
-
-  // void _volumeDragStart(DragStartDetails details) {
-  //   if (!_showSettings && _isAndroid) {
-  //     _closeVolumeStatus?.cancel();
-  //     setState(() {
-  //       _verticalDragStartOffset = details.globalPosition;
-  //       _showVolumeStatus = true;
-  //     });
-  //     _updateVolumes();
-  //   }
-  // }
-
-  // void _volumeDragUpdate(DragUpdateDetails details) {
-  //   if (!_showSettings && _isAndroid) {
-  //     double diff = _verticalDragStartOffset.dy - details.globalPosition.dy;
-  //     int volume = (diff / 15).round() + _onDragStartVolume;
-  //     if (volume <= _maxVolume && volume >= 0) _setVolume(volume);
-  //   }
-  // }
-
-  // void _volumeDragEnd() {
-  //   if (!_showSettings && _isAndroid)
-  //     setState(() {
-  //       _closeVolumeStatus = Misc.timer(600, () {
-  //         setState(() => _showVolumeStatus = false);
-  //       });
-  //     });
-  // }
-
   //-----//
   //BUILD//
   //-----//
   @override
   Widget build(BuildContext context) {
-    final double width = GetContext.width(context);
+    final double width = GetMedia(context).width;
 
     return OrientationBuilder(builder: (_, orientation) {
       Orientation landscape = Orientation.landscape;
@@ -498,6 +444,8 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   Widget _player(Orientation orientation, bool fullScreenLandscape) {
+    final Size size = GetMedia(context).size;
+
     return _globalGesture(
       Stack(children: [
         _fadeTransition(
@@ -524,7 +472,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
                 onTap: _showAndHideOverlay,
                 onScaleStart: fullScreenLandscape
                     ? (_) => setState(() {
-                          final Size size = GetContext.size(context);
                           final double aspectWidth =
                               size.height * _controller.value.aspectRatio;
                           _initialScale = _scale;
@@ -561,8 +508,8 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
         Center(
           child: _playAndPause(
             Container(
-              height: GetContext.height(context) * 0.2,
-              width: GetContext.width(context) * 0.2,
+              width: size.width * 0.2,
+              height: size.height * 0.2,
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 shape: BoxShape.circle,
@@ -707,7 +654,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   Widget _rewindAndForwardLayout({Widget rewind, Widget forward}) {
     return Row(children: [
       Expanded(child: rewind),
-      SizedBox(width: GetContext.width(context) / 2),
+      SizedBox(width: GetMedia(context).width / 2),
       Expanded(child: forward),
     ]);
   }
