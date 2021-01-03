@@ -556,9 +556,8 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   VideoViewerStyle _getResponsiveText([double multiplier = 1]) {
-    final style = widget.style;
-    return mergeVideoViewerStyle(
-      style: style,
+    final VideoViewerStyle style = widget.style;
+    return style.copywith(
       textStyle: style.textStyle.merge(
         TextStyle(
           fontSize: style.textStyle.fontSize +

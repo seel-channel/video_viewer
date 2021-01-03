@@ -99,6 +99,33 @@ class VideoViewerStyle {
   /// It is used in the responsiveness of the text, when the VideoViewer is
   /// in `Orientation.landscape` will increase the` textStyle fontSize` by x.
   final double inLandscapeEnlargeTheTextBy;
+
+  VideoViewerStyle copywith({
+    Widget thumbnail,
+    Widget header,
+    Widget loading,
+    Widget buffering,
+    TextStyle textStyle,
+    VolumeBarStyle volumeBarStyle,
+    ProgressBarStyle progressBarStyle,
+    SettingsMenuStyle settingsStyle,
+    PlayAndPauseWidgetStyle playAndPauseStyle,
+    ForwardAndRewindStyle forwardAndRewindStyle,
+  }) {
+    return VideoViewerStyle(
+      header: header ?? this.header,
+      loading: loading ?? this.loading,
+      thumbnail: thumbnail ?? this.thumbnail,
+      buffering: buffering ?? this.buffering,
+      textStyle: textStyle ?? this.textStyle,
+      settingsStyle: settingsStyle ?? this.settingsStyle,
+      volumeBarStyle: volumeBarStyle ?? this.volumeBarStyle,
+      progressBarStyle: progressBarStyle ?? this.progressBarStyle,
+      playAndPauseStyle: playAndPauseStyle ?? this.playAndPauseStyle,
+      forwardAndRewindStyle:
+          forwardAndRewindStyle ?? this.forwardAndRewindStyle,
+    );
+  }
 }
 
 class ProgressBarStyle {

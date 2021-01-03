@@ -48,7 +48,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
   @override
   void initState() {
     _style = widget.style.thumbnail != null
-        ? mergeVideoViewerStyle(style: widget.style)
+        ? widget.style.copywith(thumbnail: null)
         : widget.style;
     changeOrientation();
     Misc.setSystemOverlay([]);
