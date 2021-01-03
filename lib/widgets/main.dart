@@ -5,6 +5,13 @@ import 'package:video_viewer/utils/language.dart';
 import 'package:video_viewer/video_viewer.dart';
 import 'package:video_viewer/widgets/video_core.dart';
 
+class SettingsMenuItem {
+  final Widget mainMenu;
+  final Widget secondaryMenu;
+
+  SettingsMenuItem({@required this.mainMenu, @required this.secondaryMenu});
+}
+
 class VideoViewer extends StatefulWidget {
   VideoViewer({
     Key key,
@@ -17,6 +24,7 @@ class VideoViewer extends StatefulWidget {
     this.defaultAspectRatio = 16 / 9,
     this.onFullscreenFixLandscape = true,
     this.language = VideoViewerLanguage.en,
+    this.settingsMenuItems,
   })  : this.style = style ?? VideoViewerStyle(),
         super(key: key);
 
@@ -68,6 +76,8 @@ class VideoViewer extends StatefulWidget {
   /// ```
   final VideoViewerLanguage language;
 
+  final List<SettingsMenuItem> settingsMenuItems;
+
   @override
   VideoViewerState createState() => VideoViewerState();
 }
@@ -112,6 +122,7 @@ class VideoViewerState extends State<VideoViewer> {
             activedSource: _activedSource,
             rewindAmount: widget.rewindAmount,
             forwardAmount: widget.forwardAmount,
+            settingsMenuItems: widget.settingsMenuItems,
             defaultAspectRatio: widget.defaultAspectRatio,
             onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
           )

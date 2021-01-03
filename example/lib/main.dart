@@ -73,6 +73,16 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      settingsMenuItems: [
+        SettingsMenuItem(
+          mainMenu: Text("Video INFO",
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
+          secondaryMenu: Text("NO INFO", style: TextStyle(color: Colors.white)),
+        ),
+      ],
     );
   }
 

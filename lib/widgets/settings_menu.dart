@@ -11,19 +11,19 @@ class SettingsMenu extends StatefulWidget {
     Key key,
     this.style,
     this.source,
-    this.visible,
     this.controller,
     this.changeVisible,
     this.changeSource,
     this.activedSource,
     this.language,
+    this.items,
   }) : super(key: key);
 
-  final bool visible;
   final String activedSource;
   final VideoViewerStyle style;
   final void Function() changeVisible;
   final VideoPlayerController controller;
+  final List<SettingsMenuItem> items;
   final Map<String, VideoPlayerController> source;
   final VideoViewerLanguage language;
   final void Function(VideoPlayerController, String) changeSource;
@@ -33,16 +33,39 @@ class SettingsMenu extends StatefulWidget {
 }
 
 class _SettingsMenuState extends State<SettingsMenu> {
-  List<bool> show = [false, false];
-  bool showMenu = true;
-  TextStyle textStyle;
   SettingsMenuStyle style;
+  TextStyle textStyle;
+
+  bool showMenu = true;
+  List<bool> show = [false, false];
+  List<Widget> mainMenuItems = [];
+  List<Widget> secondaryMenus = [];
 
   @override
   void initState() {
     style = widget.style.settingsStyle;
     textStyle = widget.style.textStyle;
+    if (widget.items != null)
+      for (int i = 0; i < widget.items.length; i++) {
+        show.add(false);
+        mainMenuItems.add(_gestureMainMenuItem(
+          index: i + 2,
+          child: widget.items[i].mainMenu,
+        ));
+        secondaryMenus.add(
+          secondaryMenuContainer(
+            [widget.items[i].secondaryMenu],
+          ),
+        );
+      }
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(SettingsMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.style.textStyle != textStyle)
+      setState(() => textStyle = widget.style.textStyle);
   }
 
   void closeAllAndShowMenu() {
@@ -52,54 +75,32 @@ class _SettingsMenuState extends State<SettingsMenu> {
     });
   }
 
-  //RESPONSIVE TEXT
-  @override
-  void didUpdateWidget(SettingsMenu oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.style.textStyle != textStyle)
-      setState(() => textStyle = widget.style.textStyle);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return OpacityTransition(
-      curve: Curves.ease,
-      duration: Duration(milliseconds: widget.style.transitions),
-      visible: widget.visible,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
-        child: Stack(
-          children: [
-            GestureDetector(
-              onTap: widget.changeVisible,
-              child: Container(color: Colors.black.withOpacity(0.32)),
-            ),
-            _fadeTransition(
-              visible: !showMenu,
-              child: GestureDetector(
-                onTap: closeAllAndShowMenu,
-                child: Container(color: Colors.transparent),
-              ),
-            ),
-            _fadeTransition(
-              visible: showMenu,
-              child: iconsMainMenu(),
-            ),
-            _fadeTransition(
-              visible: show[0],
-              child: settingsQualityMenu(),
-            ),
-            _fadeTransition(
-              visible: show[1],
-              child: settingsSpeedMenu(),
-            ),
-          ],
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
+      child: Stack(children: [
+        GestureDetector(
+          onTap: widget.changeVisible,
+          child: Container(color: Colors.black.withOpacity(0.32)),
         ),
-      ),
+        fadeTransition(
+          visible: !showMenu,
+          child: GestureDetector(
+            onTap: closeAllAndShowMenu,
+            child: Container(color: Colors.transparent),
+          ),
+        ),
+        fadeTransition(visible: showMenu, child: mainMenu()),
+        fadeTransition(visible: show[1], child: settingsSpeedMenu()),
+        fadeTransition(visible: show[0], child: settingsQualityMenu()),
+        for (int i = 0; i < secondaryMenus.length; i++)
+          fadeTransition(visible: show[i + 2], child: secondaryMenus[i]),
+      ]),
     );
   }
 
-  Widget _fadeTransition({bool visible, Widget child}) {
+  Widget fadeTransition({bool visible, Widget child}) {
     return OpacityTransition(
       curve: Curves.ease,
       duration: Duration(milliseconds: (widget.style.transitions / 2).round()),
@@ -108,22 +109,29 @@ class _SettingsMenuState extends State<SettingsMenu> {
     );
   }
 
+  Widget _gestureMainMenuItem({int index, child}) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          showMenu = false;
+          show[index] = true;
+        });
+      },
+      child: child,
+    );
+  }
+
   //---------//
   //MAIN MENU//
   //---------//
-  Widget iconsMainMenu() {
-    double speed = widget.controller.value.playbackSpeed;
+  Widget mainMenu() {
+    final double speed = widget.controller.value.playbackSpeed;
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                showMenu = false;
-                show[0] = true;
-              });
-            },
+          _gestureMainMenuItem(
+            index: 0,
             child: settingsItemMenu(
               widget.language.quality,
               widget.activedSource,
@@ -131,19 +139,18 @@ class _SettingsMenuState extends State<SettingsMenu> {
             ),
           ),
           SizedBox(width: style.paddingBetween),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                showMenu = false;
-                show[1] = true;
-              });
-            },
+          _gestureMainMenuItem(
+            index: 1,
             child: settingsItemMenu(
               widget.language.speed,
               speed == 1.0 ? widget.language.normalSpeed : "x$speed",
               style.speed,
             ),
           ),
+          for (Widget child in mainMenuItems) ...[
+            SizedBox(width: style.paddingBetween),
+            child,
+          ],
         ],
       ),
     );
@@ -174,28 +181,28 @@ class _SettingsMenuState extends State<SettingsMenu> {
   //SECONDARY MENUS//
   //---------------//
   Widget settingsQualityMenu() {
-    return _secondaryMenuContainer([
+    return secondaryMenuContainer([
       for (MapEntry<String, dynamic> entry in widget.source.entries)
-        _inkWellDesigned(
+        inkWellDesigned(
           onTap: () {
             if (entry.key != widget.activedSource)
               widget.changeSource(entry.value, entry.key);
             closeAllAndShowMenu();
           },
-          child: _textDesigned(entry.key, entry.key == widget.activedSource),
+          child: textDesigned(entry.key, entry.key == widget.activedSource),
         ),
     ]);
   }
 
   Widget settingsSpeedMenu() {
-    return _secondaryMenuContainer([
+    return secondaryMenuContainer([
       for (double i = 0.5; i <= 2; i += 0.25)
-        _inkWellDesigned(
+        inkWellDesigned(
           onTap: () {
             widget.controller.setPlaybackSpeed(i);
             closeAllAndShowMenu();
           },
-          child: _textDesigned(
+          child: textDesigned(
             i == 1.0 ? widget.language.normalSpeed : "x$i",
             i == widget.controller.value.playbackSpeed,
           ),
@@ -203,7 +210,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
     ]);
   }
 
-  Widget _secondaryMenuContainer(List<Widget> children) {
+  Widget secondaryMenuContainer(List<Widget> children) {
     return Center(
       child: Container(
         width: 150,
@@ -229,7 +236,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
     );
   }
 
-  Widget _inkWellDesigned({Widget child, void Function() onTap}) {
+  Widget inkWellDesigned({Widget child, void Function() onTap}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -240,7 +247,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
     );
   }
 
-  Widget _textDesigned(String text, bool selected) {
+  Widget textDesigned(String text, bool selected) {
     return Padding(
       padding: Margin.horizontal(8),
       child: Row(children: [

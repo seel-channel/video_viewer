@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:video_viewer/widgets/main.dart';
 
 import 'package:video_viewer/widgets/settings_menu.dart';
 import 'package:video_viewer/widgets/fullscreen.dart';
@@ -30,6 +31,7 @@ class VideoViewerCore extends StatefulWidget {
     this.exitFullScreen,
     this.onFullscreenFixLandscape,
     this.language = VideoViewerLanguage.en,
+    this.settingsMenuItems,
   })  : this.style = style ?? VideoViewerStyle(),
         super(key: key);
 
@@ -48,6 +50,8 @@ class VideoViewerCore extends StatefulWidget {
 
   ///USE INSIDE FULLSCREEN
   final void Function() exitFullScreen;
+
+  final List<SettingsMenuItem> settingsMenuItems;
 
   @override
   VideoViewerCoreState createState() => VideoViewerCoreState();
@@ -114,8 +118,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
       Misc.onLayoutRendered(() {
         _changeIconPlayWidth();
       });
-    //_initAudioStreamType();
-    //_updateVolumes();
     super.initState();
   }
 
@@ -540,15 +542,20 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
             progress: (_currentVolume / _maxVolume),
           ),
         ),
-        SettingsMenu(
-          style: _style,
-          source: widget.source,
+        OpacityTransition(
+          curve: Curves.ease,
           visible: _showSettings,
-          language: widget.language,
-          controller: _controller,
-          activedSource: _activedSource,
-          changeSource: _changeVideoSource,
-          changeVisible: () => setState(() => _showSettings = !_showSettings),
+          duration: Duration(milliseconds: widget.style.transitions),
+          child: SettingsMenu(
+            style: _style,
+            items: widget.settingsMenuItems,
+            source: widget.source,
+            language: widget.language,
+            controller: _controller,
+            activedSource: _activedSource,
+            changeSource: _changeVideoSource,
+            changeVisible: () => setState(() => _showSettings = !_showSettings),
+          ),
         ),
         _rewindAndForwardIconsIndicator(),
       ]),

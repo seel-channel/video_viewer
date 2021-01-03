@@ -6,7 +6,6 @@ import 'package:video_viewer/utils/language.dart';
 
 import 'package:video_viewer/widgets/video_core.dart';
 import 'package:video_viewer/utils/styles.dart';
-import 'package:video_viewer/utils/misc.dart';
 
 class FullScreenPage extends StatefulWidget {
   FullScreenPage({
