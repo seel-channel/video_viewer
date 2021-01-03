@@ -76,6 +76,7 @@ class VideoViewer extends StatefulWidget {
   /// ```
   final VideoViewerLanguage language;
 
+  ///ADD CUSTOM SECTIONS TO SETTINGS MENU
   final List<SettingsMenuItem> settingsMenuItems;
 
   @override

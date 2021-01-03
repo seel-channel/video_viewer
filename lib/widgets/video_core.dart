@@ -402,6 +402,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
           forwardAmount: widget.forwardAmount,
           activedSource: _activedSource,
           fixedLandscape: widget.onFullscreenFixLandscape,
+          settingsMenuItems: widget.settingsMenuItems,
           defaultAspectRatio: widget.defaultAspectRatio,
           changeSource: (controller, activedSource) {
             _changeVideoSource(controller, activedSource, false);

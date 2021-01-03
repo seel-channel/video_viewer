@@ -5,16 +5,16 @@
 ## My other APIs
 
 - [Scroll Navigation](https://pub.dev/packages/scroll_navigation)
-- [Helpers](https://pub.dev/packages/helpers)
 - [Video Editor](https://pub.dev/packages/video_editor)
+- [Helpers](https://pub.dev/packages/helpers)
 
 <br>
 
 ## Features
 
 - Amazing UI / UX.
-- Fully customizable.
 - Fancy animations.
+- Fully customizable.
 - Multiplataform support.
 - HLS (m3u8) format support.
 - Easy and powerful implementation! :)

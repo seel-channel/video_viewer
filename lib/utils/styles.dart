@@ -115,7 +115,7 @@ class VideoViewerStyle {
     return VideoViewerStyle(
       header: header ?? this.header,
       loading: loading ?? this.loading,
-      thumbnail: thumbnail ?? this.thumbnail,
+      thumbnail: thumbnail,
       buffering: buffering ?? this.buffering,
       textStyle: textStyle ?? this.textStyle,
       settingsStyle: settingsStyle ?? this.settingsStyle,

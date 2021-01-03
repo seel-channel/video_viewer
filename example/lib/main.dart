@@ -75,12 +75,18 @@ class _HomePageState extends State<HomePage> {
       ),
       settingsMenuItems: [
         SettingsMenuItem(
-          mainMenu: Text("Video INFO",
+          mainMenu: Text("OTHERS",
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white)),
-          secondaryMenu: Text("NO INFO", style: TextStyle(color: Colors.white)),
+          secondaryMenu: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("CHANGE ROTATION", style: TextStyle(color: Colors.white)),
+              Text("SCREENSHOT", style: TextStyle(color: Colors.white)),
+            ],
+          ),
         ),
       ],
     );

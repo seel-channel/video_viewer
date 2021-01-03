@@ -2,9 +2,10 @@ import 'dart:async';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:video_viewer/utils/language.dart';
 
 import 'package:video_viewer/widgets/video_core.dart';
+import 'package:video_viewer/utils/language.dart';
+import 'package:video_viewer/widgets/main.dart';
 import 'package:video_viewer/utils/styles.dart';
 
 class FullScreenPage extends StatefulWidget {
@@ -21,6 +22,7 @@ class FullScreenPage extends StatefulWidget {
     this.changeSource,
     this.fixedLandscape = true,
     this.language,
+    this.settingsMenuItems,
   }) : super(key: key);
 
   final String activedSource;
@@ -33,6 +35,8 @@ class FullScreenPage extends StatefulWidget {
   final VideoPlayerController controller;
   final Map<String, VideoPlayerController> source;
   final void Function(VideoPlayerController, String) changeSource;
+
+  final List<SettingsMenuItem> settingsMenuItems;
 
   @override
   _FullScreenPageState createState() => _FullScreenPageState();
@@ -119,10 +123,11 @@ class _FullScreenPageState extends State<FullScreenPage> {
                   activedSource: widget.activedSource,
                   rewindAmount: widget.rewindAmount,
                   forwardAmount: widget.forwardAmount,
+                  settingsMenuItems: widget.settingsMenuItems,
                   defaultAspectRatio: widget.defaultAspectRatio,
+                  exitFullScreen: _exitFullscreen,
                   onChangeSource: (controller, activedSource) =>
                       widget.changeSource(controller, activedSource),
-                  exitFullScreen: _exitFullscreen,
                 ),
               );
             },
