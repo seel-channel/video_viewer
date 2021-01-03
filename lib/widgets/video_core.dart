@@ -388,24 +388,24 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
       });
       html.document.documentElement.requestFullscreen();
     } else
-      Navigator.push(
+      PushRoute.page(
         context,
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => FullScreenPage(
-            style: _style,
-            source: widget.source,
-            looping: widget.looping,
-            controller: _controller,
-            rewindAmount: widget.rewindAmount,
-            forwardAmount: widget.forwardAmount,
-            activedSource: _activedSource,
-            fixedLandscape: widget.onFullscreenFixLandscape,
-            defaultAspectRatio: widget.defaultAspectRatio,
-            changeSource: (controller, activedSource) {
-              _changeVideoSource(controller, activedSource, false);
-            },
-          ),
+        FullScreenPage(
+          style: _style,
+          source: widget.source,
+          looping: widget.looping,
+          language: widget.language,
+          controller: _controller,
+          rewindAmount: widget.rewindAmount,
+          forwardAmount: widget.forwardAmount,
+          activedSource: _activedSource,
+          fixedLandscape: widget.onFullscreenFixLandscape,
+          defaultAspectRatio: widget.defaultAspectRatio,
+          changeSource: (controller, activedSource) {
+            _changeVideoSource(controller, activedSource, false);
+          },
         ),
+        transition: false,
       );
   }
 

@@ -138,8 +138,9 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
     final double widthPos = (position / duration) * maxWidth;
     final double widthDot = height * 2;
     return BooleanTween(
-      animate:
-          isDragging && widthPos > widthDot && widthPos < maxWidth - widthDot,
+      animate: isDragging &&
+          (widthPos > widthDot) &&
+          (widthPos < maxWidth - widthDot),
       tween: Tween<double>(begin: 0, end: 0.4),
       builder: (value) => _dot(maxWidth, value, 2),
     );

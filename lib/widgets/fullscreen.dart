@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_viewer/utils/language.dart';
 
 import 'package:video_viewer/widgets/video_core.dart';
 import 'package:video_viewer/utils/styles.dart';
@@ -20,6 +21,7 @@ class FullScreenPage extends StatefulWidget {
     this.defaultAspectRatio,
     this.changeSource,
     this.fixedLandscape = true,
+    this.language,
   }) : super(key: key);
 
   final String activedSource;
@@ -28,6 +30,7 @@ class FullScreenPage extends StatefulWidget {
   final VideoViewerStyle style;
   final double defaultAspectRatio;
   final int rewindAmount, forwardAmount;
+  final VideoViewerLanguage language;
   final VideoPlayerController controller;
   final Map<String, VideoPlayerController> source;
   final void Function(VideoPlayerController, String) changeSource;
@@ -112,6 +115,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
                   style: _style,
                   source: widget.source,
                   looping: widget.looping,
+                  language: widget.language,
                   controller: widget.controller,
                   activedSource: widget.activedSource,
                   rewindAmount: widget.rewindAmount,
