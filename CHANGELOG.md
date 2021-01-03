@@ -1,7 +1,7 @@
-## [1.0.5]
+## [1.0.6]
 
-- Arabic Lenguage added.
-- HLS (m3u8) format support added.
+- Custom SettingMenuItems added.
+- VideoViewerLanguage on fullscreen bug fixed.
 
 ## [1.0.4]
 
