@@ -27,6 +27,21 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  void _init() async {
+    final subtitle =
+        VideoViewerSubtitle.network("https://pastebin.com/raw/ZWWAL7fK");
+    await subtitle.initialized();
+    subtitle.subtitles.listen((event) {
+      print(event);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -124,5 +139,41 @@ class _HomePageState extends State<HomePage> {
     }
 
     return sources;
+  }
+
+  //--------------------//
+  //SERIE EPISODES VIDEO//
+  //--------------------//
+  Widget serieEpisodesVideo() {
+    final Map<String, String> source = {
+      "Episode 1":
+          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+      "Episode1":
+          "https://file-examples-com.github.io/uploads/2017/04/file_example_MP4_480_1_5MG.mp4",
+    };
+
+    return VideoViewer(
+      onFullscreenFixLandscape: false,
+      language: VideoViewerLanguage.es,
+      source: getNetworkVideoSources(source),
+      style: VideoViewerStyle(
+        header: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("MY AMAZING VIDEO",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white)),
+              Text("YES!", style: TextStyle(color: Colors.white)),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
