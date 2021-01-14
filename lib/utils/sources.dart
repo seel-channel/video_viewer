@@ -1,8 +1,16 @@
 import 'dart:convert' show utf8;
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
+import 'package:video_viewer/video_viewer.dart';
 
 export 'package:video_player/video_player.dart';
+
+class VideoSource {
+  final VideoPlayerController video;
+  final VideoViewerSubtitle subtitle;
+
+  VideoSource({this.video, this.subtitle});
+}
 
 /// It is a function that returns a map from VideoPlayerController.network, the input
 /// data must be of type URL.
@@ -18,15 +26,16 @@ export 'package:video_player/video_player.dart';
 ///OUTPUT:
 ///```dart
 ///{
-///    "720p": VideoPlayerController.network("https://github.com/intel-iot-devkit/sample-videos/blob/master/classroom.mp4"),
-///    "1080p": VideoPlayerController.network("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"),
+///    "720p": VideoSource(video: VideoPlayerController.network("https://github.com/intel-iot-devkit/sample-videos/blob/master/classroom.mp4")),
+///    "1080p": VideoSource(video: VideoPlayerController.network("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")),
 ///}
 /// ```
-Map<String, VideoPlayerController> getNetworkVideoSources(
-    Map<String, String> sources) {
-  Map<String, VideoPlayerController> videoSource = {};
+Map<String, VideoSource> getNetworkVideoSources(Map<String, String> sources) {
+  Map<String, VideoSource> videoSource = {};
   for (String key in sources.keys)
-    videoSource[key] = VideoPlayerController.network(sources[key]);
+    videoSource[key] = VideoSource(
+      video: VideoPlayerController.network(sources[key]),
+    );
   return videoSource;
 }
 

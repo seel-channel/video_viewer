@@ -52,11 +52,11 @@ class VideoViewer extends StatefulWidget {
   ///SYNTAX EXAMPLE:
   ///```dart
   ///{
-  ///    "720p": VideoSource.network("https://github.com/intel-iot-devkit/sample-videos/blob/master/classroom.mp4"),
-  ///    "1080p": VideoSource.network("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"),
+  ///    "720p": VideoSource(video: VideoPlayerController.network("https://github.com/intel-iot-devkit/sample-videos/blob/master/classroom.mp4")),
+  ///    "1080p": VideoSource(video: VideoPlayerController.network("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")),
   ///}
   ///```
-  final Map<String, VideoPlayerController> source;
+  final Map<String, VideoSource> source;
 
   ///If it is `true`, when entering the fullscreen it will be fixed
   ///in landscape mode and it will not be possible to rotate it in portrait.
@@ -90,7 +90,7 @@ class VideoViewerState extends State<VideoViewer> {
   @override
   void initState() {
     _activedSource = widget.source.keys.toList()[0];
-    _controller = widget.source.values.toList()[0]
+    _controller = widget.source.values.toList()[0].video
       ..initialize().then((_) {
         if (widget.autoPlay) _controller.play();
         _controller.setLooping(widget.looping);

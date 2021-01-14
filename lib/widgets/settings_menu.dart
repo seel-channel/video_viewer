@@ -22,10 +22,10 @@ class SettingsMenu extends StatefulWidget {
   final String activedSource;
   final VideoViewerStyle style;
   final void Function() changeVisible;
-  final VideoPlayerController controller;
-  final List<SettingsMenuItem> items;
-  final Map<String, VideoPlayerController> source;
   final VideoViewerLanguage language;
+  final List<SettingsMenuItem> items;
+  final Map<String, VideoSource> source;
+  final VideoPlayerController controller;
   final void Function(VideoPlayerController, String) changeSource;
 
   @override

@@ -5,6 +5,7 @@ import 'package:video_player/video_player.dart';
 
 import 'package:video_viewer/widgets/video_core.dart';
 import 'package:video_viewer/utils/language.dart';
+import 'package:video_viewer/utils/sources.dart';
 import 'package:video_viewer/widgets/main.dart';
 import 'package:video_viewer/utils/styles.dart';
 
@@ -32,8 +33,8 @@ class FullScreenPage extends StatefulWidget {
   final double defaultAspectRatio;
   final int rewindAmount, forwardAmount;
   final VideoViewerLanguage language;
+  final Map<String, VideoSource> source;
   final VideoPlayerController controller;
-  final Map<String, VideoPlayerController> source;
   final void Function(VideoPlayerController, String) changeSource;
 
   final List<SettingsMenuItem> settingsMenuItems;
