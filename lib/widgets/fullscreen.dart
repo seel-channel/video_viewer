@@ -2,12 +2,8 @@ import 'dart:async';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-
+import 'package:video_viewer/video_viewer.dart';
 import 'package:video_viewer/widgets/video_core.dart';
-import 'package:video_viewer/utils/language.dart';
-import 'package:video_viewer/utils/sources.dart';
-import 'package:video_viewer/widgets/main.dart';
-import 'package:video_viewer/utils/styles.dart';
 
 class FullScreenPage extends StatefulWidget {
   FullScreenPage({

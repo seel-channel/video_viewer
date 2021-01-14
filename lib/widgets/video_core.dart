@@ -6,14 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_player/video_player.dart';
+import 'package:video_viewer/video_viewer.dart';
 
 import 'package:video_viewer/widgets/settings_menu.dart';
 import 'package:video_viewer/widgets/fullscreen.dart';
 import 'package:video_viewer/widgets/progress.dart';
-import 'package:video_viewer/utils/language.dart';
-import 'package:video_viewer/utils/sources.dart';
-import 'package:video_viewer/utils/styles.dart';
-import 'package:video_viewer/widgets/main.dart';
 import 'package:video_viewer/utils/misc.dart';
 
 class VideoViewerCore extends StatefulWidget {
