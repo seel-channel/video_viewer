@@ -24,7 +24,7 @@ export 'package:video_player/video_player.dart';
 /// ```
 Map<String, VideoPlayerController> getNetworkVideoSources(
     Map<String, String> sources) {
-  Map<String, VideoPlayerController> videoSource = Map();
+  Map<String, VideoPlayerController> videoSource = {};
   for (String key in sources.keys)
     videoSource[key] = VideoPlayerController.network(sources[key]);
   return videoSource;
@@ -66,8 +66,8 @@ Future<Map<String, String>> getm3u8VideoFileData(String m3u8) async {
     multiLine: true,
   );
 
-  Map<String, String> sources = Map();
-  List<String> audioList = List();
+  Map<String, String> sources = {};
+  List<String> audioList = [];
   String content;
 
   final http.Response response = await http.get(m3u8);
