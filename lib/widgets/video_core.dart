@@ -7,6 +7,8 @@ import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_player/video_player.dart';
 import 'package:video_viewer/video_viewer.dart';
+import 'package:video_viewer/widgets/helpers.dart';
+import 'package:video_viewer/widgets/overlay/background.dart';
 
 import 'package:video_viewer/widgets/settings_menu.dart';
 import 'package:video_viewer/widgets/fullscreen.dart';
@@ -449,7 +451,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
 
     return _globalGesture(
       Stack(children: [
-        _fadeTransition(
+        CustomFadeTransition(
           visible: !_showThumbnail,
           child: fullScreenLandscape
               ? Transform.scale(
@@ -488,7 +490,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
                     : null,
                 child: Container(color: Colors.transparent),
               ),
-        _fadeTransition(
+        CustomFadeTransition(
           visible: _showThumbnail,
           child: GestureDetector(
             onTap: () => setState(() {
@@ -502,7 +504,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
           ),
         ),
         _rewindAndForward(),
-        _fadeTransition(
+        CustomFadeTransition(
           visible: !_showThumbnail,
           child: _overlayButtons(),
         ),
@@ -518,20 +520,20 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
             ),
           ),
         ),
-        _fadeTransition(
+        CustomFadeTransition(
           visible: _isBuffering,
           child: _style.buffering,
         ),
-        _fadeTransition(
+        CustomFadeTransition(
           visible: _showForwardStatus,
           child: _forwardAmountAlert(),
         ),
-        _fadeTransition(
+        CustomFadeTransition(
           visible: _showAMomentPlayAndPause ||
               _controller.value.position >= _controller.value.duration,
           child: _playAndPauseIconButtons(),
         ),
-        _swipeTransition(
+        CustomSwipeTransition(
           visible: _showVolumeStatus,
           direction: _style.volumeBarStyle.alignment == Alignment.centerLeft
               ? SwipeDirection.fromLeft
@@ -623,29 +625,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     return GestureDetector(child: child, onTap: _onTapPlayAndPause);
   }
 
-  //------------------//
-  //TRANSITION WIDGETS//
-  //------------------//
-  Widget _fadeTransition({bool visible, Widget child}) {
-    return OpacityTransition(
-      curve: Curves.ease,
-      duration: Duration(milliseconds: _transitions),
-      visible: visible,
-      child: child,
-    );
-  }
-
-  Widget _swipeTransition(
-      {bool visible, Widget child, SwipeDirection direction}) {
-    return SwipeTransition(
-      curve: Curves.ease,
-      duration: Duration(milliseconds: _transitions),
-      direction: direction,
-      visible: visible,
-      child: child,
-    );
-  }
-
   //------//
   //REWIND//
   //------//
@@ -667,11 +646,11 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   Widget _rewindAndForwardIconsIndicator() {
     final style = _style.forwardAndRewindStyle;
     return _rewindAndForwardLayout(
-      rewind: _fadeTransition(
+      rewind: CustomFadeTransition(
         visible: _showAMomentRewindIcons[0],
         child: Center(child: style.rewind),
       ),
-      forward: _fadeTransition(
+      forward: CustomFadeTransition(
         visible: _showAMomentRewindIcons[1],
         child: Center(child: style.forward),
       ),
@@ -708,41 +687,27 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     final Widget header = widget.style.header;
     return Stack(children: [
       if (header != null)
-        _swipeTransition(
+        CustomSwipeTransition(
           direction: SwipeDirection.fromTop,
           visible: _showButtons,
           child: Align(
             alignment: Alignment.topLeft,
-            child: _gradientBackground(child: header, onBottom: false),
+            child: GradientBackground(
+              child: header,
+              direction: Direction.top,
+            ),
           ),
         ),
-      _swipeTransition(
+      CustomSwipeTransition(
         direction: SwipeDirection.fromBottom,
         visible: _showButtons,
         child: _bottomProgressBar(),
       ),
-      _fadeTransition(
+      CustomFadeTransition(
         visible: _showButtons && !_isPlaying,
         child: _playAndPauseIconButtons(),
       ),
     ]);
-  }
-
-  Widget _gradientBackground({Widget child, bool onBottom = true}) {
-    List<Color> colors = [
-      Colors.transparent,
-      _style.progressBarStyle.backgroundColor,
-    ];
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: onBottom ? colors : colors.reversed.toList(),
-        ),
-      ),
-      child: child,
-    );
   }
 
   //-------------------//
@@ -808,7 +773,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(child: SizedBox()),
         _textPositionProgress(position),
-        _gradientBackground(
+        GradientBackground(
           child: Row(children: [
             _playAndPause(Container(
                 key: _playKey,

@@ -2,9 +2,10 @@ library video_viewer;
 
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:video_viewer/utils/language.dart';
 import 'package:video_viewer/widgets/video_core.dart';
-import 'package:video_viewer/video_viewer.dart';
+import 'package:video_viewer/utils/language.dart';
+import 'package:video_viewer/utils/sources.dart';
+import 'package:video_viewer/utils/styles.dart';
 
 export 'utils/styles.dart';
 export 'utils/sources.dart';
@@ -119,7 +120,7 @@ class VideoViewerState extends State<VideoViewer> {
 
   @override
   Widget build(BuildContext context) {
-    Widget returnWidget = _controller.value.initialized
+    return _controller.value.initialized
         ? VideoViewerCore(
             style: widget.style,
             source: widget.source,
@@ -136,6 +137,5 @@ class VideoViewerState extends State<VideoViewer> {
         : AspectRatio(
             aspectRatio: widget.defaultAspectRatio,
             child: widget.style.loading);
-    return returnWidget;
   }
 }

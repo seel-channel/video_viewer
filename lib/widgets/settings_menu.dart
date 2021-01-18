@@ -1,9 +1,10 @@
 import 'dart:ui';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
-
-import 'package:video_viewer/utils/language.dart';
 import 'package:video_player/video_player.dart';
+
+import 'package:video_viewer/widgets/helpers.dart';
+import 'package:video_viewer/utils/language.dart';
 import 'package:video_viewer/video_viewer.dart';
 
 class SettingsMenu extends StatefulWidget {
@@ -84,28 +85,19 @@ class _SettingsMenuState extends State<SettingsMenu> {
           onTap: widget.changeVisible,
           child: Container(color: Colors.black.withOpacity(0.32)),
         ),
-        fadeTransition(
+        CustomFadeTransition(
           visible: !showMenu,
           child: GestureDetector(
             onTap: closeAllAndShowMenu,
             child: Container(color: Colors.transparent),
           ),
         ),
-        fadeTransition(visible: showMenu, child: mainMenu()),
-        fadeTransition(visible: show[1], child: settingsSpeedMenu()),
-        fadeTransition(visible: show[0], child: settingsQualityMenu()),
+        CustomFadeTransition(visible: showMenu, child: mainMenu()),
+        CustomFadeTransition(visible: show[1], child: settingsSpeedMenu()),
+        CustomFadeTransition(visible: show[0], child: settingsQualityMenu()),
         for (int i = 0; i < secondaryMenus.length; i++)
-          fadeTransition(visible: show[i + 2], child: secondaryMenus[i]),
+          CustomFadeTransition(visible: show[i + 2], child: secondaryMenus[i]),
       ]),
-    );
-  }
-
-  Widget fadeTransition({bool visible, Widget child}) {
-    return OpacityTransition(
-      curve: Curves.ease,
-      duration: Duration(milliseconds: (widget.style.transitions / 2).round()),
-      visible: visible,
-      child: child,
     );
   }
 

@@ -13,6 +13,7 @@ dependencies:
 
   http: ^0.12.2
   helpers: ^1.0.3
+  provider: ^4.3.2+4
   video_player: ^1.0.1
   universal_html: ^1.2.3
 
