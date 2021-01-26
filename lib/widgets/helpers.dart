@@ -1,9 +1,9 @@
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:video_viewer/utils/provider.dart';
+import 'package:video_viewer/data/repositories/provider.dart';
 
-class CustomFadeTransition extends StatelessWidget {
-  const CustomFadeTransition({
+class CustomOpacityTransition extends StatelessWidget {
+  const CustomOpacityTransition({
     Key key,
     this.visible,
     this.child,
@@ -14,7 +14,7 @@ class CustomFadeTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = getVideoStyle(context);
+    final style = ProviderQuery().getVideoStyle(context);
 
     return OpacityTransition(
       curve: Curves.ease,
@@ -39,7 +39,7 @@ class CustomSwipeTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = getVideoStyle(context);
+    final style = ProviderQuery().getVideoStyle(context);
 
     return SwipeTransition(
       curve: Curves.ease,

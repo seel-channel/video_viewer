@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:video_viewer/utils/provider.dart';
+import 'package:video_viewer/data/repositories/provider.dart';
 
 enum Direction { bottom, top }
 
@@ -15,7 +15,7 @@ class GradientBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = getVideoStyle(context);
+    final style = ProviderQuery().getVideoStyle(context);
     List<Color> colors = [
       Colors.transparent,
       style.progressBarStyle.backgroundColor,

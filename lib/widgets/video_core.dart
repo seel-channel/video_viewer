@@ -3,15 +3,14 @@ import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_player/video_player.dart';
+import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/video_viewer.dart';
 import 'package:video_viewer/widgets/helpers.dart';
-import 'package:video_viewer/widgets/overlay/background.dart';
+import 'package:video_viewer/widgets/overlay/overlay.dart';
+import 'package:video_viewer/widgets/overlay/widgets/play_and_pause.dart';
 
-import 'package:video_viewer/widgets/settings_menu.dart';
-import 'package:video_viewer/widgets/fullscreen.dart';
 import 'package:video_viewer/widgets/progress.dart';
 import 'package:video_viewer/utils/misc.dart';
 
@@ -27,7 +26,6 @@ class VideoViewerCore extends StatefulWidget {
     this.rewindAmount,
     this.forwardAmount,
     this.defaultAspectRatio,
-    this.onChangeSource,
     this.exitFullScreen,
     this.onFullscreenFixLandscape,
     this.language = VideoViewerLanguage.en,
@@ -44,9 +42,6 @@ class VideoViewerCore extends StatefulWidget {
   final VideoPlayerController controller;
   final Map<String, VideoSource> source;
   final bool onFullscreenFixLandscape;
-
-  ///USE INSIDE THE SETTINGS MENU
-  final void Function(VideoPlayerController, String) onChangeSource;
 
   ///USE INSIDE FULLSCREEN
   final void Function() exitFullScreen;
@@ -74,18 +69,13 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   bool _showForwardStatus = false;
   Offset _horizontalDragStartOffset;
   List<bool> _showAMomentRewindIcons = [false, false];
-  int _lastPosition = 0, _forwardAmount = 0, _transitions = 0;
+  int _lastPosition = 0, _forwardAmount = 0;
 
   //VOLUME
   double _maxVolume = 1, _onDragStartVolume = 1, _currentVolume = 1;
   Offset _verticalDragStartOffset;
   bool _showVolumeStatus = false;
   Timer _closeVolumeStatus;
-
-  //TEXT POSITION ON DRAGGING
-  final GlobalKey _playKey = GlobalKey();
-  double _progressBarWidth = 0, _progressScale = 0, _iconPlayWidth = 0;
-  bool _isDraggingProgress = false, _switchRemaingText = false;
 
   //LANDSCAPE
   VideoViewerStyle _style, _landscapeStyle;
@@ -108,16 +98,11 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   void initState() {
     _style = widget.style;
     _controller = widget.controller;
-    _transitions = _style.transitions;
     _activedSource = widget.activedSource;
     _landscapeStyle = _getResponsiveText();
     _controller.addListener(_videoListener);
     _controller.setLooping(widget.looping);
     _showThumbnail = _style.thumbnail == null ? false : true;
-    if (!_showThumbnail)
-      Misc.onLayoutRendered(() {
-        _changeIconPlayWidth();
-      });
     super.initState();
   }
 
@@ -140,49 +125,18 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
 
       if (playing != _isPlaying) _isPlaying = playing;
       if (_isPlaying && _showThumbnail) _showThumbnail = false;
-      if (_isPlaying && _isDraggingProgress) _isDraggingProgress = false;
       if (_showButtons) {
         if (_isPlaying) {
           if (value.position >= value.duration && !widget.looping) {
             _controller.seekTo(Duration.zero);
           } else {
             if (_timerPosition == null) _createBufferTimer();
-            if (_closeOverlayButtons == null && !_isDraggingProgress)
-              _startCloseOverlayButtons();
+            if (_closeOverlayButtons == null) _startCloseOverlayButtons();
           }
         } else if (_isGoingToCloseBufferingWidget) _cancelCloseOverlayButtons();
       }
       setState(() {});
     }
-  }
-
-  void _changeVideoSource(VideoPlayerController source, String activedSource,
-      [bool initialize = true]) {
-    double speed = _controller.value.playbackSpeed;
-    Duration seekTo = _controller.value.position;
-    setState(() {
-      _showButtons = false;
-      _showSettings = false;
-      _activedSource = activedSource;
-      if (initialize)
-        source
-            .initialize()
-            .then((_) => _setSettingsController(source, speed, seekTo));
-      else
-        _setSettingsController(source, speed, seekTo);
-    });
-  }
-
-  void _setSettingsController(
-      VideoPlayerController source, double speed, Duration seekTo) {
-    setState(() => _controller = source);
-    _controller.addListener(_videoListener);
-    _controller.setLooping(widget.looping);
-    _controller.setPlaybackSpeed(speed);
-    _controller.seekTo(seekTo);
-    _controller.play();
-    if (widget.onChangeSource != null) //Only used in fullscreenpage
-      widget.onChangeSource(_controller, _activedSource);
   }
 
   //-----//
@@ -248,13 +202,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
         });
       } else if (_isPlaying) _showButtons = false;
     });
-  }
-
-  void _changeIconPlayWidth() {
-    Misc.delayed(
-      800,
-      () => setState(() => _iconPlayWidth = GetKey(_playKey).width),
-    );
   }
 
   void _showAndHideOverlay([bool show]) {
@@ -380,44 +327,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     _volumeDragEnd();
   }
 
-  //----------//
-  //FULLSCREEN//
-  //----------//
-  void toFullscreen() {
-    if (kIsWeb) {
-      html.document.documentElement.onFullscreenChange.listen((_) {
-        setState(() => _isFullScreen = html.document.fullscreenElement != null);
-      });
-      html.document.documentElement.requestFullscreen();
-    } else
-      PushRoute.page(
-        context,
-        FullScreenPage(
-          style: _style,
-          source: widget.source,
-          looping: widget.looping,
-          language: widget.language,
-          controller: _controller,
-          rewindAmount: widget.rewindAmount,
-          forwardAmount: widget.forwardAmount,
-          activedSource: _activedSource,
-          fixedLandscape: widget.onFullscreenFixLandscape,
-          settingsMenuItems: widget.settingsMenuItems,
-          defaultAspectRatio: widget.defaultAspectRatio,
-          changeSource: (controller, activedSource) {
-            _changeVideoSource(controller, activedSource, false);
-          },
-        ),
-        transition: false,
-      );
-  }
-
-  void _exitFullscreen() {
-    if (kIsWeb) {
-      html.document.exitFullscreen();
-    } else if (widget.exitFullScreen != null) widget.exitFullScreen();
-  }
-
   //-----//
   //BUILD//
   //-----//
@@ -451,7 +360,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
 
     return _globalGesture(
       Stack(children: [
-        CustomFadeTransition(
+        CustomOpacityTransition(
           visible: !_showThumbnail,
           child: fullScreenLandscape
               ? Transform.scale(
@@ -490,13 +399,10 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
                     : null,
                 child: Container(color: Colors.transparent),
               ),
-        CustomFadeTransition(
+        CustomOpacityTransition(
           visible: _showThumbnail,
           child: GestureDetector(
-            onTap: () => setState(() {
-              _controller.play();
-              _changeIconPlayWidth();
-            }),
+            onTap: () => setState(() => _controller.play()),
             child: Container(
               color: Colors.transparent,
               child: _style.thumbnail,
@@ -504,9 +410,14 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
           ),
         ),
         _rewindAndForward(),
-        CustomFadeTransition(
+        CustomOpacityTransition(
           visible: !_showThumbnail,
-          child: _overlayButtons(),
+          child: VideoOverlay(
+            visible: _showButtons,
+            videoListener: _videoListener,
+            onTapPlayAndPause: _onTapPlayAndPause,
+            cancelOverlayTimer: _cancelCloseOverlayButtons,
+          ),
         ),
         Center(
           child: _playAndPause(
@@ -520,18 +431,18 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
             ),
           ),
         ),
-        CustomFadeTransition(
+        CustomOpacityTransition(
           visible: _isBuffering,
           child: _style.buffering,
         ),
-        CustomFadeTransition(
+        CustomOpacityTransition(
           visible: _showForwardStatus,
           child: _forwardAmountAlert(),
         ),
-        CustomFadeTransition(
+        CustomOpacityTransition(
           visible: _showAMomentPlayAndPause ||
               _controller.value.position >= _controller.value.duration,
-          child: _playAndPauseIconButtons(),
+          child: PlayAndPause(onTap: _onTapPlayAndPause),
         ),
         CustomSwipeTransition(
           visible: _showVolumeStatus,
@@ -543,21 +454,14 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
             progress: (_currentVolume / _maxVolume),
           ),
         ),
-        OpacityTransition(
-          curve: Curves.ease,
-          visible: _showSettings,
-          duration: Duration(milliseconds: widget.style.transitions),
-          child: SettingsMenu(
-            style: _style,
-            items: widget.settingsMenuItems,
-            source: widget.source,
-            language: widget.language,
-            controller: _controller,
-            activedSource: _activedSource,
-            changeSource: _changeVideoSource,
-            changeVisible: () => setState(() => _showSettings = !_showSettings),
-          ),
-        ),
+        // CustomOpacityTransition(
+        //   visible: _showSettings,
+        //   child: SettingsMenu(
+        //     onChangeVisible: () =>
+        //         setState(() => _showSettings = !_showSettings),
+        //     videoListener: _videoListener,
+        //   ),
+        // ),
         _rewindAndForwardIconsIndicator(),
       ]),
     );
@@ -646,11 +550,11 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   Widget _rewindAndForwardIconsIndicator() {
     final style = _style.forwardAndRewindStyle;
     return _rewindAndForwardLayout(
-      rewind: CustomFadeTransition(
+      rewind: CustomOpacityTransition(
         visible: _showAMomentRewindIcons[0],
         child: Center(child: style.rewind),
       ),
-      forward: CustomFadeTransition(
+      forward: CustomOpacityTransition(
         visible: _showAMomentRewindIcons[1],
         child: Center(child: style.forward),
       ),
@@ -670,176 +574,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
         ),
         child: Text(text, style: _style.textStyle),
       ),
-    );
-  }
-
-  //---------------//
-  //OVERLAY BUTTONS//
-  //---------------//
-  Widget _playAndPauseIconButtons() {
-    final style = _style.playAndPauseStyle;
-    return Center(
-      child: _playAndPause(!_isPlaying ? style.playWidget : style.pauseWidget),
-    );
-  }
-
-  Widget _overlayButtons() {
-    final Widget header = widget.style.header;
-    return Stack(children: [
-      if (header != null)
-        CustomSwipeTransition(
-          direction: SwipeDirection.fromTop,
-          visible: _showButtons,
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: GradientBackground(
-              child: header,
-              direction: Direction.top,
-            ),
-          ),
-        ),
-      CustomSwipeTransition(
-        direction: SwipeDirection.fromBottom,
-        visible: _showButtons,
-        child: _bottomProgressBar(),
-      ),
-      CustomFadeTransition(
-        visible: _showButtons && !_isPlaying,
-        child: _playAndPauseIconButtons(),
-      ),
-    ]);
-  }
-
-  //-------------------//
-  //BOTTOM PROGRESS BAR//
-  //-------------------//
-  Widget _containerPadding({Widget child}) {
-    return Container(
-      color: Colors.transparent,
-      padding: Margin.vertical(_progressBarMargin),
-      child: child,
-    );
-  }
-
-  Widget _settingsIconButton() {
-    double padding = _style.progressBarStyle.paddingBeetwen;
-    return Align(
-      alignment: Alignment.topRight,
-      child: GestureDetector(
-        onTap: () => setState(() => _showSettings = !_showSettings),
-        child: Container(
-          color: Colors.transparent,
-          child: _style.settingsStyle.settings,
-          padding:
-              Margin.horizontal(padding) + Margin.vertical(_progressBarMargin),
-        ),
-      ),
-    );
-  }
-
-  Widget _textPositionProgress(String position) {
-    double width = 60;
-    double margin =
-        (_progressScale * _progressBarWidth) + _iconPlayWidth - (width / 2);
-    return OpacityTransition(
-      visible: _isDraggingProgress,
-      child: Container(
-        width: width,
-        child: Text(position, style: _style.textStyle),
-        margin: Margin.left(margin < 0 ? 0 : margin),
-        padding: Margin.all(5),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-            color: _style.progressBarStyle.backgroundColor,
-            borderRadius: _style.progressBarStyle.borderRadius),
-      ),
-    );
-  }
-
-  Widget _bottomProgressBar() {
-    ProgressBarStyle style = _style.progressBarStyle;
-    String position = "00:00", remaing = "-00:00";
-    double padding = style.paddingBeetwen;
-
-    if (_controller.value.initialized) {
-      final value = _controller.value;
-      final seconds = value.position.inSeconds;
-      position = secondsFormatter(seconds);
-      remaing = secondsFormatter(seconds - value.duration.inSeconds);
-    }
-
-    return Align(
-      alignment: Alignment.bottomLeft,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Expanded(child: SizedBox()),
-        _textPositionProgress(position),
-        GradientBackground(
-          child: Row(children: [
-            _playAndPause(Container(
-                key: _playKey,
-                padding: Margin.symmetric(
-                  horizontal: padding,
-                  vertical: _progressBarMargin,
-                ),
-                child: !_isPlaying
-                    ? _style.playAndPauseStyle.play
-                    : _style.playAndPauseStyle.pause)),
-            Expanded(
-              child: VideoProgressBar(
-                _controller,
-                style: style,
-                padding: Margin.vertical(_progressBarMargin),
-                isBuffering: _isBuffering,
-                changePosition: (double scale, double width) {
-                  if (mounted) {
-                    if (scale != null) {
-                      setState(() {
-                        _isDraggingProgress = true;
-                        _progressScale = scale;
-                        _progressBarWidth = width;
-                      });
-                      _cancelCloseOverlayButtons();
-                    } else {
-                      setState(() => _isDraggingProgress = false);
-                      _startCloseOverlayButtons();
-                    }
-                  }
-                },
-              ),
-            ),
-            SizedBox(width: padding),
-            Container(
-              color: Colors.transparent,
-              alignment: Alignment.center,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() => _switchRemaingText = !_switchRemaingText);
-                  _cancelCloseOverlayButtons();
-                },
-                child: _containerPadding(
-                  child: Text(
-                    _switchRemaingText ? position : remaing,
-                    style: _style.textStyle,
-                  ),
-                ),
-              ),
-            ),
-            _settingsIconButton(),
-            GestureDetector(
-              onTap: () async {
-                if (!_isFullScreen)
-                  toFullscreen();
-                else
-                  _exitFullscreen();
-              },
-              child: _containerPadding(
-                child: _isFullScreen ? style.fullScreenExit : style.fullScreen,
-              ),
-            ),
-            SizedBox(width: padding),
-          ]),
-        ),
-      ]),
     );
   }
 }

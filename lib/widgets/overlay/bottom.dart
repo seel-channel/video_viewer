@@ -2,72 +2,72 @@ import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:video_viewer/data/repositories/provider.dart';
 
-import 'package:video_viewer/widgets/overlay/background.dart';
+import 'package:video_viewer/widgets/overlay/widgets/play_and_pause.dart';
+import 'package:video_viewer/widgets/overlay/widgets/background.dart';
+import 'package:video_viewer/widgets/fullscreen.dart';
 import 'package:video_viewer/widgets/progress.dart';
 import 'package:video_viewer/widgets/helpers.dart';
-import 'package:video_viewer/utils/provider.dart';
-import 'package:video_viewer/utils/styles.dart';
 import 'package:video_viewer/utils/misc.dart';
 
 class OverlayBottomButtons extends StatefulWidget {
   OverlayBottomButtons({
     Key key,
     @required this.onPlayAndPause,
+    @required this.onShowSettings,
+    @required this.onCancelOverlayTimer,
+    this.onExitFullScreen,
     this.verticalPadding = 20.0,
   }) : super(key: key);
 
-  final void Function() onPlayAndPause;
   final double verticalPadding;
+  final void Function() onPlayAndPause;
+  final void Function() onShowSettings;
+  final void Function() onExitFullScreen;
+  final void Function() onCancelOverlayTimer;
 
   @override
   _OverlayBottomButtonsState createState() => _OverlayBottomButtonsState();
 }
 
 class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
+  final ProviderQuery query = ProviderQuery();
+  bool _showRemaingText = false;
+  bool _isDraggingBar = false;
+
   void toFullscreen() {
     if (kIsWeb) {
       html.document.documentElement.onFullscreenChange.listen((_) {
-        setVideoFullScreen(context, html.document.fullscreenElement != null);
+        query.setVideoFullScreen(
+            context, html.document.fullscreenElement != null);
       });
       html.document.documentElement.requestFullscreen();
     } else
       PushRoute.page(
         context,
-        FullScreenPage(
-          style: _style,
-          source: widget.source,
-          looping: widget.looping,
-          language: widget.language,
-          controller: _controller,
-          rewindAmount: widget.rewindAmount,
-          forwardAmount: widget.forwardAmount,
-          activedSource: _activedSource,
-          fixedLandscape: widget.onFullscreenFixLandscape,
-          settingsMenuItems: widget.settingsMenuItems,
-          defaultAspectRatio: widget.defaultAspectRatio,
-          changeSource: (controller, activedSource) {
-            _changeVideoSource(controller, activedSource, false);
-          },
-        ),
+        FullScreenPage(),
         transition: false,
       );
   }
 
   void _exitFullscreen() {
-    if (kIsWeb) {
+    if (kIsWeb)
       html.document.exitFullscreen();
-    } else if (widget.exitFullScreen != null) widget.exitFullScreen();
+    else
+      widget?.onExitFullScreen();
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = getVideoController(context);
-    final globalStyle = getVideoStyle(context);
-    final style = globalStyle.progressBarStyle;
+    final style = query.getVideoStyle(context);
+    final controller = query.getVideoController(context);
+    final isFullscreen = query.getVideoFullScreen(context);
+    final edgeInset = Margin.vertical(widget.verticalPadding);
+    final barStyle = style.progressBarStyle;
+    final padding = barStyle.paddingBeetwen;
 
     String position = "00:00", remaing = "-00:00";
-    double padding = style.paddingBeetwen;
 
     if (controller.value.initialized) {
       final value = controller.value;
@@ -81,22 +81,16 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(child: SizedBox()),
         _TextPositionProgress(
-          isDragging: true,
           text: position,
-          style: globalStyle,
+          isDragging: _isDraggingBar,
         ),
         GradientBackground(
           child: Row(children: [
-            GestureDetector(
-              onTap: onPlayAndPause,
-              child: Container(
-                padding: Margin.symmetric(
-                  horizontal: padding,
-                  vertical: verticalPadding,
-                ),
-                child: !controller.value.isPlaying
-                    ? globalStyle.playAndPauseStyle.play
-                    : globalStyle.playAndPauseStyle.pause,
+            PlayAndPause(
+              onTap: widget.onPlayAndPause,
+              padding: Margin.symmetric(
+                horizontal: padding,
+                vertical: widget.verticalPadding,
               ),
             ),
             Expanded(
@@ -105,22 +99,13 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
                 builder: (_, __) {
                   return VideoProgressBar(
                     controller,
-                    style: style,
-                    padding: Margin.vertical(verticalPadding),
-                    isBuffering: _isBuffering,
+                    style: barStyle,
+                    padding: edgeInset,
+                    isBuffering: query.getVideoBuffering(context),
                     changePosition: (double scale, double width) {
                       if (mounted) {
-                        if (scale != null) {
-                          setState(() {
-                            _isDraggingProgress = true;
-                            _progressScale = scale;
-                            _progressBarWidth = width;
-                          });
-                          _cancelCloseOverlayButtons();
-                        } else {
-                          setState(() => _isDraggingProgress = false);
-                          _startCloseOverlayButtons();
-                        }
+                        setState(() => _isDraggingBar = scale != null);
+                        widget?.onCancelOverlayTimer();
                       }
                     },
                   );
@@ -133,28 +118,41 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
               alignment: Alignment.center,
               child: GestureDetector(
                 onTap: () {
-                  setState(() => _switchRemaingText = !_switchRemaingText);
-                  _cancelCloseOverlayButtons();
+                  setState(() => _showRemaingText = !_showRemaingText);
+                  widget?.onCancelOverlayTimer();
                 },
-                child: _containerPadding(
+                child: _ContainerPadding(
+                  padding: edgeInset,
                   child: Text(
-                    _switchRemaingText ? position : remaing,
-                    style: _style.textStyle,
+                    _showRemaingText ? position : remaing,
+                    style: style.textStyle,
                   ),
                 ),
               ),
             ),
-            _settingsIconButton(),
+            Align(
+              alignment: Alignment.topRight,
+              child: GestureDetector(
+                onTap: widget.onShowSettings,
+                child: Container(
+                  color: Colors.transparent,
+                  child: style.settingsStyle.settings,
+                  padding: Margin.horizontal(padding) + edgeInset,
+                ),
+              ),
+            ),
             GestureDetector(
               onTap: () async {
-                if (!_isFullScreen)
+                if (!isFullscreen)
                   toFullscreen();
                 else
                   _exitFullscreen();
               },
-              child: _containerPadding(
-                child: _isFullScreen ? style.fullScreenExit : style.fullScreen,
-              ),
+              child: _ContainerPadding(
+                  child: isFullscreen
+                      ? barStyle.fullScreenExit
+                      : barStyle.fullScreen,
+                  padding: edgeInset),
             ),
             SizedBox(width: padding),
           ]),
@@ -164,24 +162,43 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
   }
 }
 
+class _ContainerPadding extends StatelessWidget {
+  const _ContainerPadding({
+    Key key,
+    @required this.child,
+    @required this.padding,
+  }) : super(key: key);
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.transparent,
+      child: child,
+      padding: padding,
+    );
+  }
+}
+
 class _TextPositionProgress extends StatelessWidget {
   const _TextPositionProgress({
     Key key,
     this.isDragging,
     this.text,
-    this.style,
   }) : super(key: key);
 
   final String text;
   final bool isDragging;
-  final VideoViewerStyle style;
 
   @override
   Widget build(BuildContext context) {
+    final style = ProviderQuery().getVideoStyle(context);
     double width = 60;
     double margin = 20;
 
-    return CustomFadeTransition(
+    return CustomOpacityTransition(
       visible: isDragging,
       child: Container(
         width: width,

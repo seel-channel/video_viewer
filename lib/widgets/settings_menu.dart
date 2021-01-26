@@ -3,39 +3,31 @@ import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
+import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
+import 'package:video_viewer/data/repositories/provider.dart';
+import 'package:video_viewer/domain/bloc/metadata.dart';
 import 'package:video_viewer/widgets/helpers.dart';
-import 'package:video_viewer/utils/language.dart';
-import 'package:video_viewer/video_viewer.dart';
 
 class SettingsMenu extends StatefulWidget {
   SettingsMenu({
     Key key,
-    this.style,
-    this.source,
-    this.controller,
-    this.changeVisible,
-    this.changeSource,
-    this.activedSource,
-    this.language,
-    this.items,
+    @required this.onChangeVisible,
+    @required this.videoListener,
   }) : super(key: key);
 
-  final String activedSource;
-  final VideoViewerStyle style;
-  final void Function() changeVisible;
-  final VideoViewerLanguage language;
-  final List<SettingsMenuItem> items;
-  final Map<String, VideoSource> source;
-  final VideoPlayerController controller;
-  final void Function(VideoPlayerController, String) changeSource;
+  final void Function() onChangeVisible;
+  final void Function() videoListener;
 
   @override
   _SettingsMenuState createState() => _SettingsMenuState();
 }
 
 class _SettingsMenuState extends State<SettingsMenu> {
-  SettingsMenuStyle style;
-  TextStyle textStyle;
+  VideoPlayerController _controller;
+  SettingsMenuStyle _style;
+  VideoMetadata _meta;
+  TextStyle _textStyle;
+  String _activeSource;
 
   bool showMenu = true;
   List<bool> show = [false, false];
@@ -44,29 +36,33 @@ class _SettingsMenuState extends State<SettingsMenu> {
 
   @override
   void initState() {
-    style = widget.style.settingsStyle;
-    textStyle = widget.style.textStyle;
-    if (widget.items != null)
-      for (int i = 0; i < widget.items.length; i++) {
-        show.add(false);
-        mainMenuItems.add(_gestureMainMenuItem(
-          index: i + 2,
-          child: widget.items[i].mainMenu,
-        ));
-        secondaryMenus.add(
-          secondaryMenuContainer(
-            [widget.items[i].secondaryMenu],
-          ),
-        );
-      }
-    super.initState();
-  }
+    Misc.onLayoutRendered(() {
+      final query = ProviderQuery();
+      final meta = query.getVideoMetadata(context);
+      final video = query.getVideo(context);
+      final style = meta.style;
+      final items = meta.settingsMenuItems;
 
-  @override
-  void didUpdateWidget(SettingsMenu oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.style.textStyle != textStyle)
-      setState(() => textStyle = widget.style.textStyle);
+      _meta = meta;
+      _style = style.settingsStyle;
+      _controller = video.controller;
+      _activeSource = video.activeSource;
+      _textStyle = style.textStyle;
+      if (items != null)
+        for (int i = 0; i < items.length; i++) {
+          show.add(false);
+          mainMenuItems.add(_gestureMainMenuItem(
+            index: i + 2,
+            child: items[i].mainMenu,
+          ));
+          secondaryMenus.add(
+            secondaryMenuContainer(
+              [items[i].secondaryMenu],
+            ),
+          );
+        }
+    });
+    super.initState();
   }
 
   void closeAllAndShowMenu() {
@@ -82,21 +78,24 @@ class _SettingsMenuState extends State<SettingsMenu> {
       filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
       child: Stack(children: [
         GestureDetector(
-          onTap: widget.changeVisible,
+          onTap: widget.onChangeVisible,
           child: Container(color: Colors.black.withOpacity(0.32)),
         ),
-        CustomFadeTransition(
+        CustomOpacityTransition(
           visible: !showMenu,
           child: GestureDetector(
             onTap: closeAllAndShowMenu,
             child: Container(color: Colors.transparent),
           ),
         ),
-        CustomFadeTransition(visible: showMenu, child: mainMenu()),
-        CustomFadeTransition(visible: show[1], child: settingsSpeedMenu()),
-        CustomFadeTransition(visible: show[0], child: settingsQualityMenu()),
+        CustomOpacityTransition(visible: showMenu, child: mainMenu()),
+        CustomOpacityTransition(visible: show[1], child: settingsSpeedMenu()),
+        CustomOpacityTransition(visible: show[0], child: settingsQualityMenu()),
         for (int i = 0; i < secondaryMenus.length; i++)
-          CustomFadeTransition(visible: show[i + 2], child: secondaryMenus[i]),
+          CustomOpacityTransition(
+            visible: show[i + 2],
+            child: secondaryMenus[i],
+          ),
       ]),
     );
   }
@@ -117,7 +116,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   //MAIN MENU//
   //---------//
   Widget mainMenu() {
-    final double speed = widget.controller.value.playbackSpeed;
+    final double speed = _controller.value.playbackSpeed;
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -125,22 +124,22 @@ class _SettingsMenuState extends State<SettingsMenu> {
           _gestureMainMenuItem(
             index: 0,
             child: settingsItemMenu(
-              widget.language.quality,
-              widget.activedSource,
-              style.settings,
+              _meta.language.quality,
+              _activeSource,
+              _style.settings,
             ),
           ),
-          SizedBox(width: style.paddingBetween),
+          SizedBox(width: _style.paddingBetween),
           _gestureMainMenuItem(
             index: 1,
             child: settingsItemMenu(
-              widget.language.speed,
-              speed == 1.0 ? widget.language.normalSpeed : "x$speed",
-              style.speed,
+              _meta.language.speed,
+              speed == 1.0 ? _meta.language.normalSpeed : "x$speed",
+              _style.speed,
             ),
           ),
           for (Widget child in mainMenuItems) ...[
-            SizedBox(width: style.paddingBetween),
+            SizedBox(width: _style.paddingBetween),
             child,
           ],
         ],
@@ -151,18 +150,19 @@ class _SettingsMenuState extends State<SettingsMenu> {
   Widget settingsItemMenu(String title, String subtitle, Widget icon) {
     return Container(
       color: Colors.transparent,
-      padding: Margin.all(style.paddingBetween / 2),
+      padding: Margin.all(_style.paddingBetween / 2),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           icon,
-          Text(title, style: textStyle),
+          Text(title, style: _textStyle),
           Text(
             subtitle,
-            style: textStyle.merge(TextStyle(
-                fontWeight: FontWeight.normal,
-                fontSize: textStyle.fontSize -
-                    widget.style.inLandscapeEnlargeTheTextBy)),
+            style: _textStyle.merge(TextStyle(
+              fontWeight: FontWeight.normal,
+              fontSize:
+                  _textStyle.fontSize - _meta.style.inLandscapeEnlargeTheTextBy,
+            )),
           ),
         ],
       ),
@@ -174,14 +174,18 @@ class _SettingsMenuState extends State<SettingsMenu> {
   //---------------//
   Widget settingsQualityMenu() {
     return secondaryMenuContainer([
-      for (MapEntry<String, dynamic> entry in widget.source.entries)
+      for (MapEntry<String, dynamic> entry in _meta.source.entries)
         inkWellDesigned(
           onTap: () {
-            if (entry.key != widget.activedSource)
-              widget.changeSource(entry.value, entry.key);
+            if (entry.key != _activeSource)
+              ProviderQuery().getVideo(context).changeSource(
+                    source: entry.value,
+                    listener: widget.videoListener,
+                    activeSource: entry.key,
+                  );
             closeAllAndShowMenu();
           },
-          child: textDesigned(entry.key, entry.key == widget.activedSource),
+          child: textDesigned(entry.key, entry.key == _activeSource),
         ),
     ]);
   }
@@ -191,12 +195,12 @@ class _SettingsMenuState extends State<SettingsMenu> {
       for (double i = 0.5; i <= 2; i += 0.25)
         inkWellDesigned(
           onTap: () {
-            widget.controller.setPlaybackSpeed(i);
+            ProviderQuery().updateVideoController(context).setPlaybackSpeed(i);
             closeAllAndShowMenu();
           },
           child: textDesigned(
-            i == 1.0 ? widget.language.normalSpeed : "x$i",
-            i == widget.controller.value.playbackSpeed,
+            i == 1.0 ? _meta.language.normalSpeed : "x$i",
+            i == _controller.value.playbackSpeed,
           ),
         ),
     ]);
@@ -215,9 +219,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
             GestureDetector(
               onTap: closeAllAndShowMenu,
               child: Row(children: [
-                style.chevron,
+                _style.chevron,
                 Expanded(
-                  child: Text(widget.language.settings, style: textStyle),
+                  child: Text(_meta.language.settings, style: _textStyle),
                 ),
               ]),
             ),
@@ -246,10 +250,10 @@ class _SettingsMenuState extends State<SettingsMenu> {
         Expanded(
           child: Text(
             text,
-            style: textStyle.merge(TextStyle(fontWeight: FontWeight.normal)),
+            style: _textStyle.merge(TextStyle(fontWeight: FontWeight.normal)),
           ),
         ),
-        if (selected) style.selected,
+        if (selected) _style.selected,
       ]),
     );
   }

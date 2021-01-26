@@ -2,21 +2,24 @@ import 'dart:async';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:video_viewer/video_viewer.dart';
+
+import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
+import 'package:video_viewer/domain/entities/settings_menu_item.dart';
+import 'package:video_viewer/domain/entities/video_source.dart';
+import 'package:video_viewer/data/repositories/provider.dart';
+import 'package:video_viewer/domain/entities/language.dart';
 import 'package:video_viewer/widgets/video_core.dart';
 
 class FullScreenPage extends StatefulWidget {
   FullScreenPage({
     Key key,
     this.controller,
-    this.style,
     this.source,
     this.activedSource,
     this.looping,
     this.rewindAmount,
     this.forwardAmount,
     this.defaultAspectRatio,
-    this.changeSource,
     this.fixedLandscape = true,
     this.language,
     this.settingsMenuItems,
@@ -25,13 +28,11 @@ class FullScreenPage extends StatefulWidget {
   final String activedSource;
   final bool looping;
   final bool fixedLandscape;
-  final VideoViewerStyle style;
   final double defaultAspectRatio;
   final int rewindAmount, forwardAmount;
   final VideoViewerLanguage language;
   final Map<String, VideoSource> source;
   final VideoPlayerController controller;
-  final void Function(VideoPlayerController, String) changeSource;
 
   final List<SettingsMenuItem> settingsMenuItems;
 
@@ -47,12 +48,16 @@ class _FullScreenPageState extends State<FullScreenPage> {
 
   @override
   void initState() {
-    _style = widget.style.thumbnail != null
-        ? widget.style.copywith(thumbnail: null)
-        : widget.style;
     changeOrientation();
     Misc.setSystemOverlay([]);
-    Misc.onLayoutRendered(() => fullScreenOrientation());
+    Misc.onLayoutRendered(() {
+      setState(() {
+        final style = ProviderQuery().getVideoStyle(context);
+        _style =
+            style.thumbnail != null ? style.copywith(thumbnail: null) : style;
+      });
+      fullScreenOrientation();
+    });
     super.initState();
   }
 
@@ -123,8 +128,6 @@ class _FullScreenPageState extends State<FullScreenPage> {
                   settingsMenuItems: widget.settingsMenuItems,
                   defaultAspectRatio: widget.defaultAspectRatio,
                   exitFullScreen: _exitFullscreen,
-                  onChangeSource: (controller, activedSource) =>
-                      widget.changeSource(controller, activedSource),
                 ),
               );
             },

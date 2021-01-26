@@ -1,16 +1,10 @@
 import 'dart:convert' show utf8;
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
+import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/video_viewer.dart';
 
 export 'package:video_player/video_player.dart';
-
-class VideoSource {
-  final VideoPlayerController video;
-  final VideoViewerSubtitle subtitle;
-
-  VideoSource({this.video, this.subtitle});
-}
 
 /// It is a function that returns a map from VideoPlayerController.network, the input
 /// data must be of type URL.

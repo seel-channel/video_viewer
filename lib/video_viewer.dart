@@ -2,22 +2,20 @@ library video_viewer;
 
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+
+import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
+import 'package:video_viewer/domain/entities/settings_menu_item.dart';
+import 'package:video_viewer/domain/entities/video_source.dart';
+import 'package:video_viewer/domain/entities/language.dart';
 import 'package:video_viewer/widgets/video_core.dart';
-import 'package:video_viewer/utils/language.dart';
 import 'package:video_viewer/utils/sources.dart';
-import 'package:video_viewer/utils/styles.dart';
 
-export 'utils/styles.dart';
-export 'utils/sources.dart';
-export 'utils/language.dart';
+export 'package:video_viewer/domain/entities/styles/video_viewer.dart';
+export 'package:video_viewer/domain/entities/settings_menu_item.dart';
+export 'package:video_viewer/domain/entities/video_source.dart';
+export 'package:video_viewer/domain/entities/language.dart';
 export 'utils/subtitle.dart';
-
-class SettingsMenuItem {
-  final Widget mainMenu;
-  final Widget secondaryMenu;
-
-  SettingsMenuItem({@required this.mainMenu, @required this.secondaryMenu});
-}
+export 'utils/sources.dart';
 
 class VideoViewer extends StatefulWidget {
   VideoViewer({
