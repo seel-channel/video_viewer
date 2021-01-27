@@ -13,57 +13,30 @@ import 'package:video_viewer/widgets/helpers.dart';
 import 'package:video_viewer/utils/misc.dart';
 
 class OverlayBottomButtons extends StatefulWidget {
-  OverlayBottomButtons({
-    Key key,
-    @required this.onShowSettings,
-    this.onExitFullScreen,
-    this.verticalPadding = 20.0,
-  }) : super(key: key);
+  OverlayBottomButtons({Key key, @required this.onShowSettings})
+      : super(key: key);
 
-  final double verticalPadding;
   final void Function() onShowSettings;
-  final void Function() onExitFullScreen;
 
   @override
   _OverlayBottomButtonsState createState() => _OverlayBottomButtonsState();
 }
 
 class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
-  final VideoQuery query = VideoQuery();
+  final VideoQuery _query = VideoQuery();
   bool _showRemaingText = false;
   bool _isDraggingBar = false;
 
-  void toFullscreen() {
-    if (kIsWeb) {
-      html.document.documentElement.onFullscreenChange.listen((_) {
-        query.setVideoFullScreen(
-            context, html.document.fullscreenElement != null);
-      });
-      html.document.documentElement.requestFullscreen();
-    } else
-      PushRoute.page(
-        context,
-        FullScreenPage(),
-        transition: false,
-      );
-  }
-
-  void _exitFullscreen() {
-    if (kIsWeb)
-      html.document.exitFullscreen();
-    else
-      widget?.onExitFullScreen();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final style = query.getVideoStyle(context);
-    final video = query.getVideo(context);
-    final isFullscreen = query.getVideoFullScreen(context);
-    final edgeInset = Margin.vertical(widget.verticalPadding);
+    final style = _query.videoMetadata(context, listen: true).style;
+    final video = _query.video(context, listen: true);
+    final edgeInset = Margin.vertical(20.0);
+
+    final isFullscreen = video.isFullScreen;
+    final controller = video.controller;
     final barStyle = style.progressBarStyle;
     final padding = barStyle.paddingBeetwen;
-    final controller = video.controller;
 
     String position = "00:00", remaing = "-00:00";
 
@@ -88,7 +61,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
               type: PlayAndPauseType.bottom,
               padding: Margin.symmetric(
                 horizontal: padding,
-                vertical: widget.verticalPadding,
+                vertical: edgeInset.vertical,
               ),
             ),
             Expanded(
@@ -99,7 +72,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
                     controller,
                     style: barStyle,
                     padding: edgeInset,
-                    isBuffering: query.getVideoBuffering(context),
+                    isBuffering: video.isBuffering,
                     changePosition: (double scale, double width) {
                       if (mounted) {
                         setState(() => _isDraggingBar = scale != null);
@@ -142,9 +115,9 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
             GestureDetector(
               onTap: () async {
                 if (!isFullscreen)
-                  toFullscreen();
+                  await video.openFullScreen(context);
                 else
-                  _exitFullscreen();
+                  await video.closeFullScreen(context);
               },
               child: _ContainerPadding(
                   child: isFullscreen
@@ -192,7 +165,7 @@ class _TextPositionProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = VideoQuery().getVideoStyle(context);
+    final style = VideoQuery().videoMetadata(context, listen: true).style;
     double width = 60;
     double margin = 20;
 

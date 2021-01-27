@@ -1,7 +1,12 @@
 library video_viewer;
 
 import 'package:flutter/material.dart';
+import 'package:helpers/helpers.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_viewer/data/repositories/video.dart';
+import 'package:video_viewer/domain/bloc/controller.dart';
+import 'package:video_viewer/domain/bloc/metadata.dart';
 
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/domain/entities/settings_menu_item.dart';
@@ -89,48 +94,57 @@ class VideoViewer extends StatefulWidget {
 }
 
 class VideoViewerState extends State<VideoViewer> {
-  VideoPlayerController _controller;
-  String _activedSource;
+  final VideoQuery _query = VideoQuery();
+  VideoControllerNotifier _notifier;
+  bool _initialized = false;
 
   @override
   void initState() {
-    _activedSource = widget.source.keys.toList()[0];
-    _controller = widget.source.values.toList()[0].video
-      ..initialize().then((_) {
-        if (widget.autoPlay) _controller.play();
-        _controller.setLooping(widget.looping);
-        setState(() {});
-      });
+    final activedSource = widget.source.keys.toList()[0];
+    final controller = widget.source.values.toList()[0].video;
+    controller.initialize().then((_) {
+      _notifier = VideoControllerNotifier(
+        looping: widget.looping,
+        controller: controller,
+        activeSource: activedSource,
+      );
+      if (widget.autoPlay) controller.play();
+      _initialized = true;
+      setState(() {});
+    });
+
+    Misc.onLayoutRendered(() {
+      _query.video(context).showThumbnail = widget.style.thumbnail != null;
+    });
     super.initState();
   }
 
   @override
   void dispose() {
-    disposeController();
+    _query.video(context).dispose();
     super.dispose();
-  }
-
-  void disposeController() async {
-    await _controller?.pause();
-    await _controller.dispose();
-    _controller = null;
   }
 
   @override
   Widget build(BuildContext context) {
-    return _controller.value.initialized
-        ? VideoViewerCore(
-            style: widget.style,
-            source: widget.source,
-            looping: widget.looping,
-            language: widget.language,
-            controller: _controller,
-            activedSource: _activedSource,
-            rewindAmount: widget.rewindAmount,
-            forwardAmount: widget.forwardAmount,
-            settingsMenuItems: widget.settingsMenuItems,
-            defaultAspectRatio: widget.defaultAspectRatio,
-            onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
+    return _initialized
+        ? MultiProvider(
+            providers: [
+              ChangeNotifierProvider.value(value: _notifier),
+              ChangeNotifierProvider(
+                create: (_) => VideoMetadata(
+                  style: widget.style,
+                  source: widget.source,
+                  language: widget.language,
+                  rewindAmount: widget.rewindAmount,
+                  forwardAmount: widget.forwardAmount,
+                  settingsMenuItems: widget.settingsMenuItems,
+                  defaultAspectRatio: widget.defaultAspectRatio,
+                  onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
+                ),
+              ),
+            ],
+            builder: (_, __) => VideoViewerCore(),
           )
         : AspectRatio(
             aspectRatio: widget.defaultAspectRatio,

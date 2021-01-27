@@ -14,7 +14,7 @@ class CustomOpacityTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = VideoQuery().getVideoStyle(context);
+    final style = VideoQuery().videoMetadata(context, listen: true).style;
 
     return OpacityTransition(
       curve: Curves.ease,
@@ -39,7 +39,7 @@ class CustomSwipeTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = VideoQuery().getVideoStyle(context);
+    final style = VideoQuery().videoMetadata(context, listen: true).style;
 
     return SwipeTransition(
       curve: Curves.ease,

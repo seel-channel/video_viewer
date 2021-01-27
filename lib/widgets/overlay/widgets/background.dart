@@ -15,7 +15,7 @@ class GradientBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = VideoQuery().getVideoStyle(context);
+    final style = VideoQuery().videoMetadata(context, listen: true).style;
     List<Color> colors = [
       Colors.transparent,
       style.progressBarStyle.backgroundColor,

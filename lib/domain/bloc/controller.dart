@@ -1,10 +1,13 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
+import 'package:flutter/material.dart';
+import 'package:universal_html/html.dart' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/utils/sources.dart';
 import 'package:video_viewer/video_viewer.dart';
+import 'package:video_viewer/widgets/fullscreen.dart';
 
 class VideoControllerNotifier extends ChangeNotifier {
   VideoControllerNotifier({
@@ -27,8 +30,11 @@ class VideoControllerNotifier extends ChangeNotifier {
   int _lastVideoPosition = 0;
   Timer _closeOverlayButtons, _timerPosition;
 
+  bool showThumbnail = false;
+
   VideoPlayerController get controller => _controller;
   String get activeSource => _activeSource;
+  bool get isFullScreen => _isFullScreen;
   bool get showOverlay => _showOverlay;
   bool get isPlaying => _controller.value.isPlaying;
 
@@ -38,16 +44,50 @@ class VideoControllerNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool get isFullScreen => _isFullScreen;
-  set isFullScreen(bool value) {
-    _isFullScreen = value;
-    notifyListeners();
-  }
-
   int get lastVideoPosition => _lastVideoPosition;
   set lastVideoPosition(int value) {
     _lastVideoPosition = value;
     notifyListeners();
+  }
+
+  @override
+  void dispose() async {
+    await _controller?.pause();
+    await _controller.dispose();
+    _controller = null;
+    super.dispose();
+  }
+
+  Future<void> openFullScreen(BuildContext context) async {
+    if (kIsWeb) {
+      html.document.documentElement.requestFullscreen();
+      html.document.documentElement.onFullscreenChange.listen((_) {
+        _isFullScreen = html.document.fullscreenElement != null;
+      });
+    } else {
+      _isFullScreen = true;
+      notifyListeners();
+      await PushRoute.page(
+        context,
+        FullScreenPage(),
+        transition: false,
+      );
+    }
+  }
+
+  Future<void> closeFullScreen(BuildContext context) async {
+    if (kIsWeb)
+      html.document.exitFullscreen();
+    else if (_isFullScreen) {
+      _isFullScreen = false;
+      notifyListeners();
+      await Misc.setSystemOrientation(SystemOrientation.portraitUp);
+      await Misc.setSystemOverlay(SystemOverlay.values);
+      Misc.delayed(3200, () {
+        Misc.setSystemOrientation(SystemOrientation.values);
+      });
+      Navigator.pop(context);
+    }
   }
 
   //----------------//
@@ -87,6 +127,10 @@ class VideoControllerNotifier extends ChangeNotifier {
 
   void _videoListener() {
     final value = _controller.value;
+    if (isPlaying && showThumbnail) {
+      showThumbnail = false;
+      notifyListeners();
+    }
     if (_showOverlay) {
       if (isPlaying) {
         if (value.position >= value.duration && looping) {

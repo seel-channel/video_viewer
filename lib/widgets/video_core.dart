@@ -5,72 +5,41 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_player/video_player.dart';
-import 'package:video_viewer/data/repositories/video.dart';
-import 'package:video_viewer/domain/entities/video_source.dart';
-import 'package:video_viewer/video_viewer.dart';
-import 'package:video_viewer/widgets/helpers.dart';
-import 'package:video_viewer/widgets/overlay/overlay.dart';
-import 'package:video_viewer/widgets/overlay/widgets/play_and_pause.dart';
 
+import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
+import 'package:video_viewer/domain/entities/video_source.dart';
+import 'package:video_viewer/data/repositories/video.dart';
+
+import 'package:video_viewer/widgets/overlay/widgets/play_and_pause.dart';
+import 'package:video_viewer/widgets/overlay/overlay.dart';
 import 'package:video_viewer/widgets/progress.dart';
+import 'package:video_viewer/widgets/helpers.dart';
 import 'package:video_viewer/utils/misc.dart';
 
 class VideoViewerCore extends StatefulWidget {
-  ///IS THE VIDEOVIEWER CORE
-  VideoViewerCore({
-    Key key,
-    @required this.controller,
-    @required this.source,
-    VideoViewerStyle style,
-    this.activedSource,
-    this.looping,
-    this.rewindAmount,
-    this.forwardAmount,
-    this.defaultAspectRatio,
-    this.exitFullScreen,
-    this.onFullscreenFixLandscape,
-    this.language = VideoViewerLanguage.en,
-    this.settingsMenuItems,
-  })  : this.style = style ?? VideoViewerStyle(),
-        super(key: key);
-
-  final String activedSource;
-  final bool looping;
-  final double defaultAspectRatio;
-  final int rewindAmount, forwardAmount;
-  final VideoViewerStyle style;
-  final VideoViewerLanguage language;
-  final VideoPlayerController controller;
-  final Map<String, VideoSource> source;
-  final bool onFullscreenFixLandscape;
-
-  ///USE INSIDE FULLSCREEN
-  final void Function() exitFullScreen;
-
-  final List<SettingsMenuItem> settingsMenuItems;
+  VideoViewerCore({Key key}) : super(key: key);
 
   @override
   VideoViewerCoreState createState() => VideoViewerCoreState();
 }
 
 class VideoViewerCoreState extends State<VideoViewerCore> {
+  final VideoQuery _query = VideoQuery();
   VideoPlayerController _controller;
-  bool _isPlaying = false,
-      _isBuffering = false,
+  bool _isBuffering = false,
       _isFullScreen = false,
       _showButtons = false,
       _showSettings = false,
-      _showThumbnail = true,
-      _showAMomentPlayAndPause = false,
-      _isGoingToCloseBufferingWidget = false;
+      _showAMomentPlayAndPause = false;
   Timer _closeOverlayButtons, _timerPosition, _hidePlayAndPause;
-  String _activedSource;
 
   //REWIND AND FORWARD
+  int _defaultRewindAmount = 10;
+  int _defaultForwardAmount = 10;
+  int _forwardAndRewindAmount = 0;
   bool _showForwardStatus = false;
   Offset _horizontalDragStartOffset;
   List<bool> _showAMomentRewindIcons = [false, false];
-  int _lastPosition = 0, _forwardAmount = 0;
 
   //VOLUME
   double _maxVolume = 1, _onDragStartVolume = 1, _currentVolume = 1;
@@ -89,20 +58,16 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   //WEB
   final FocusNode _focusRawKeyboard = FocusNode();
 
-  //ONLY USE ON FULLSCREENPAGE
-  set fullScreen(bool value) {
-    _isFullScreen = value;
-    if (mounted) setState(() {});
-  }
-
   @override
   void initState() {
-    _style = widget.style;
-    _controller = widget.controller;
-    _activedSource = widget.activedSource;
+    _style = _style;
     _landscapeStyle = _getResponsiveText();
-    _controller.setLooping(widget.looping);
-    _showThumbnail = _style.thumbnail == null ? false : true;
+    Misc.onLayoutRendered(() {
+      final metadata = _query.videoMetadata(context);
+      _style = metadata.style;
+      _defaultRewindAmount = metadata.rewindAmount;
+      _defaultForwardAmount = metadata.forwardAmount;
+    });
     super.initState();
   }
 
@@ -115,77 +80,11 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     super.dispose();
   }
 
-  //----------------//
-  //VIDEO CONTROLLER//
-  //----------------//
-  // void _videoListener() {
-  //   if (mounted) {
-  //     final value = _controller.value;
-  //     final playing = value.isPlaying;
-
-  //     if (playing != _isPlaying) _isPlaying = playing;
-  //     if (_isPlaying && _showThumbnail) _showThumbnail = false;
-  //     if (_showButtons) {
-  //       if (_isPlaying) {
-  //         if (value.position >= value.duration && !widget.looping) {
-  //           _controller.seekTo(Duration.zero);
-  //         } else {
-  //           if (_timerPosition == null) _createBufferTimer();
-  //           if (_closeOverlayButtons == null) _startCloseOverlayButtons();
-  //         }
-  //       } else if (_isGoingToCloseBufferingWidget) _cancelCloseOverlayButtons();
-  //     }
-  //     setState(() {});
-  //   }
-  // }
-
-  // //-----//
-  // //TIMER//
-  // //-----//
-  // void _startCloseOverlayButtons() {
-  //   if (!_isGoingToCloseBufferingWidget && mounted) {
-  //     setState(() {
-  //       _isGoingToCloseBufferingWidget = true;
-  //       _closeOverlayButtons = Misc.timer(3200, () {
-  //         if (mounted && _isPlaying) {
-  //           setState(() => _showButtons = false);
-  //           _cancelCloseOverlayButtons();
-  //         }
-  //       });
-  //     });
-  //   }
-  // }
-
-  // void _createBufferTimer() {
-  //   if (mounted)
-  //     setState(() {
-  //       _timerPosition = Misc.periodic(1000, () {
-  //         int position = _controller.value.position.inMilliseconds;
-  //         if (mounted)
-  //           setState(() {
-  //             if (_isPlaying)
-  //               _isBuffering = _lastPosition != position ? false : true;
-  //             else
-  //               _isBuffering = false;
-  //             _lastPosition = position;
-  //           });
-  //       });
-  //     });
-  // }
-
-  // void _cancelCloseOverlayButtons() {
-  //   setState(() {
-  //     _isGoingToCloseBufferingWidget = false;
-  //     _closeOverlayButtons?.cancel();
-  //     _closeOverlayButtons = null;
-  //   });
-  // }
-
   //--------------//
   //MISC FUNCTIONS//
   //--------------//
   void _onTapPlayAndPause() async {
-    final video = VideoQuery().getVideo(context);
+    final video = _query.video(context);
     await video.onTapPlayAndPause();
     if (!video.showOverlay) {
       _showAMomentPlayAndPause = true;
@@ -198,7 +97,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   void _showAndHideOverlay([bool show]) {
-    VideoQuery().getVideo(context).showAndHideOverlay(show);
+    _query.video(context).showAndHideOverlay(show);
     if (!_focusRawKeyboard.hasFocus)
       FocusScope.of(context).requestFocus(_focusRawKeyboard);
   }
@@ -206,19 +105,20 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   //------------------//
   //FORWARD AND REWIND//
   //------------------//
-  void _rewind() => _showRewindAndForward(0, -widget.rewindAmount);
-  void _forward() => _showRewindAndForward(1, widget.forwardAmount);
+  void _rewind() => _showRewindAndForward(0, -_defaultRewindAmount);
+  void _forward() => _showRewindAndForward(1, _defaultForwardAmount);
 
   void _controllerSeekTo(int amount) async {
-    int seconds = _controller.value.position.inSeconds;
-    await _controller.seekTo(Duration(seconds: seconds + amount));
-    await _controller.play();
+    final controller = _query.video(context).controller;
+    final seconds = controller.value.position.inSeconds;
+    await controller.seekTo(Duration(seconds: seconds + amount));
+    await controller.play();
   }
 
   void _showRewindAndForward(int index, int amount) async {
     _controllerSeekTo(amount);
     setState(() {
-      _forwardAmount = amount;
+      _forwardAndRewindAmount = amount;
       _showForwardStatus = true;
       _showAMomentRewindIcons[index] = true;
     });
@@ -246,7 +146,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
       int amount = -((diff / 10).round() * multiplicator).round();
       setState(() {
         if (seconds + amount < _controller.value.duration.inSeconds &&
-            seconds + amount > 0) _forwardAmount = amount;
+            seconds + amount > 0) _forwardAndRewindAmount = amount;
       });
     }
   }
@@ -254,7 +154,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   void _forwardDragEnd() {
     if (!_showSettings && _showForwardStatus) {
       setState(() => _showForwardStatus = false);
-      _controllerSeekTo(_forwardAmount);
+      _controllerSeekTo(_forwardAndRewindAmount);
     }
   }
 
@@ -333,11 +233,11 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
       _style = kIsWeb
           ? width > 1400
               ? _getResponsiveText(
-                  widget.style.inLandscapeEnlargeTheTextBy * (width / 1400))
+                  _style.inLandscapeEnlargeTheTextBy * (width / 1400))
               : _landscapeStyle
           : orientation == landscape
               ? _landscapeStyle
-              : widget.style;
+              : _style;
 
       return fullScreenLandscape
           ? _player(orientation, fullScreenLandscape)
@@ -347,18 +247,19 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
 
   Widget _player(Orientation orientation, bool fullScreenLandscape) {
     final Size size = GetMedia(context).size;
+    final video = _query.video(context, listen: true);
 
     return _globalGesture(
       Stack(children: [
         CustomOpacityTransition(
-          visible: !_showThumbnail,
+          visible: !video.showThumbnail,
           child: fullScreenLandscape
               ? Transform.scale(
                   scale: _scale,
                   child: Center(
                     child: _playerAspectRatio(VideoPlayer(_controller)),
                   ))
-              : VideoPlayer(_controller),
+              : VideoPlayer(video.controller),
         ),
         kIsWeb
             ? MouseRegion(
@@ -390,7 +291,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
                 child: Container(color: Colors.transparent),
               ),
         CustomOpacityTransition(
-          visible: _showThumbnail,
+          visible: video.showThumbnail,
           child: GestureDetector(
             onTap: () => setState(() => _controller.play()),
             child: Container(
@@ -401,10 +302,8 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
         ),
         _rewindAndForward(),
         CustomOpacityTransition(
-          visible: !_showThumbnail,
-          child: VideoOverlay(
-            visible: _showButtons,
-          ),
+          visible: !video.showThumbnail,
+          child: VideoOverlay(),
         ),
         Center(
           child: _playAndPause(
@@ -424,12 +323,18 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
         ),
         CustomOpacityTransition(
           visible: _showForwardStatus,
-          child: _forwardAmountAlert(),
+          child: _forwardAndRewindAmountAlert(),
         ),
-        CustomOpacityTransition(
-          visible: _showAMomentPlayAndPause ||
-              _controller.value.position >= _controller.value.duration,
-          child: PlayAndPause(type: PlayAndPauseType.center),
+        AnimatedBuilder(
+          animation: video.controller,
+          builder: (_, __) {
+            final position = video.controller.value.position;
+            final duration = video.controller.value.duration;
+            return CustomOpacityTransition(
+              visible: _showAMomentPlayAndPause || position >= duration,
+              child: PlayAndPause(type: PlayAndPauseType.center),
+            );
+          },
         ),
         CustomSwipeTransition(
           visible: _showVolumeStatus,
@@ -437,7 +342,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
               ? SwipeDirection.fromLeft
               : SwipeDirection.fromRight,
           child: VideoVolumeBar(
-            style: widget.style.volumeBarStyle,
+            style: _style.volumeBarStyle,
             progress: (_currentVolume / _maxVolume),
           ),
         ),
@@ -447,7 +352,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   VideoViewerStyle _getResponsiveText([double multiplier = 1]) {
-    final VideoViewerStyle style = widget.style;
+    final VideoViewerStyle style = _style;
     return style.copywith(
       textStyle: style.textStyle.merge(
         TextStyle(
@@ -544,8 +449,8 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     );
   }
 
-  Widget _forwardAmountAlert() {
-    String text = secondsFormatter(_forwardAmount);
+  Widget _forwardAndRewindAmountAlert() {
+    String text = secondsFormatter(_forwardAndRewindAmount);
     final style = _style.forwardAndRewindStyle;
     return Align(
       alignment: Alignment.topCenter,

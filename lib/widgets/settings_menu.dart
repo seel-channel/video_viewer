@@ -21,6 +21,7 @@ class SettingsMenu extends StatefulWidget {
 }
 
 class _SettingsMenuState extends State<SettingsMenu> {
+  final VideoQuery _query = VideoQuery();
   VideoPlayerController _controller;
   SettingsMenuStyle _style;
   VideoMetadata _meta;
@@ -35,9 +36,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
   @override
   void initState() {
     Misc.onLayoutRendered(() {
-      final query = VideoQuery();
-      final meta = query.getVideoMetadata(context);
-      final video = query.getVideo(context);
+      final meta = _query.videoMetadata(context);
+      final video = _query.video(context);
       final style = meta.style;
       final items = meta.settingsMenuItems;
 
@@ -176,8 +176,8 @@ class _SettingsMenuState extends State<SettingsMenu> {
         inkWellDesigned(
           onTap: () {
             if (entry.key != _activeSource)
-              VideoQuery()
-                  .getVideo(context)
+              _query
+                  .video(context)
                   .changeSource(source: entry.value, activeSource: entry.key);
             closeAllAndShowMenu();
           },
@@ -191,7 +191,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
       for (double i = 0.5; i <= 2; i += 0.25)
         inkWellDesigned(
           onTap: () {
-            VideoQuery().updateVideoController(context).setPlaybackSpeed(i);
+            _query.video(context).controller.setPlaybackSpeed(i);
             closeAllAndShowMenu();
           },
           child: textDesigned(

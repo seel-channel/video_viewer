@@ -10,18 +10,18 @@ import 'package:video_viewer/widgets/settings_menu.dart';
 import 'package:video_viewer/widgets/helpers.dart';
 
 class VideoOverlay extends StatelessWidget {
-  const VideoOverlay({Key key, @required this.visible}) : super(key: key);
-
-  final bool visible;
+  const VideoOverlay({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final query = VideoQuery();
-    final style = query.getVideoStyle(context);
+    final style = query.videoMetadata(context, listen: true).style;
+    final video = query.video(context, listen: true);
     final setting = ValueNotifier<bool>(false);
-    final controller = query.getVideoController(context);
 
     final header = style.header;
+    final visible = video.showOverlay;
+    final controller = video.controller;
 
     return Stack(children: [
       if (header != null)

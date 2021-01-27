@@ -9,13 +9,13 @@ import 'package:video_viewer/video_viewer.dart';
 class VideoMetadata extends ChangeNotifier {
   VideoMetadata({
     @required this.source,
-    VideoViewerStyle style,
-    this.rewindAmount,
-    this.forwardAmount,
-    this.defaultAspectRatio,
-    this.onFullscreenFixLandscape,
-    this.language = VideoViewerLanguage.en,
-    this.settingsMenuItems,
+    @required VideoViewerStyle style,
+    @required this.rewindAmount,
+    @required this.forwardAmount,
+    @required this.defaultAspectRatio,
+    @required this.onFullscreenFixLandscape,
+    @required this.language,
+    @required this.settingsMenuItems,
   }) : this._style = style ?? VideoViewerStyle();
 
   final int rewindAmount, forwardAmount;
