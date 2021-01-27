@@ -2,7 +2,8 @@ import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:video_viewer/data/repositories/provider.dart';
+
+import 'package:video_viewer/data/repositories/video.dart';
 
 import 'package:video_viewer/widgets/overlay/widgets/play_and_pause.dart';
 import 'package:video_viewer/widgets/overlay/widgets/background.dart';
@@ -14,25 +15,21 @@ import 'package:video_viewer/utils/misc.dart';
 class OverlayBottomButtons extends StatefulWidget {
   OverlayBottomButtons({
     Key key,
-    @required this.onPlayAndPause,
     @required this.onShowSettings,
-    @required this.onCancelOverlayTimer,
     this.onExitFullScreen,
     this.verticalPadding = 20.0,
   }) : super(key: key);
 
   final double verticalPadding;
-  final void Function() onPlayAndPause;
   final void Function() onShowSettings;
   final void Function() onExitFullScreen;
-  final void Function() onCancelOverlayTimer;
 
   @override
   _OverlayBottomButtonsState createState() => _OverlayBottomButtonsState();
 }
 
 class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
-  final ProviderQuery query = ProviderQuery();
+  final VideoQuery query = VideoQuery();
   bool _showRemaingText = false;
   bool _isDraggingBar = false;
 
@@ -61,11 +58,12 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
   @override
   Widget build(BuildContext context) {
     final style = query.getVideoStyle(context);
-    final controller = query.getVideoController(context);
+    final video = query.getVideo(context);
     final isFullscreen = query.getVideoFullScreen(context);
     final edgeInset = Margin.vertical(widget.verticalPadding);
     final barStyle = style.progressBarStyle;
     final padding = barStyle.paddingBeetwen;
+    final controller = video.controller;
 
     String position = "00:00", remaing = "-00:00";
 
@@ -87,7 +85,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
         GradientBackground(
           child: Row(children: [
             PlayAndPause(
-              onTap: widget.onPlayAndPause,
+              type: PlayAndPauseType.bottom,
               padding: Margin.symmetric(
                 horizontal: padding,
                 vertical: widget.verticalPadding,
@@ -105,7 +103,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
                     changePosition: (double scale, double width) {
                       if (mounted) {
                         setState(() => _isDraggingBar = scale != null);
-                        widget?.onCancelOverlayTimer();
+                        video.cancelCloseOverlay();
                       }
                     },
                   );
@@ -119,7 +117,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
               child: GestureDetector(
                 onTap: () {
                   setState(() => _showRemaingText = !_showRemaingText);
-                  widget?.onCancelOverlayTimer();
+                  video.cancelCloseOverlay();
                 },
                 child: _ContainerPadding(
                   padding: edgeInset,
@@ -194,7 +192,7 @@ class _TextPositionProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = ProviderQuery().getVideoStyle(context);
+    final style = VideoQuery().getVideoStyle(context);
     double width = 60;
     double margin = 20;
 

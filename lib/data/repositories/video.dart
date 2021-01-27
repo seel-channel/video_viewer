@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
-import 'package:video_viewer/domain/repositories/provider.dart';
+import 'package:video_viewer/domain/repositories/video.dart';
 import 'package:video_viewer/domain/bloc/controller.dart';
 import 'package:video_viewer/domain/bloc/metadata.dart';
 
-class ProviderQuery extends ProviderQueryRepository {
+class VideoQuery extends VideoQueryRepository {
   VideoMetadata getVideoMetadata(BuildContext context) {
     return Provider.of<VideoMetadata>(context);
   }

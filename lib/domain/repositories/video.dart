@@ -5,7 +5,7 @@ import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/domain/bloc/controller.dart';
 import 'package:video_viewer/domain/bloc/metadata.dart';
 
-abstract class ProviderQueryRepository {
+abstract class VideoQueryRepository {
   VideoMetadata getVideoMetadata(BuildContext context);
 
   VideoViewerStyle getVideoStyle(BuildContext context);

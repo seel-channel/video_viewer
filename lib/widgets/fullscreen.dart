@@ -6,7 +6,7 @@ import 'package:video_player/video_player.dart';
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/domain/entities/settings_menu_item.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
-import 'package:video_viewer/data/repositories/provider.dart';
+import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/entities/language.dart';
 import 'package:video_viewer/widgets/video_core.dart';
 
@@ -52,7 +52,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
     Misc.setSystemOverlay([]);
     Misc.onLayoutRendered(() {
       setState(() {
-        final style = ProviderQuery().getVideoStyle(context);
+        final style = VideoQuery().getVideoStyle(context);
         _style =
             style.thumbnail != null ? style.copywith(thumbnail: null) : style;
       });

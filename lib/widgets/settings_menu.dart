@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
-import 'package:video_viewer/data/repositories/provider.dart';
+import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/bloc/metadata.dart';
 import 'package:video_viewer/widgets/helpers.dart';
 
@@ -12,11 +12,9 @@ class SettingsMenu extends StatefulWidget {
   SettingsMenu({
     Key key,
     @required this.onChangeVisible,
-    @required this.videoListener,
   }) : super(key: key);
 
   final void Function() onChangeVisible;
-  final void Function() videoListener;
 
   @override
   _SettingsMenuState createState() => _SettingsMenuState();
@@ -37,7 +35,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   @override
   void initState() {
     Misc.onLayoutRendered(() {
-      final query = ProviderQuery();
+      final query = VideoQuery();
       final meta = query.getVideoMetadata(context);
       final video = query.getVideo(context);
       final style = meta.style;
@@ -178,11 +176,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
         inkWellDesigned(
           onTap: () {
             if (entry.key != _activeSource)
-              ProviderQuery().getVideo(context).changeSource(
-                    source: entry.value,
-                    listener: widget.videoListener,
-                    activeSource: entry.key,
-                  );
+              VideoQuery()
+                  .getVideo(context)
+                  .changeSource(source: entry.value, activeSource: entry.key);
             closeAllAndShowMenu();
           },
           child: textDesigned(entry.key, entry.key == _activeSource),
@@ -195,7 +191,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
       for (double i = 0.5; i <= 2; i += 0.25)
         inkWellDesigned(
           onTap: () {
-            ProviderQuery().updateVideoController(context).setPlaybackSpeed(i);
+            VideoQuery().updateVideoController(context).setPlaybackSpeed(i);
             closeAllAndShowMenu();
           },
           child: textDesigned(

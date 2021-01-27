@@ -1,28 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:video_viewer/data/repositories/provider.dart';
+import 'package:video_viewer/data/repositories/video.dart';
+
+enum PlayAndPauseType { center, bottom }
 
 class PlayAndPause extends StatelessWidget {
   const PlayAndPause({
     Key key,
-    @required this.onTap,
+    @required this.type,
     this.padding,
   }) : super(key: key);
 
+  final PlayAndPauseType type;
   final EdgeInsetsGeometry padding;
-  final void Function() onTap;
 
   @override
   Widget build(BuildContext context) {
-    final query = ProviderQuery();
+    final query = VideoQuery();
     final style = query.getVideoStyle(context).playAndPauseStyle;
-    final controller = query.getVideoController(context);
+    final video = query.getVideo(context);
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: video.onTapPlayAndPause,
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: padding,
-        child: !controller.value.isPlaying ? style.play : style.pause,
+        child: type == PlayAndPauseType.bottom
+            ? !video.isPlaying
+                ? style.play
+                : style.pause
+            : !video.isPlaying
+                ? style.playWidget
+                : style.pauseWidget,
       ),
     );
   }

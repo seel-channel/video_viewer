@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_player/video_player.dart';
+import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/video_viewer.dart';
 import 'package:video_viewer/widgets/helpers.dart';
@@ -100,7 +101,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     _controller = widget.controller;
     _activedSource = widget.activedSource;
     _landscapeStyle = _getResponsiveText();
-    _controller.addListener(_videoListener);
     _controller.setLooping(widget.looping);
     _showThumbnail = _style.thumbnail == null ? false : true;
     super.initState();
@@ -118,97 +118,87 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   //----------------//
   //VIDEO CONTROLLER//
   //----------------//
-  void _videoListener() {
-    if (mounted) {
-      final value = _controller.value;
-      final playing = value.isPlaying;
+  // void _videoListener() {
+  //   if (mounted) {
+  //     final value = _controller.value;
+  //     final playing = value.isPlaying;
 
-      if (playing != _isPlaying) _isPlaying = playing;
-      if (_isPlaying && _showThumbnail) _showThumbnail = false;
-      if (_showButtons) {
-        if (_isPlaying) {
-          if (value.position >= value.duration && !widget.looping) {
-            _controller.seekTo(Duration.zero);
-          } else {
-            if (_timerPosition == null) _createBufferTimer();
-            if (_closeOverlayButtons == null) _startCloseOverlayButtons();
-          }
-        } else if (_isGoingToCloseBufferingWidget) _cancelCloseOverlayButtons();
-      }
-      setState(() {});
-    }
-  }
+  //     if (playing != _isPlaying) _isPlaying = playing;
+  //     if (_isPlaying && _showThumbnail) _showThumbnail = false;
+  //     if (_showButtons) {
+  //       if (_isPlaying) {
+  //         if (value.position >= value.duration && !widget.looping) {
+  //           _controller.seekTo(Duration.zero);
+  //         } else {
+  //           if (_timerPosition == null) _createBufferTimer();
+  //           if (_closeOverlayButtons == null) _startCloseOverlayButtons();
+  //         }
+  //       } else if (_isGoingToCloseBufferingWidget) _cancelCloseOverlayButtons();
+  //     }
+  //     setState(() {});
+  //   }
+  // }
 
-  //-----//
-  //TIMER//
-  //-----//
-  void _startCloseOverlayButtons() {
-    if (!_isGoingToCloseBufferingWidget && mounted) {
-      setState(() {
-        _isGoingToCloseBufferingWidget = true;
-        _closeOverlayButtons = Misc.timer(3200, () {
-          if (mounted && _isPlaying) {
-            setState(() => _showButtons = false);
-            _cancelCloseOverlayButtons();
-          }
-        });
-      });
-    }
-  }
+  // //-----//
+  // //TIMER//
+  // //-----//
+  // void _startCloseOverlayButtons() {
+  //   if (!_isGoingToCloseBufferingWidget && mounted) {
+  //     setState(() {
+  //       _isGoingToCloseBufferingWidget = true;
+  //       _closeOverlayButtons = Misc.timer(3200, () {
+  //         if (mounted && _isPlaying) {
+  //           setState(() => _showButtons = false);
+  //           _cancelCloseOverlayButtons();
+  //         }
+  //       });
+  //     });
+  //   }
+  // }
 
-  void _createBufferTimer() {
-    if (mounted)
-      setState(() {
-        _timerPosition = Misc.periodic(1000, () {
-          int position = _controller.value.position.inMilliseconds;
-          if (mounted)
-            setState(() {
-              if (_isPlaying)
-                _isBuffering = _lastPosition != position ? false : true;
-              else
-                _isBuffering = false;
-              _lastPosition = position;
-            });
-        });
-      });
-  }
+  // void _createBufferTimer() {
+  //   if (mounted)
+  //     setState(() {
+  //       _timerPosition = Misc.periodic(1000, () {
+  //         int position = _controller.value.position.inMilliseconds;
+  //         if (mounted)
+  //           setState(() {
+  //             if (_isPlaying)
+  //               _isBuffering = _lastPosition != position ? false : true;
+  //             else
+  //               _isBuffering = false;
+  //             _lastPosition = position;
+  //           });
+  //       });
+  //     });
+  // }
 
-  void _cancelCloseOverlayButtons() {
-    setState(() {
-      _isGoingToCloseBufferingWidget = false;
-      _closeOverlayButtons?.cancel();
-      _closeOverlayButtons = null;
-    });
-  }
+  // void _cancelCloseOverlayButtons() {
+  //   setState(() {
+  //     _isGoingToCloseBufferingWidget = false;
+  //     _closeOverlayButtons?.cancel();
+  //     _closeOverlayButtons = null;
+  //   });
+  // }
 
   //--------------//
   //MISC FUNCTIONS//
   //--------------//
-  void _onTapPlayAndPause() {
-    final value = _controller.value;
-    setState(() {
-      if (_isPlaying)
-        _controller.pause();
-      else {
-        if (value.position >= value.duration) _controller.seekTo(Duration.zero);
-        _lastPosition = _lastPosition - 1;
-        _controller.play();
-      }
-      if (!_showButtons) {
-        _showAMomentPlayAndPause = true;
-        _hidePlayAndPause?.cancel();
-        _hidePlayAndPause = Misc.timer(600, () {
-          setState(() => _showAMomentPlayAndPause = false);
-        });
-      } else if (_isPlaying) _showButtons = false;
-    });
+  void _onTapPlayAndPause() async {
+    final video = VideoQuery().getVideo(context);
+    await video.onTapPlayAndPause();
+    if (!video.showOverlay) {
+      _showAMomentPlayAndPause = true;
+      _hidePlayAndPause?.cancel();
+      _hidePlayAndPause = Misc.timer(600, () {
+        setState(() => _showAMomentPlayAndPause = false);
+      });
+    }
+    setState(() {});
   }
 
   void _showAndHideOverlay([bool show]) {
-    setState(() {
-      _showButtons = show ?? !_showButtons;
-      if (_showButtons) _isGoingToCloseBufferingWidget = false;
-    });
+    VideoQuery().getVideo(context).showAndHideOverlay(show);
     if (!_focusRawKeyboard.hasFocus)
       FocusScope.of(context).requestFocus(_focusRawKeyboard);
   }
@@ -414,9 +404,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
           visible: !_showThumbnail,
           child: VideoOverlay(
             visible: _showButtons,
-            videoListener: _videoListener,
-            onTapPlayAndPause: _onTapPlayAndPause,
-            cancelOverlayTimer: _cancelCloseOverlayButtons,
           ),
         ),
         Center(
@@ -442,7 +429,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
         CustomOpacityTransition(
           visible: _showAMomentPlayAndPause ||
               _controller.value.position >= _controller.value.duration,
-          child: PlayAndPause(onTap: _onTapPlayAndPause),
+          child: PlayAndPause(type: PlayAndPauseType.center),
         ),
         CustomSwipeTransition(
           visible: _showVolumeStatus,
@@ -454,14 +441,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
             progress: (_currentVolume / _maxVolume),
           ),
         ),
-        // CustomOpacityTransition(
-        //   visible: _showSettings,
-        //   child: SettingsMenu(
-        //     onChangeVisible: () =>
-        //         setState(() => _showSettings = !_showSettings),
-        //     videoListener: _videoListener,
-        //   ),
-        // ),
         _rewindAndForwardIconsIndicator(),
       ]),
     );
@@ -526,7 +505,11 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   Widget _playAndPause(Widget child) {
-    return GestureDetector(child: child, onTap: _onTapPlayAndPause);
+    return GestureDetector(
+      onTap: _onTapPlayAndPause,
+      child: child,
+      behavior: HitTestBehavior.opaque,
+    );
   }
 
   //------//
