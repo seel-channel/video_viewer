@@ -13,7 +13,6 @@ import 'package:video_viewer/ui/overlay/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 import 'package:video_viewer/ui/widgets/volume_bar.dart';
 import 'package:video_viewer/ui/overlay/overlay.dart';
-import 'package:video_viewer/ui/utils/misc.dart';
 
 class VideoViewerCore extends StatefulWidget {
   VideoViewerCore({Key key}) : super(key: key);
@@ -434,19 +433,19 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   Widget _forwardAndRewindAmountAlert() {
-    final text = secondsFormatter(_forwardAndRewindAmount);
-    final metadata = _query.videoMetadata(context, listen: true);
-    final style = metadata.style.forwardAndRewindStyle;
+    final text = _query.secondsFormatter(_forwardAndRewindAmount);
+    final style = _query.videoStyle(context);
+    final forwardStyle = style.forwardAndRewindStyle;
 
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
-        padding: style.padding,
+        padding: forwardStyle.padding,
         decoration: BoxDecoration(
-          color: style.backgroundColor,
-          borderRadius: style.borderRadius,
+          color: forwardStyle.backgroundColor,
+          borderRadius: forwardStyle.borderRadius,
         ),
-        child: Text(text, style: metadata.style.textStyle),
+        child: Text(text, style: style.textStyle),
       ),
     );
   }

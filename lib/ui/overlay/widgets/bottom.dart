@@ -7,7 +7,6 @@ import 'package:video_viewer/ui/overlay/widgets/background.dart';
 import 'package:video_viewer/ui/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/widgets/progress_bar.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
-import 'package:video_viewer/ui/utils/misc.dart';
 
 class OverlayBottomButtons extends StatefulWidget {
   OverlayBottomButtons({Key key}) : super(key: key);
@@ -23,10 +22,9 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
 
   @override
   Widget build(BuildContext context) {
-    final metadata = _query.videoMetadata(context, listen: true);
+    final style = _query.videoStyle(context);
     final video = _query.video(context, listen: true);
 
-    final style = metadata.style;
     final isFullscreen = video.isFullScreen;
     final controller = video.controller;
     final barStyle = style.progressBarStyle;
@@ -38,8 +36,8 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
     if (controller.value.initialized) {
       final value = controller.value;
       final seconds = value.position.inSeconds;
-      position = secondsFormatter(seconds);
-      remaing = secondsFormatter(seconds - value.duration.inSeconds);
+      position = _query.secondsFormatter(seconds);
+      remaing = _query.secondsFormatter(seconds - value.duration.inSeconds);
     }
 
     return Align(
