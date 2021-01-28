@@ -3,7 +3,7 @@ import 'package:helpers/helpers.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
 class MainMenu extends StatelessWidget {
-  const MainMenu({Key key, this.onOpenMenu}) : super(key: key);
+  const MainMenu({Key key, @required this.onOpenMenu}) : super(key: key);
 
   final void Function(int index) onOpenMenu;
 
@@ -15,6 +15,7 @@ class MainMenu extends StatelessWidget {
 
     final speed = video.controller.value.playbackSpeed;
     final style = metadata.style.settingsStyle;
+    final items = metadata.settingsMenuItems;
 
     return Center(
       child: Row(
@@ -22,6 +23,7 @@ class MainMenu extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () => onOpenMenu(0),
+            behavior: HitTestBehavior.opaque,
             child: _MainMenuItem(
               icon: style.settings,
               title: metadata.language.quality,
@@ -31,6 +33,7 @@ class MainMenu extends StatelessWidget {
           SizedBox(width: style.paddingBetween),
           GestureDetector(
             onTap: () => onOpenMenu(1),
+            behavior: HitTestBehavior.opaque,
             child: _MainMenuItem(
               icon: style.speed,
               title: metadata.language.speed,
@@ -38,10 +41,15 @@ class MainMenu extends StatelessWidget {
                   speed == 1.0 ? metadata.language.normalSpeed : "x$speed",
             ),
           ),
-          // for (Widget child in mainMenuItems) ...[
-          //   SizedBox(width: style.paddingBetween),
-          //   child,
-          // ],
+          if (items != null)
+            for (int i = 0; i < items.length; i++) ...[
+              SizedBox(width: style.paddingBetween),
+              GestureDetector(
+                onTap: () => onOpenMenu(i + 2),
+                behavior: HitTestBehavior.opaque,
+                child: items[i].mainMenu,
+              ),
+            ],
         ],
       ),
     );
