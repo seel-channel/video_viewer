@@ -72,7 +72,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   void _onTapPlayAndPause() async {
     final video = _query.video(context);
     await video.onTapPlayAndPause();
-    if (!video.showOverlay) {
+    if (!video.isShowingOverlay) {
       _showAMomentPlayAndPause = true;
       _hidePlayAndPause?.cancel();
       _hidePlayAndPause = Misc.timer(600, () {
@@ -118,7 +118,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
 
   void _forwardDragStart(DragStartDetails details) {
     final video = _query.video(context);
-    if (!video.showSettingsMenu && _pointers == 1)
+    if (!video.isShowingSettingsMenu && _pointers == 1)
       setState(() {
         _horizontalDragStartOffset = details.globalPosition;
         _showForwardStatus = true;
@@ -127,7 +127,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
 
   void _forwardDragUpdate(DragUpdateDetails details) {
     final video = _query.video(context);
-    if (!video.showSettingsMenu && _pointers == 1) {
+    if (!video.isShowingSettingsMenu && _pointers == 1) {
       double diff = _horizontalDragStartOffset.dx - details.globalPosition.dx;
       double multiplicator = (diff.abs() / 50);
       int seconds = video.controller.value.position.inSeconds;
@@ -141,7 +141,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
 
   void _forwardDragEnd() {
     final video = _query.video(context);
-    if (!video.showSettingsMenu && _showForwardStatus) {
+    if (!video.isShowingSettingsMenu && _showForwardStatus) {
       setState(() => _showForwardStatus = false);
       _controllerSeekTo(_forwardAndRewindAmount);
     }
@@ -171,7 +171,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
 
   void _volumeDragStart(DragStartDetails details) {
     final video = _query.video(context);
-    if (!video.showSettingsMenu && _pointers == 1) {
+    if (!video.isShowingSettingsMenu && _pointers == 1) {
       _closeVolumeStatus?.cancel();
       setState(() {
         _verticalDragStartOffset = details.globalPosition;
@@ -183,7 +183,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
 
   void _volumeDragUpdate(DragUpdateDetails details) {
     final video = _query.video(context);
-    if (!video.showSettingsMenu && _pointers == 1) {
+    if (!video.isShowingSettingsMenu && _pointers == 1) {
       double diff = _verticalDragStartOffset.dy - details.globalPosition.dy;
       double volume = (diff / 125) + _onDragStartVolume;
       _setVolume(volume);
@@ -192,7 +192,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
 
   void _volumeDragEnd() {
     final video = _query.video(context);
-    if (!video.showSettingsMenu && _showVolumeStatus)
+    if (!video.isShowingSettingsMenu && _showVolumeStatus)
       setState(() {
         _closeVolumeStatus = Misc.timer(600, () {
           setState(() {
@@ -243,7 +243,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     return _globalGesture(
       Stack(children: [
         CustomOpacityTransition(
-          visible: !video.showThumbnail,
+          visible: !video.isShowingThumbnail,
           child: fullScreenLandscape
               ? Transform.scale(
                   scale: _scale,
@@ -256,7 +256,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
         kIsWeb
             ? MouseRegion(
                 onHover: (_) {
-                  if (!video.showOverlay) _showAndHideOverlay(true);
+                  if (!video.isShowingOverlay) _showAndHideOverlay(true);
                 },
                 child: GestureDetector(
                   onTap: _showAndHideOverlay,
@@ -283,7 +283,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
                 child: Container(color: Colors.transparent),
               ),
         CustomOpacityTransition(
-          visible: video.showThumbnail,
+          visible: video.isShowingThumbnail,
           child: GestureDetector(
             onTap: () => setState(controller.play),
             child: Container(
@@ -306,7 +306,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
           ),
         ),
         CustomOpacityTransition(
-          visible: !video.showThumbnail,
+          visible: !video.isShowingThumbnail,
           child: VideoOverlay(),
         ),
         CustomOpacityTransition(

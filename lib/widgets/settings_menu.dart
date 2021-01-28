@@ -5,12 +5,7 @@ import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/widgets/helpers.dart';
 
 class SettingsMenu extends StatefulWidget {
-  SettingsMenu({
-    Key key,
-    @required this.onChangeVisible,
-  }) : super(key: key);
-
-  final void Function() onChangeVisible;
+  SettingsMenu({Key key}) : super(key: key);
 
   @override
   _SettingsMenuState createState() => _SettingsMenuState();
@@ -61,7 +56,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
       filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
       child: Stack(children: [
         GestureDetector(
-          onTap: widget.onChangeVisible,
+          onTap: () => _query.video(context).isShowingSettingsMenu = false,
           child: Container(color: Colors.black.withOpacity(0.32)),
         ),
         CustomOpacityTransition(

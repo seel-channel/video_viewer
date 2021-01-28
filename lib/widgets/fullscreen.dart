@@ -14,7 +14,7 @@ class FullScreenPage extends StatefulWidget {
 
 class _FullScreenPageState extends State<FullScreenPage> {
   final VideoQuery _query = VideoQuery();
-  bool _showVideo = false, fixedLandscape = false;
+  bool _fixedLandscape = false;
   Timer _closeOverlay;
 
   @override
@@ -22,12 +22,8 @@ class _FullScreenPageState extends State<FullScreenPage> {
     _resetSystem();
     Misc.onLayoutRendered(() {
       final metadata = _query.videoMetadata(context);
-      // final style = metadata.style;
-      // _style =
-      //     style.thumbnail != null ? style.copywith(thumbnail: null) : style;
       _closeOverlay = Misc.periodic(3000, _resetSystem);
-      _showVideo = true;
-      fixedLandscape = metadata.onFullscreenFixLandscape;
+      _fixedLandscape = metadata.onFullscreenFixLandscape;
       setState(() {});
     });
     super.initState();
@@ -42,12 +38,8 @@ class _FullScreenPageState extends State<FullScreenPage> {
 
   void _resetSystem() {
     Misc.setSystemOverlay([]);
-    changeOrientation();
-  }
-
-  void changeOrientation() {
     Misc.setSystemOrientation(
-      fixedLandscape
+      _fixedLandscape
           ? [
               ...SystemOrientation.landscapeLeft,
               ...SystemOrientation.landscapeRight
@@ -56,34 +48,16 @@ class _FullScreenPageState extends State<FullScreenPage> {
     );
   }
 
-  Future<bool> _returnButton() async {
-    await _query.video(context).closeFullScreen(context);
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final metadata = _query.videoMetadata(context, listen: true);
-    final style = metadata.style;
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: WillPopScope(
-        onWillPop: _returnButton,
-        child: Center(
-          child: BooleanTween(
-            tween: Tween<double>(begin: 0, end: 1.0),
-            curve: Curves.ease,
-            animate: _showVideo,
-            duration: Duration(milliseconds: style.transitions),
-            builder: (value) {
-              return Opacity(
-                opacity: value,
-                child: VideoViewerCore(),
-              );
-            },
-          ),
-        ),
+        onWillPop: () async {
+          await _query.video(context).closeFullScreen(context);
+          return false;
+        },
+        child: Center(child: VideoViewerCore()),
       ),
     );
   }

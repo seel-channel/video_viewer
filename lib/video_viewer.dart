@@ -1,9 +1,7 @@
 library video_viewer;
 
 import 'package:flutter/material.dart';
-import 'package:helpers/helpers.dart';
 import 'package:provider/provider.dart';
-import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/bloc/controller.dart';
 import 'package:video_viewer/domain/bloc/metadata.dart';
 
@@ -92,7 +90,6 @@ class VideoViewer extends StatefulWidget {
 }
 
 class VideoViewerState extends State<VideoViewer> {
-  final VideoQuery _query = VideoQuery();
   VideoControllerNotifier _notifier;
   bool _initialized = false;
 
@@ -102,24 +99,21 @@ class VideoViewerState extends State<VideoViewer> {
     final controller = widget.source.values.toList()[0].video;
     controller.initialize().then((_) {
       _notifier = VideoControllerNotifier(
-        looping: widget.looping,
+        isLooping: widget.looping,
         controller: controller,
         activeSource: activedSource,
       );
       if (widget.autoPlay) controller.play();
       _initialized = true;
+      _notifier.isShowingThumbnail = widget.style.thumbnail != null;
       setState(() {});
-    });
-
-    Misc.onLayoutRendered(() {
-      _query.video(context).showThumbnail = widget.style.thumbnail != null;
     });
     super.initState();
   }
 
   @override
   void dispose() {
-    _query.video(context).dispose();
+    _notifier.dispose();
     super.dispose();
   }
 

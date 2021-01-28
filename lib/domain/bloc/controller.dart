@@ -15,30 +15,30 @@ class VideoControllerNotifier extends ChangeNotifier {
   VideoControllerNotifier({
     VideoPlayerController controller,
     String activeSource,
-    this.looping,
+    this.isLooping,
   }) {
     this._activeSource = activeSource;
     this._controller = controller;
     this._controller.addListener(_videoListener);
   }
 
-  final bool looping;
+  final bool isLooping;
   VideoPlayerController _controller;
   String _activeSource;
   bool _isBuffering = false,
-      _showOverlay = false,
+      _isShowingOverlay = false,
       _isFullScreen = false,
       _isGoingToCloseBufferingWidget = false;
   int _lastVideoPosition = 0;
   Timer _closeOverlayButtons, _timerPosition;
 
-  bool showThumbnail = false;
-  bool _showSettingsMenu = false;
+  bool _isShowingThumbnail = true;
+  bool _isShowingSettingsMenu = false;
 
   VideoPlayerController get controller => _controller;
   String get activeSource => _activeSource;
+  bool get isShowingOverlay => _isShowingOverlay;
   bool get isFullScreen => _isFullScreen;
-  bool get showOverlay => _showOverlay;
   bool get isPlaying => _controller.value.isPlaying;
 
   bool get isBuffering => _isBuffering;
@@ -53,20 +53,33 @@ class VideoControllerNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool get showSettingsMenu => _showSettingsMenu;
-  set showSettingsMenu(bool value) {
-    _showSettingsMenu = value;
+  bool get isShowingSettingsMenu => _isShowingSettingsMenu;
+  set isShowingSettingsMenu(bool value) {
+    _isShowingSettingsMenu = value;
+    notifyListeners();
+  }
+
+  bool get isShowingThumbnail => _isShowingThumbnail;
+  set isShowingThumbnail(bool value) {
+    _isShowingThumbnail = value;
     notifyListeners();
   }
 
   @override
   void dispose() async {
+    _timerPosition?.cancel();
+    _closeOverlayButtons?.cancel();
     await _controller?.pause();
     await _controller.dispose();
+    _closeOverlayButtons = null;
+    _timerPosition = null;
     _controller = null;
     super.dispose();
   }
 
+  //----------//
+  //FULLSCREEN//
+  //----------//
   Future<void> openFullScreen(BuildContext context) async {
     if (kIsWeb) {
       html.document.documentElement.requestFullscreen();
@@ -78,12 +91,12 @@ class VideoControllerNotifier extends ChangeNotifier {
       notifyListeners();
       await PushRoute.page(
         context,
-        ListenableProvider.value(
-          value: VideoQuery().video(context),
-          child: Provider.value(
-            value: VideoQuery().videoMetadata(context),
-            child: FullScreenPage(),
-          ),
+        MultiProvider(
+          providers: [
+            ListenableProvider.value(value: VideoQuery().video(context)),
+            Provider.value(value: VideoQuery().videoMetadata(context)),
+          ],
+          child: FullScreenPage(),
         ),
         transition: false,
       );
@@ -111,44 +124,30 @@ class VideoControllerNotifier extends ChangeNotifier {
   Future<void> changeSource({
     @required VideoPlayerController source,
     @required String activeSource,
-    bool initialize = true,
   }) async {
-    double speed = _controller.value.playbackSpeed;
-    Duration seekTo = _controller.value.position;
-    _activeSource = activeSource;
+    final double speed = _controller.value.playbackSpeed;
+    final Duration seekTo = _controller.value.position;
 
-    if (initialize) {
-      await source.initialize();
-      _setSettingsController(source, speed, seekTo);
-    } else {
-      _setSettingsController(source, speed, seekTo);
-    }
-    notifyListeners();
-  }
-
-  void _setSettingsController(
-    VideoPlayerController source,
-    double speed,
-    Duration seekTo,
-  ) {
+    await source.initialize();
     _controller = source;
+    _activeSource = activeSource;
     _controller.addListener(_videoListener);
-    _controller.setPlaybackSpeed(speed);
-    _controller.setLooping(looping);
-    _controller.seekTo(seekTo);
-    _controller.play();
+    await _controller.setPlaybackSpeed(speed);
+    await _controller.setLooping(isLooping);
+    await _controller.seekTo(seekTo);
+    await _controller.play();
     notifyListeners();
   }
 
   void _videoListener() {
     final value = _controller.value;
-    if (isPlaying && showThumbnail) {
-      showThumbnail = false;
+    if (isPlaying && isShowingThumbnail) {
+      _isShowingThumbnail = false;
       notifyListeners();
     }
-    if (_showOverlay) {
+    if (_isShowingOverlay) {
       if (isPlaying) {
-        if (value.position >= value.duration && looping) {
+        if (value.position >= value.duration && isLooping) {
           _controller.seekTo(Duration.zero);
           notifyListeners();
         } else {
@@ -167,7 +166,7 @@ class VideoControllerNotifier extends ChangeNotifier {
       _isGoingToCloseBufferingWidget = true;
       _closeOverlayButtons = Misc.timer(3200, () {
         if (isPlaying) {
-          _showOverlay = false;
+          _isShowingOverlay = false;
           cancelCloseOverlay();
         }
       });
@@ -195,11 +194,14 @@ class VideoControllerNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  //-------//
+  //OVERLAY//
+  //-------//
   Future<void> onTapPlayAndPause() async {
     final value = _controller.value;
     if (isPlaying) {
       await _controller.pause();
-      if (!_showOverlay) _showOverlay = false;
+      if (!_isShowingOverlay) _isShowingOverlay = false;
     } else {
       if (value.position >= value.duration)
         await _controller.seekTo(Duration.zero);
@@ -210,8 +212,8 @@ class VideoControllerNotifier extends ChangeNotifier {
   }
 
   void showAndHideOverlay([bool show]) {
-    _showOverlay = show ?? !_showOverlay;
-    if (_showOverlay) _isGoingToCloseBufferingWidget = false;
+    _isShowingOverlay = show ?? !_isShowingOverlay;
+    if (_isShowingOverlay) _isGoingToCloseBufferingWidget = false;
     notifyListeners();
   }
 }

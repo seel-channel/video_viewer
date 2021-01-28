@@ -16,10 +16,9 @@ class VideoOverlay extends StatelessWidget {
     final query = VideoQuery();
     final style = query.videoMetadata(context, listen: true).style;
     final video = query.video(context, listen: true);
-    final setting = ValueNotifier<bool>(false);
 
     final header = style.header;
-    final visible = video.showOverlay;
+    final visible = video.isShowingOverlay;
     final controller = video.controller;
 
     return Stack(children: [
@@ -38,12 +37,7 @@ class VideoOverlay extends StatelessWidget {
       CustomSwipeTransition(
         direction: SwipeDirection.fromBottom,
         visible: visible,
-        child: ValueListenableBuilder(
-          valueListenable: setting,
-          builder: (_, bool value, ___) => OverlayBottomButtons(
-            onShowSettings: () => setting.value = !value,
-          ),
-        ),
+        child: OverlayBottomButtons(),
       ),
       AnimatedBuilder(
         animation: controller,
@@ -52,17 +46,9 @@ class VideoOverlay extends StatelessWidget {
           child: Center(child: PlayAndPause(type: PlayAndPauseType.center)),
         ),
       ),
-      ValueListenableBuilder(
-        valueListenable: setting,
-        builder: (_, bool value, ___) => CustomOpacityTransition(
-          visible: value,
-          child: SettingsMenu(
-            onChangeVisible: () {
-              setting.value = !value;
-              video.showSettingsMenu = !value;
-            },
-          ),
-        ),
+      CustomOpacityTransition(
+        visible: video.isShowingSettingsMenu,
+        child: SettingsMenu(),
       ),
     ]);
   }

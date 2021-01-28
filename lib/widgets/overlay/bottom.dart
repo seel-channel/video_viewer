@@ -10,12 +10,7 @@ import 'package:video_viewer/widgets/helpers.dart';
 import 'package:video_viewer/utils/misc.dart';
 
 class OverlayBottomButtons extends StatefulWidget {
-  OverlayBottomButtons({
-    Key key,
-    @required this.onShowSettings,
-  }) : super(key: key);
-
-  final void Function() onShowSettings;
+  OverlayBottomButtons({Key key}) : super(key: key);
 
   @override
   _OverlayBottomButtonsState createState() => _OverlayBottomButtonsState();
@@ -101,7 +96,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
             Align(
               alignment: Alignment.topRight,
               child: GestureDetector(
-                onTap: widget.onShowSettings,
+                onTap: () => video.isShowingSettingsMenu = true,
                 child: Container(
                   color: Colors.transparent,
                   child: style.settingsStyle.settings,
