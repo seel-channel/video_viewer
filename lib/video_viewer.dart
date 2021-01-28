@@ -9,7 +9,7 @@ import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/domain/entities/settings_menu_item.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/domain/entities/language.dart';
-import 'package:video_viewer/ui/video_core.dart';
+import 'package:video_viewer/ui/video_core/video_core.dart';
 
 export 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 export 'package:video_viewer/domain/entities/settings_menu_item.dart';

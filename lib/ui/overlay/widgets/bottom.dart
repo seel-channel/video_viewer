@@ -155,7 +155,7 @@ class _TextPositionProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = VideoQuery().videoMetadata(context, listen: true).style;
+    final style = VideoQuery().videoStyle(context);
     double width = 60;
     double margin = 20;
 
