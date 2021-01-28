@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:video_viewer/data/repositories/video.dart';
 
+import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
-import 'package:video_viewer/utils/sources.dart';
-import 'package:video_viewer/video_viewer.dart';
-import 'package:video_viewer/widgets/fullscreen.dart';
+import 'package:video_viewer/ui/fullscreen.dart';
 
 class VideoControllerNotifier extends ChangeNotifier {
   VideoControllerNotifier({

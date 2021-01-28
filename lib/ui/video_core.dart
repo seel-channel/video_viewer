@@ -9,11 +9,11 @@ import 'package:video_player/video_player.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
-import 'package:video_viewer/widgets/overlay/widgets/play_and_pause.dart';
-import 'package:video_viewer/widgets/overlay/overlay.dart';
-import 'package:video_viewer/widgets/progress.dart';
-import 'package:video_viewer/widgets/helpers.dart';
-import 'package:video_viewer/utils/misc.dart';
+import 'package:video_viewer/ui/overlay/widgets/play_and_pause.dart';
+import 'package:video_viewer/ui/widgets/transitions.dart';
+import 'package:video_viewer/ui/widgets/volume_bar.dart';
+import 'package:video_viewer/ui/overlay/overlay.dart';
+import 'package:video_viewer/ui/utils/misc.dart';
 
 class VideoViewerCore extends StatefulWidget {
   VideoViewerCore({Key key}) : super(key: key);

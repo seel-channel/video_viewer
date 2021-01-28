@@ -3,7 +3,7 @@ import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 
 import 'package:video_viewer/data/repositories/video.dart';
-import 'package:video_viewer/widgets/video_core.dart';
+import 'package:video_viewer/ui/video_core.dart';
 
 class FullScreenPage extends StatefulWidget {
   FullScreenPage({Key key}) : super(key: key);

@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage> {
       "720p":
           "https://file-examples-com.github.io/uploads/2017/04/file_example_MP4_480_1_5MG.mp4",
     };
-    return video(getNetworkVideoSources(src));
+    return video(VideoSource.getNetworkVideoSources(src));
   }
 
   Widget video(source) {
@@ -127,7 +127,8 @@ class _HomePageState extends State<HomePage> {
   ///USE [path_provider] AND [dart.io] (Only available on Android and iOS)
   Future<Map<String, VideoPlayerController>> createFiles(String url) async {
     final Directory directory = await getApplicationDocumentsDirectory();
-    final Map<String, String> files = await getm3u8VideoFileData(url); //STAAAR
+    final Map<String, String> files =
+        await VideoSource.getm3u8VideoFileData(url);
     Map<String, VideoPlayerController> sources = {
       "Auto": VideoPlayerController.network(url)
     };
@@ -155,7 +156,7 @@ class _HomePageState extends State<HomePage> {
     return VideoViewer(
       onFullscreenFixLandscape: false,
       language: VideoViewerLanguage.es,
-      source: getNetworkVideoSources(source),
+      source: VideoSource.getNetworkVideoSources(source),
       style: VideoViewerStyle(
         header: Container(
           width: double.infinity,
