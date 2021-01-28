@@ -14,7 +14,17 @@ class VideoMetadata {
     @required this.onFullscreenFixLandscape,
     @required this.language,
     @required this.settingsMenuItems,
-  }) : this.style = style ?? VideoViewerStyle();
+  }) : this.style = style ?? VideoViewerStyle() {
+    originalStyle = this.style;
+    responsiveStyle = originalStyle.copywith(
+      textStyle: originalStyle.textStyle.merge(
+        TextStyle(
+          fontSize: originalStyle.textStyle.fontSize +
+              originalStyle.inLandscapeEnlargeTheTextBy,
+        ),
+      ),
+    );
+  }
 
   final int rewindAmount, forwardAmount;
   final bool onFullscreenFixLandscape;
@@ -22,5 +32,8 @@ class VideoMetadata {
   final VideoViewerLanguage language;
   final Map<String, VideoSource> source;
   final List<SettingsMenuItem> settingsMenuItems;
+
   VideoViewerStyle style;
+  VideoViewerStyle originalStyle;
+  VideoViewerStyle responsiveStyle;
 }

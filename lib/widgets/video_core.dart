@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_player/video_player.dart';
 
-import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
@@ -42,10 +41,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   bool _showVolumeStatus = false;
   Timer _closeVolumeStatus;
 
-  //LANDSCAPE
-  VideoViewerStyle _style, _landscapeStyle;
-  double _progressBarMargin = 0;
-
   //VIDEO ZOOM
   double _scale = 1.0, _maxScale = 1.0, _minScale = 1.0, _initialScale = 1.0;
   int _pointers = 0;
@@ -57,10 +52,9 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   void initState() {
     Misc.onLayoutRendered(() {
       final metadata = _query.videoMetadata(context);
-      _style = metadata.style;
-      _landscapeStyle = _getResponsiveText();
       _defaultRewindAmount = metadata.rewindAmount;
       _defaultForwardAmount = metadata.forwardAmount;
+      setState(() {});
     });
     super.initState();
   }
@@ -222,24 +216,16 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   //-----//
   @override
   Widget build(BuildContext context) {
-    final double width = GetMedia(context).width;
-
     return OrientationBuilder(builder: (_, orientation) {
       final video = _query.video(context, listen: true);
-      final metadata = _query.videoMetadata(context);
+      final metadata = _query.videoMetadata(context, listen: true);
+
       Orientation landscape = Orientation.landscape;
-      double padding = metadata.style.progressBarStyle.paddingBeetwen;
       bool fullScreenLandscape = video.isFullScreen && orientation == landscape;
 
-      _progressBarMargin = orientation == landscape ? padding * 2 : padding;
-      _style = kIsWeb
-          ? width > 1400
-              ? _getResponsiveText(
-                  _style.inLandscapeEnlargeTheTextBy * (width / 1400))
-              : _landscapeStyle
-          : orientation == landscape
-              ? _landscapeStyle
-              : _style;
+      metadata.style = orientation == landscape
+          ? metadata.responsiveStyle
+          : metadata.originalStyle;
 
       return fullScreenLandscape
           ? _player(orientation, fullScreenLandscape)
@@ -358,17 +344,6 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     );
   }
 
-  VideoViewerStyle _getResponsiveText([double multiplier = 1]) {
-    return _style.copywith(
-      textStyle: _style.textStyle.merge(
-        TextStyle(
-          fontSize: _style.textStyle.fontSize +
-              _style.inLandscapeEnlargeTheTextBy * multiplier,
-        ),
-      ),
-    );
-  }
-
   Widget _playerAspectRatio(Widget child) {
     final controller = _query.video(context, listen: true).controller;
     return AspectRatio(
@@ -443,7 +418,9 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   Widget _rewindAndForwardIconsIndicator() {
-    final style = _style.forwardAndRewindStyle;
+    final style =
+        _query.videoMetadata(context, listen: true).style.forwardAndRewindStyle;
+
     return _rewindAndForwardLayout(
       rewind: CustomOpacityTransition(
         visible: _showAMomentRewindIcons[0],
@@ -457,8 +434,10 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   Widget _forwardAndRewindAmountAlert() {
-    String text = secondsFormatter(_forwardAndRewindAmount);
-    final style = _style.forwardAndRewindStyle;
+    final text = secondsFormatter(_forwardAndRewindAmount);
+    final metadata = _query.videoMetadata(context, listen: true);
+    final style = metadata.style.forwardAndRewindStyle;
+
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
@@ -467,7 +446,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
           color: style.backgroundColor,
           borderRadius: style.borderRadius,
         ),
-        child: Text(text, style: _style.textStyle),
+        child: Text(text, style: metadata.style.textStyle),
       ),
     );
   }

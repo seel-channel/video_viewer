@@ -10,8 +10,10 @@ import 'package:video_viewer/widgets/helpers.dart';
 import 'package:video_viewer/utils/misc.dart';
 
 class OverlayBottomButtons extends StatefulWidget {
-  OverlayBottomButtons({Key key, @required this.onShowSettings})
-      : super(key: key);
+  OverlayBottomButtons({
+    Key key,
+    @required this.onShowSettings,
+  }) : super(key: key);
 
   final void Function() onShowSettings;
 
@@ -26,14 +28,15 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
 
   @override
   Widget build(BuildContext context) {
-    final style = _query.videoMetadata(context, listen: true).style;
+    final metadata = _query.videoMetadata(context, listen: true);
     final video = _query.video(context, listen: true);
-    final edgeInset = Margin.vertical(20.0);
 
+    final style = metadata.style;
     final isFullscreen = video.isFullScreen;
     final controller = video.controller;
     final barStyle = style.progressBarStyle;
     final padding = barStyle.paddingBeetwen;
+    final edgeInset = Margin.vertical(padding);
 
     String position = "00:00", remaing = "-00:00";
 
@@ -56,10 +59,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
           child: Row(children: [
             PlayAndPause(
               type: PlayAndPauseType.bottom,
-              padding: Margin.symmetric(
-                horizontal: padding,
-                vertical: edgeInset.vertical,
-              ),
+              padding: Margin.all(padding),
             ),
             Expanded(
               child: AnimatedBuilder(

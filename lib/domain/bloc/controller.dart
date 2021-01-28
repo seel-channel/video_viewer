@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:video_viewer/data/repositories/video.dart';
 
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/utils/sources.dart';
@@ -76,7 +78,13 @@ class VideoControllerNotifier extends ChangeNotifier {
       notifyListeners();
       await PushRoute.page(
         context,
-        FullScreenPage(),
+        ListenableProvider.value(
+          value: VideoQuery().video(context),
+          child: Provider.value(
+            value: VideoQuery().videoMetadata(context),
+            child: FullScreenPage(),
+          ),
+        ),
         transition: false,
       );
     }
