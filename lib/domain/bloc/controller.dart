@@ -31,6 +31,7 @@ class VideoControllerNotifier extends ChangeNotifier {
   Timer _closeOverlayButtons, _timerPosition;
 
   bool showThumbnail = false;
+  bool _showSettingsMenu = false;
 
   VideoPlayerController get controller => _controller;
   String get activeSource => _activeSource;
@@ -47,6 +48,12 @@ class VideoControllerNotifier extends ChangeNotifier {
   int get lastVideoPosition => _lastVideoPosition;
   set lastVideoPosition(int value) {
     _lastVideoPosition = value;
+    notifyListeners();
+  }
+
+  bool get showSettingsMenu => _showSettingsMenu;
+  set showSettingsMenu(bool value) {
+    _showSettingsMenu = value;
     notifyListeners();
   }
 

@@ -3,7 +3,6 @@ library video_viewer;
 import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/bloc/controller.dart';
 import 'package:video_viewer/domain/bloc/metadata.dart';
@@ -13,7 +12,6 @@ import 'package:video_viewer/domain/entities/settings_menu_item.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/domain/entities/language.dart';
 import 'package:video_viewer/widgets/video_core.dart';
-import 'package:video_viewer/utils/sources.dart';
 
 export 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 export 'package:video_viewer/domain/entities/settings_menu_item.dart';

@@ -1,6 +1,5 @@
 import 'package:helpers/helpers.dart';
 import 'package:flutter/cupertino.dart';
-
 import 'package:video_viewer/data/repositories/video.dart';
 
 import 'package:video_viewer/widgets/overlay/widgets/play_and_pause.dart';
@@ -41,7 +40,7 @@ class VideoOverlay extends StatelessWidget {
         visible: visible,
         child: ValueListenableBuilder(
           valueListenable: setting,
-          builder: (_, value, ___) => OverlayBottomButtons(
+          builder: (_, bool value, ___) => OverlayBottomButtons(
             onShowSettings: () => setting.value = !value,
           ),
         ),
@@ -55,10 +54,13 @@ class VideoOverlay extends StatelessWidget {
       ),
       ValueListenableBuilder(
         valueListenable: setting,
-        builder: (_, value, ___) => CustomOpacityTransition(
+        builder: (_, bool value, ___) => CustomOpacityTransition(
           visible: value,
           child: SettingsMenu(
-            onChangeVisible: () => setting.value = !value,
+            onChangeVisible: () {
+              setting.value = !value;
+              video.showSettingsMenu = !value;
+            },
           ),
         ),
       ),

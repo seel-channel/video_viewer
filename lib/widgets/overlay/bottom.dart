@@ -1,13 +1,10 @@
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:universal_html/html.dart' as html;
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:video_viewer/data/repositories/video.dart';
 
 import 'package:video_viewer/widgets/overlay/widgets/play_and_pause.dart';
 import 'package:video_viewer/widgets/overlay/widgets/background.dart';
-import 'package:video_viewer/widgets/fullscreen.dart';
 import 'package:video_viewer/widgets/progress.dart';
 import 'package:video_viewer/widgets/helpers.dart';
 import 'package:video_viewer/utils/misc.dart';

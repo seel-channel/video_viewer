@@ -2,6 +2,7 @@ import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 
 import 'package:video_player/video_player.dart';
+import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/video_viewer.dart';
 
 class VideoProgressBar extends StatefulWidget {
@@ -220,17 +221,15 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 }
 
 class VideoVolumeBar extends StatelessWidget {
-  const VideoVolumeBar({
-    Key key,
-    this.style,
-    this.progress,
-  }) : super(key: key);
+  const VideoVolumeBar({Key key, this.progress}) : super(key: key);
 
   final double progress;
-  final VolumeBarStyle style;
 
   @override
   Widget build(BuildContext context) {
+    final style =
+        VideoQuery().videoMetadata(context, listen: true).style.volumeBarStyle;
+
     return Align(
       alignment: style.alignment,
       child: Padding(

@@ -25,13 +25,8 @@ class VideoViewerCore extends StatefulWidget {
 
 class VideoViewerCoreState extends State<VideoViewerCore> {
   final VideoQuery _query = VideoQuery();
-  VideoPlayerController _controller;
-  bool _isBuffering = false,
-      _isFullScreen = false,
-      _showButtons = false,
-      _showSettings = false,
-      _showAMomentPlayAndPause = false;
-  Timer _closeOverlayButtons, _timerPosition, _hidePlayAndPause;
+  bool _showAMomentPlayAndPause = false;
+  Timer _hidePlayAndPause;
 
   //REWIND AND FORWARD
   int _defaultRewindAmount = 10;
@@ -60,11 +55,10 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
 
   @override
   void initState() {
-    _style = _style;
-    _landscapeStyle = _getResponsiveText();
     Misc.onLayoutRendered(() {
       final metadata = _query.videoMetadata(context);
       _style = metadata.style;
+      _landscapeStyle = _getResponsiveText();
       _defaultRewindAmount = metadata.rewindAmount;
       _defaultForwardAmount = metadata.forwardAmount;
     });
@@ -74,9 +68,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   @override
   void dispose() {
     _focusRawKeyboard.dispose();
-    _timerPosition?.cancel();
     _hidePlayAndPause?.cancel();
-    _closeOverlayButtons?.cancel();
     super.dispose();
   }
 
@@ -131,7 +123,8 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   void _forwardDragStart(DragStartDetails details) {
-    if (!_showSettings && _pointers == 1)
+    final video = _query.video(context);
+    if (!video.showSettingsMenu && _pointers == 1)
       setState(() {
         _horizontalDragStartOffset = details.globalPosition;
         _showForwardStatus = true;
@@ -139,20 +132,22 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   void _forwardDragUpdate(DragUpdateDetails details) {
-    if (!_showSettings && _pointers == 1) {
+    final video = _query.video(context);
+    if (!video.showSettingsMenu && _pointers == 1) {
       double diff = _horizontalDragStartOffset.dx - details.globalPosition.dx;
       double multiplicator = (diff.abs() / 50);
-      int seconds = _controller.value.position.inSeconds;
+      int seconds = video.controller.value.position.inSeconds;
       int amount = -((diff / 10).round() * multiplicator).round();
       setState(() {
-        if (seconds + amount < _controller.value.duration.inSeconds &&
+        if (seconds + amount < video.controller.value.duration.inSeconds &&
             seconds + amount > 0) _forwardAndRewindAmount = amount;
       });
     }
   }
 
   void _forwardDragEnd() {
-    if (!_showSettings && _showForwardStatus) {
+    final video = _query.video(context);
+    if (!video.showSettingsMenu && _showForwardStatus) {
       setState(() => _showForwardStatus = false);
       _controllerSeekTo(_forwardAndRewindAmount);
     }
@@ -162,24 +157,27 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   //CONTROLLER VOLUME//
   //-----------------//
   void _updateVolumes() {
+    final video = _query.video(context);
     _maxVolume = 1.0;
-    _onDragStartVolume = _controller.value.volume;
+    _onDragStartVolume = video.controller.value.volume;
     _currentVolume = _onDragStartVolume;
     if (mounted) setState(() {});
   }
 
   void _setVolume(double volume) async {
     if (volume <= _maxVolume && volume >= 0) {
-      final double fractional = _maxVolume * 0.05;
+      final video = _query.video(context);
+      final fractional = _maxVolume * 0.05;
       if (volume >= _maxVolume - fractional) volume = _maxVolume;
       if (volume <= fractional) volume = 0.0;
-      await _controller.setVolume(volume);
+      await video.controller.setVolume(volume);
       setState(() => _currentVolume = volume);
     }
   }
 
   void _volumeDragStart(DragStartDetails details) {
-    if (!_showSettings && _pointers == 1) {
+    final video = _query.video(context);
+    if (!video.showSettingsMenu && _pointers == 1) {
       _closeVolumeStatus?.cancel();
       setState(() {
         _verticalDragStartOffset = details.globalPosition;
@@ -190,7 +188,8 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   void _volumeDragUpdate(DragUpdateDetails details) {
-    if (!_showSettings && _pointers == 1) {
+    final video = _query.video(context);
+    if (!video.showSettingsMenu && _pointers == 1) {
       double diff = _verticalDragStartOffset.dy - details.globalPosition.dy;
       double volume = (diff / 125) + _onDragStartVolume;
       _setVolume(volume);
@@ -198,7 +197,8 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   void _volumeDragEnd() {
-    if (!_showSettings && _showVolumeStatus)
+    final video = _query.video(context);
+    if (!video.showSettingsMenu && _showVolumeStatus)
       setState(() {
         _closeVolumeStatus = Misc.timer(600, () {
           setState(() {
@@ -225,9 +225,11 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
     final double width = GetMedia(context).width;
 
     return OrientationBuilder(builder: (_, orientation) {
+      final video = _query.video(context, listen: true);
+      final metadata = _query.videoMetadata(context);
       Orientation landscape = Orientation.landscape;
-      double padding = _style.progressBarStyle.paddingBeetwen;
-      bool fullScreenLandscape = _isFullScreen && orientation == landscape;
+      double padding = metadata.style.progressBarStyle.paddingBeetwen;
+      bool fullScreenLandscape = video.isFullScreen && orientation == landscape;
 
       _progressBarMargin = orientation == landscape ? padding * 2 : padding;
       _style = kIsWeb
@@ -248,6 +250,9 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   Widget _player(Orientation orientation, bool fullScreenLandscape) {
     final Size size = GetMedia(context).size;
     final video = _query.video(context, listen: true);
+    final controller = video.controller;
+
+    final style = _query.videoMetadata(context, listen: true).style;
 
     return _globalGesture(
       Stack(children: [
@@ -257,14 +262,15 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
               ? Transform.scale(
                   scale: _scale,
                   child: Center(
-                    child: _playerAspectRatio(VideoPlayer(_controller)),
-                  ))
+                    child: _playerAspectRatio(VideoPlayer(controller)),
+                  ),
+                )
               : VideoPlayer(video.controller),
         ),
         kIsWeb
             ? MouseRegion(
                 onHover: (_) {
-                  if (!_showButtons) _showAndHideOverlay(true);
+                  if (!video.showOverlay) _showAndHideOverlay(true);
                 },
                 child: GestureDetector(
                   onTap: _showAndHideOverlay,
@@ -276,7 +282,7 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
                 onScaleStart: fullScreenLandscape
                     ? (_) => setState(() {
                           final double aspectWidth =
-                              size.height * _controller.value.aspectRatio;
+                              size.height * controller.value.aspectRatio;
                           _initialScale = _scale;
                           _maxScale = size.width / aspectWidth;
                         })
@@ -293,18 +299,14 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
         CustomOpacityTransition(
           visible: video.showThumbnail,
           child: GestureDetector(
-            onTap: () => setState(() => _controller.play()),
+            onTap: () => setState(controller.play),
             child: Container(
               color: Colors.transparent,
-              child: _style.thumbnail,
+              child: style.thumbnail,
             ),
           ),
         ),
         _rewindAndForward(),
-        CustomOpacityTransition(
-          visible: !video.showThumbnail,
-          child: VideoOverlay(),
-        ),
         Center(
           child: _playAndPause(
             Container(
@@ -318,8 +320,12 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
           ),
         ),
         CustomOpacityTransition(
-          visible: _isBuffering,
-          child: _style.buffering,
+          visible: !video.showThumbnail,
+          child: VideoOverlay(),
+        ),
+        CustomOpacityTransition(
+          visible: video.isBuffering,
+          child: style.buffering,
         ),
         CustomOpacityTransition(
           visible: _showForwardStatus,
@@ -330,19 +336,20 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
           builder: (_, __) {
             final position = video.controller.value.position;
             final duration = video.controller.value.duration;
-            return CustomOpacityTransition(
-              visible: _showAMomentPlayAndPause || position >= duration,
-              child: PlayAndPause(type: PlayAndPauseType.center),
+            return Center(
+              child: CustomOpacityTransition(
+                visible: _showAMomentPlayAndPause || position >= duration,
+                child: PlayAndPause(type: PlayAndPauseType.center),
+              ),
             );
           },
         ),
         CustomSwipeTransition(
           visible: _showVolumeStatus,
-          direction: _style.volumeBarStyle.alignment == Alignment.centerLeft
+          direction: style.volumeBarStyle.alignment == Alignment.centerLeft
               ? SwipeDirection.fromLeft
               : SwipeDirection.fromRight,
           child: VideoVolumeBar(
-            style: _style.volumeBarStyle,
             progress: (_currentVolume / _maxVolume),
           ),
         ),
@@ -352,20 +359,20 @@ class VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   VideoViewerStyle _getResponsiveText([double multiplier = 1]) {
-    final VideoViewerStyle style = _style;
-    return style.copywith(
-      textStyle: style.textStyle.merge(
+    return _style.copywith(
+      textStyle: _style.textStyle.merge(
         TextStyle(
-          fontSize: style.textStyle.fontSize +
-              style.inLandscapeEnlargeTheTextBy * multiplier,
+          fontSize: _style.textStyle.fontSize +
+              _style.inLandscapeEnlargeTheTextBy * multiplier,
         ),
       ),
     );
   }
 
   Widget _playerAspectRatio(Widget child) {
+    final controller = _query.video(context, listen: true).controller;
     return AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
+      aspectRatio: controller.value.aspectRatio,
       child: child,
     );
   }
