@@ -89,30 +89,40 @@ class VideoViewer extends StatefulWidget {
 }
 
 class VideoViewerState extends State<VideoViewer> {
-  VideoControllerNotifier _notifier;
+  VideoViewerController _controller;
   bool _initialized = false;
+
+  VideoViewerController get controller => _controller;
 
   @override
   void initState() {
-    final activedSource = widget.source.keys.toList()[0];
-    final controller = widget.source.values.toList()[0].video;
-    controller.initialize().then((_) {
-      _notifier = VideoControllerNotifier(
-        isLooping: widget.looping,
-        controller: controller,
-        activeSource: activedSource,
-      );
-      if (widget.autoPlay) controller.play();
-      _notifier.isShowingThumbnail = widget.style.thumbnail != null;
-      setState(() => _initialized = true);
-    });
+    _initVideoViewer();
     super.initState();
   }
 
   @override
   void dispose() {
-    _notifier.dispose();
+    _controller.dispose();
     super.dispose();
+  }
+
+  void _initVideoViewer() async {
+    final activedSource = widget.source.keys.toList()[0];
+    final source = widget.source.values.toList()[0];
+
+    await source.video?.initialize();
+    await source.subtitle?.initialize();
+
+    _controller = VideoViewerController(
+      subtitle: source.subtitle,
+      isLooping: widget.looping,
+      controller: source.video,
+      activeSource: activedSource,
+    );
+
+    if (widget.autoPlay) source.video.play();
+    _controller.isShowingThumbnail = widget.style.thumbnail != null;
+    setState(() => _initialized = true);
   }
 
   @override
@@ -120,7 +130,7 @@ class VideoViewerState extends State<VideoViewer> {
     return _initialized
         ? MultiProvider(
             providers: [
-              ChangeNotifierProvider.value(value: _notifier),
+              ChangeNotifierProvider.value(value: _controller),
               Provider(
                 create: (_) => VideoMetadata(
                   style: widget.style,

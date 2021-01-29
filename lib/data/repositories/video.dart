@@ -13,8 +13,8 @@ class VideoQuery extends VideoQueryRepository {
   }
 
   @override
-  VideoControllerNotifier video(BuildContext context, {bool listen = false}) {
-    return Provider.of<VideoControllerNotifier>(context, listen: listen);
+  VideoViewerController video(BuildContext context, {bool listen = false}) {
+    return Provider.of<VideoViewerController>(context, listen: listen);
   }
 
   @override

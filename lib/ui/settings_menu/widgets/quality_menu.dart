@@ -25,7 +25,7 @@ class QualityMenu extends StatelessWidget {
             onTap: () {
               if (entry.key != activeSource)
                 query.video(context).changeSource(
-                      source: entry.value.video,
+                      source: entry.value,
                       activeSource: entry.key,
                     );
               closeMenu?.call();

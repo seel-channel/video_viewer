@@ -1,42 +1,62 @@
 import 'dart:convert' show utf8;
 import 'package:http/http.dart' as http;
 
+enum SubtitleType { webvtt, srt }
+enum _SubtitleIntializeType { network, string }
+
 class SubtitleData {
+  SubtitleData({
+    this.start = Duration.zero,
+    this.end = Duration.zero,
+    this.text = "",
+  });
+
   final Duration start;
   final Duration end;
   final String text;
-
-  SubtitleData({this.start, this.end, this.text});
 }
 
-enum SubtitleType { webvtt, srt }
-
 class VideoViewerSubtitle {
+  _SubtitleIntializeType _intializedType;
   final SubtitleType type;
   String content;
   String _url;
 
-  Stream<List<SubtitleData>> _subtitleStream;
+  List<SubtitleData> _subtitles = [];
 
   VideoViewerSubtitle.network(
     String url, {
     this.type = SubtitleType.webvtt,
-  }) : this._url = url;
+  })  : this._url = url,
+        this._intializedType = _SubtitleIntializeType.network;
 
-  Future<void> initialized() async {
-    final http.Response response = await http.get(_url);
-    if (response.statusCode == 200) {
-      content = utf8.decode(
-        response.bodyBytes,
-        allowMalformed: true,
-      );
-      _subtitleStream = _getSubtitlesData();
+  VideoViewerSubtitle.content(
+    String content, {
+    this.type = SubtitleType.webvtt,
+  })  : this.content = content,
+        this._intializedType = _SubtitleIntializeType.string;
+
+  Future<void> initialize() async {
+    switch (_intializedType) {
+      case _SubtitleIntializeType.network:
+        final http.Response response = await http.get(_url);
+        if (response.statusCode == 200) {
+          content = utf8.decode(
+            response.bodyBytes,
+            allowMalformed: true,
+          );
+          _getSubtitlesData();
+        }
+        break;
+      case _SubtitleIntializeType.string:
+        _getSubtitlesData();
+        break;
     }
   }
 
-  Stream<List<SubtitleData>> get subtitles => _subtitleStream;
+  List<SubtitleData> get subtitles => _subtitles;
 
-  Stream<List<SubtitleData>> _getSubtitlesData() async* {
+  void _getSubtitlesData() async {
     RegExp regExp;
 
     switch (type) {
@@ -57,11 +77,8 @@ class VideoViewerSubtitle {
     }
 
     List<RegExpMatch> matches = regExp.allMatches(content).toList();
-    List<SubtitleData> subtitleList = [];
 
-    for (int i = 0; i < matches.length; i++) {
-      final RegExpMatch regExpMatch = matches[i];
-
+    matches.forEach((regExpMatch) {
       final Duration start = Duration(
         hours: int.parse(regExpMatch.group(2)),
         minutes: int.parse(regExpMatch.group(3)),
@@ -78,14 +95,12 @@ class VideoViewerSubtitle {
 
       final String text = _removeAllHtmlTags(regExpMatch.group(11));
 
-      subtitleList.add(SubtitleData(
+      subtitles.add(SubtitleData(
         start: start,
         end: end,
         text: text.trim(),
       ));
-
-      yield subtitleList;
-    }
+    });
   }
 
   String _removeAllHtmlTags(String htmlText) {

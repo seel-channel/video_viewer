@@ -70,14 +70,15 @@ class _SettingsMenuState extends State<SettingsMenu> {
           visible: show[1],
           child: SpeedMenu(closeMenu: closeAllAndShowMenu),
         ),
-        for (int i = 0; i < items.length; i++)
-          CustomOpacityTransition(
-            visible: show[i + 2],
-            child: SecondaryMenu(
-              children: [items[i].secondaryMenu],
-              closeMenu: closeAllAndShowMenu,
+        if (items != null)
+          for (int i = 0; i < items.length; i++)
+            CustomOpacityTransition(
+              visible: show[i + 2],
+              child: SecondaryMenu(
+                children: [items[i].secondaryMenu],
+                closeMenu: closeAllAndShowMenu,
+              ),
             ),
-          ),
       ]),
     );
   }

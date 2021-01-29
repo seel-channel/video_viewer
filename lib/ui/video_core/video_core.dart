@@ -321,10 +321,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           visible: video.isBuffering,
           child: style.buffering,
         ),
-        CustomOpacityTransition(
-          visible: _showForwardStatus,
-          child: RewindAndForwardTextAlert(amount: _forwardAndRewindAmount),
-        ),
         AnimatedBuilder(
           animation: video.controller,
           builder: (_, __) {
@@ -341,6 +337,10 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         CustomOpacityTransition(
           visible: !video.isShowingThumbnail,
           child: VideoOverlay(),
+        ),
+        CustomOpacityTransition(
+          visible: _showForwardStatus,
+          child: RewindAndForwardTextAlert(amount: _forwardAndRewindAmount),
         ),
         CustomSwipeTransition(
           visible: _showVolumeStatus,

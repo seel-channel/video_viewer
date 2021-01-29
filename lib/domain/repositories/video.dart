@@ -8,5 +8,5 @@ abstract class VideoQueryRepository {
   String secondsFormatter(int seconds);
   VideoMetadata videoMetadata(BuildContext context, {bool listen = true});
   VideoViewerStyle videoStyle(BuildContext context, {bool listen = true});
-  VideoControllerNotifier video(BuildContext context, {bool listen = false});
+  VideoViewerController video(BuildContext context, {bool listen = false});
 }
