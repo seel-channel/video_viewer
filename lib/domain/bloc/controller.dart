@@ -91,12 +91,15 @@ class VideoControllerNotifier extends ChangeNotifier {
         context,
         MultiProvider(
           providers: [
-            ListenableProvider.value(value: VideoQuery().video(context)),
-            Provider.value(value: VideoQuery().videoMetadata(context)),
+            ChangeNotifierProvider.value(
+              value: VideoQuery().video(context, listen: false),
+            ),
+            Provider.value(
+              value: VideoQuery().videoMetadata(context, listen: false),
+            ),
           ],
           child: FullScreenPage(),
         ),
-        transition: false,
       );
     }
   }

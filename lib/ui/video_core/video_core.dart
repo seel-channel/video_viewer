@@ -9,8 +9,8 @@ import 'package:video_player/video_player.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
-import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/layout.dart';
 import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/text_alert.dart';
+import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/layout.dart';
 import 'package:video_viewer/ui/video_core/widgets/aspect_ratio.dart';
 import 'package:video_viewer/ui/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
@@ -34,28 +34,27 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   int _defaultForwardAmount = 10;
   int _forwardAndRewindAmount = 0;
   bool _showForwardStatus = false;
-  Offset _horizontalDragStartOffset;
+  Offset _horizontalDragStartOffset = Offset.zero;
   List<bool> _showAMomentRewindIcons = [false, false];
 
   //VOLUME
+  final FocusNode _focusRawKeyboard = FocusNode();
   final ValueNotifier<double> _currentVolume = ValueNotifier<double>(1.0);
   final double _maxVolume = 1.0;
+  Offset _verticalDragStartOffset = Offset.zero;
   double _onDragStartVolume = 1;
-  Offset _verticalDragStartOffset;
   bool _showVolumeStatus = false;
   Timer _closeVolumeStatus;
 
   //VIDEO ZOOM
-  double _scale = 1.0, _maxScale = 1.0, _minScale = 1.0, _initialScale = 1.0;
+  final ValueNotifier<double> _scale = ValueNotifier<double>(1.0);
+  double _maxScale = 1.0, _minScale = 1.0, _initialScale = 1.0;
   int _pointers = 0;
-
-  //WEB
-  final FocusNode _focusRawKeyboard = FocusNode();
 
   @override
   void initState() {
     Misc.onLayoutRendered(() {
-      final metadata = _query.videoMetadata(context);
+      final metadata = _query.videoMetadata(context, listen: false);
       _defaultRewindAmount = metadata.rewindAmount;
       _defaultForwardAmount = metadata.forwardAmount;
       setState(() {});
@@ -67,6 +66,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   void dispose() {
     _focusRawKeyboard.dispose();
     _hidePlayAndPause?.cancel();
+    _closeVolumeStatus?.cancel();
     super.dispose();
   }
 
@@ -77,13 +77,14 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     final video = _query.video(context);
     await video.onTapPlayAndPause();
     if (!video.isShowingOverlay) {
-      _showAMomentPlayAndPause = true;
-      _hidePlayAndPause?.cancel();
-      _hidePlayAndPause = Misc.timer(600, () {
-        setState(() => _showAMomentPlayAndPause = false);
+      setState(() {
+        _showAMomentPlayAndPause = true;
+        _hidePlayAndPause?.cancel();
+        _hidePlayAndPause = Misc.timer(600, () {
+          setState(() => _showAMomentPlayAndPause = false);
+        });
       });
     }
-    setState(() {});
   }
 
   void _showAndHideOverlay([bool show]) {
@@ -154,13 +155,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //-----------------//
   //CONTROLLER VOLUME//
   //-----------------//
-  void _updateVolumes() {
-    final video = _query.video(context);
-    _onDragStartVolume = video.controller.value.volume;
-    _currentVolume.value = _onDragStartVolume;
-    if (mounted) setState(() {});
-  }
-
   void _setVolume(double volume) async {
     if (volume <= _maxVolume && volume >= 0) {
       final video = _query.video(context);
@@ -175,12 +169,13 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   void _volumeDragStart(DragStartDetails details) {
     final video = _query.video(context);
     if (!video.isShowingSettingsMenu && _pointers == 1) {
-      _closeVolumeStatus?.cancel();
       setState(() {
-        _verticalDragStartOffset = details.globalPosition;
+        _closeVolumeStatus?.cancel();
         _showVolumeStatus = true;
+        _onDragStartVolume = video.controller.value.volume;
+        _currentVolume.value = _onDragStartVolume;
+        _verticalDragStartOffset = details.globalPosition;
       });
-      _updateVolumes();
     }
   }
 
@@ -195,7 +190,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   void _volumeDragEnd() {
     final video = _query.video(context);
-    if (!video.isShowingSettingsMenu && _showVolumeStatus)
+    if (!video.isShowingSettingsMenu && _showVolumeStatus) {
       setState(() {
         _closeVolumeStatus = Misc.timer(600, () {
           setState(() {
@@ -205,6 +200,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           });
         });
       });
+    }
   }
 
   void _onKeypressVolume(bool isArrowUp) {
@@ -222,22 +218,21 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     final controller = _query.video(context).controller;
     final aspectWidth = size.height * controller.value.aspectRatio;
 
-    _initialScale = _scale;
+    _initialScale = _scale.value;
     _maxScale = size.width / aspectWidth;
     setState(() {});
   }
 
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final double newScale = _initialScale * details.scale;
-    if (newScale >= _minScale && newScale <= _maxScale)
-      setState(() => _scale = newScale);
+    if (newScale >= _minScale && newScale <= _maxScale) _scale.value = newScale;
   }
 
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (_, orientation) {
       final video = _query.video(context, listen: true);
-      final metadata = _query.videoMetadata(context, listen: true);
+      final metadata = _query.videoMetadata(context, listen: false);
 
       final isFullScreenLandscape =
           video.isFullScreen && orientation == Orientation.landscape;
@@ -265,11 +260,16 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         CustomOpacityTransition(
           visible: !video.isShowingThumbnail,
           child: isFullScreenLandscape
-              ? Transform.scale(
-                  scale: _scale,
-                  child: Center(
-                    child: VideoAspectRadio(child: VideoPlayer(controller)),
-                  ),
+              ? ValueListenableBuilder(
+                  valueListenable: _scale,
+                  builder: (_, double value, __) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Center(
+                        child: VideoAspectRadio(child: VideoPlayer(controller)),
+                      ),
+                    );
+                  },
                 )
               : VideoPlayer(video.controller),
         ),
@@ -292,7 +292,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         CustomOpacityTransition(
           visible: video.isShowingThumbnail,
           child: GestureDetector(
-            onTap: () => setState(controller.play),
+            onTap: controller.play,
             child: Container(
               color: Colors.transparent,
               child: style.thumbnail,
@@ -318,10 +318,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           ),
         ),
         CustomOpacityTransition(
-          visible: !video.isShowingThumbnail,
-          child: VideoOverlay(),
-        ),
-        CustomOpacityTransition(
           visible: video.isBuffering,
           child: style.buffering,
         ),
@@ -341,6 +337,10 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
               ),
             );
           },
+        ),
+        CustomOpacityTransition(
+          visible: !video.isShowingThumbnail,
+          child: VideoOverlay(),
         ),
         CustomSwipeTransition(
           visible: _showVolumeStatus,

@@ -103,9 +103,8 @@ class VideoViewerState extends State<VideoViewer> {
         activeSource: activedSource,
       );
       if (widget.autoPlay) controller.play();
-      _initialized = true;
       _notifier.isShowingThumbnail = widget.style.thumbnail != null;
-      setState(() {});
+      setState(() => _initialized = true);
     });
     super.initState();
   }

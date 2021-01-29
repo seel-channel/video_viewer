@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
@@ -21,25 +20,10 @@ class _SettingsMenuState extends State<SettingsMenu> {
 
   bool showMenu = true;
   List<bool> show = [false, false];
-  List<Widget> secondaryMenus = [];
 
   @override
   void initState() {
-    Misc.onLayoutRendered(() {
-      final meta = _query.videoMetadata(context);
-      final items = meta.settingsMenuItems;
-
-      if (items != null)
-        for (int i = 0; i < items.length; i++) {
-          show.add(false);
-          secondaryMenus.add(
-            SecondaryMenu(
-              children: [items[i].secondaryMenu],
-              closeMenu: closeAllAndShowMenu,
-            ),
-          );
-        }
-    });
+    show = List.filled(12, false);
     super.initState();
   }
 
@@ -52,6 +36,9 @@ class _SettingsMenuState extends State<SettingsMenu> {
 
   @override
   Widget build(BuildContext context) {
+    final meta = _query.videoMetadata(context);
+    final items = meta.settingsMenuItems;
+
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
       child: Stack(children: [
@@ -76,17 +63,20 @@ class _SettingsMenuState extends State<SettingsMenu> {
           ),
         ),
         CustomOpacityTransition(
-          visible: show[1],
-          child: SpeedMenu(closeMenu: closeAllAndShowMenu),
-        ),
-        CustomOpacityTransition(
           visible: show[0],
           child: QualityMenu(closeMenu: closeAllAndShowMenu),
         ),
-        for (int i = 0; i < secondaryMenus.length; i++)
+        CustomOpacityTransition(
+          visible: show[1],
+          child: SpeedMenu(closeMenu: closeAllAndShowMenu),
+        ),
+        for (int i = 0; i < items.length; i++)
           CustomOpacityTransition(
             visible: show[i + 2],
-            child: secondaryMenus[i],
+            child: SecondaryMenu(
+              children: [items[i].secondaryMenu],
+              closeMenu: closeAllAndShowMenu,
+            ),
           ),
       ]),
     );

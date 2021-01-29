@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
+import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/helpers.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/seconday_menu.dart';
 
@@ -19,13 +20,14 @@ class QualityMenu extends StatelessWidget {
     return SecondaryMenu(
       closeMenu: closeMenu,
       children: [
-        for (MapEntry<String, dynamic> entry in metadata.source.entries)
+        for (MapEntry<String, VideoSource> entry in metadata.source.entries)
           CustomInkWell(
             onTap: () {
               if (entry.key != activeSource)
-                query
-                    .video(context)
-                    .changeSource(source: entry.value, activeSource: entry.key);
+                query.video(context).changeSource(
+                      source: entry.value.video,
+                      activeSource: entry.key,
+                    );
               closeMenu?.call();
             },
             child: CustomText(

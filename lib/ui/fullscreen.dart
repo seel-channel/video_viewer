@@ -15,14 +15,14 @@ class FullScreenPage extends StatefulWidget {
 class _FullScreenPageState extends State<FullScreenPage> {
   final VideoQuery _query = VideoQuery();
   bool _fixedLandscape = false;
-  Timer _closeOverlay;
+  Timer _systemResetTimer;
 
   @override
   void initState() {
     _resetSystem();
     Misc.onLayoutRendered(() {
-      final metadata = _query.videoMetadata(context);
-      _closeOverlay = Misc.periodic(3000, _resetSystem);
+      final metadata = _query.videoMetadata(context, listen: false);
+      _systemResetTimer = Misc.periodic(3000, _resetSystem);
       _fixedLandscape = metadata.onFullscreenFixLandscape;
       setState(() {});
     });
@@ -31,8 +31,8 @@ class _FullScreenPageState extends State<FullScreenPage> {
 
   @override
   void dispose() {
-    _closeOverlay?.cancel();
-    _closeOverlay = null;
+    _systemResetTimer?.cancel();
+    _systemResetTimer = null;
     super.dispose();
   }
 
