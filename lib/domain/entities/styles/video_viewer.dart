@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'package:video_viewer/domain/entities/styles/forward_and_rewind.dart';
 import 'package:video_viewer/domain/entities/styles/play_and_pause.dart';
-import 'package:video_viewer/domain/entities/styles/progress_bar.dart';
 import 'package:video_viewer/domain/entities/styles/settings_menu.dart';
+import 'package:video_viewer/domain/entities/styles/progress_bar.dart';
 import 'package:video_viewer/domain/entities/styles/volume_bar.dart';
+import 'package:video_viewer/domain/entities/styles/subtitle.dart';
 
 export 'package:video_viewer/domain/entities/styles/forward_and_rewind.dart';
 export 'package:video_viewer/domain/entities/styles/play_and_pause.dart';
-export 'package:video_viewer/domain/entities/styles/progress_bar.dart';
 export 'package:video_viewer/domain/entities/styles/settings_menu.dart';
+export 'package:video_viewer/domain/entities/styles/progress_bar.dart';
 export 'package:video_viewer/domain/entities/styles/volume_bar.dart';
+export 'package:video_viewer/domain/entities/styles/subtitle.dart';
 
 class VideoViewerStyle {
   /// It is the main class of VideoViewer styles, in this class you can almost
@@ -21,6 +23,7 @@ class VideoViewerStyle {
     SettingsMenuStyle settingsStyle,
     ForwardAndRewindStyle forwardAndRewindStyle,
     VolumeBarStyle volumeBarStyle,
+    SubtitleStyle subtitleStyle,
     this.header,
     this.thumbnail,
     Widget loading,
@@ -39,6 +42,7 @@ class VideoViewerStyle {
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ),
+        this.subtitleStyle = subtitleStyle ?? SubtitleStyle(),
         this.settingsStyle = settingsStyle ?? SettingsMenuStyle(),
         this.progressBarStyle = progressBarStyle ?? ProgressBarStyle(),
         this.volumeBarStyle = volumeBarStyle ?? VolumeBarStyle(),
@@ -59,6 +63,8 @@ class VideoViewerStyle {
 
   /// It is the style that will have all the icons and elements of the progress bar
   final ProgressBarStyle progressBarStyle;
+
+  final SubtitleStyle subtitleStyle;
 
   /// With this argument change the icons that appear when double-tapping,
   /// also the style of the container that indicates when the video will be rewind or forward.

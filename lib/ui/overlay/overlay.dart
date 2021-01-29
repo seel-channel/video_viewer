@@ -21,35 +21,38 @@ class VideoOverlay extends StatelessWidget {
     final visible = video.isShowingOverlay;
     final controller = video.controller;
 
-    return Stack(children: [
-      if (header != null)
-        CustomSwipeTransition(
-          direction: SwipeDirection.fromTop,
-          visible: visible,
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: GradientBackground(
-              child: header,
-              direction: Direction.top,
+    return CustomOpacityTransition(
+      visible: !video.isShowingThumbnail,
+      child: Stack(children: [
+        if (header != null)
+          CustomSwipeTransition(
+            direction: SwipeDirection.fromTop,
+            visible: visible,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: GradientBackground(
+                child: header,
+                direction: Direction.top,
+              ),
             ),
           ),
+        CustomSwipeTransition(
+          direction: SwipeDirection.fromBottom,
+          visible: visible,
+          child: OverlayBottomButtons(),
         ),
-      CustomSwipeTransition(
-        direction: SwipeDirection.fromBottom,
-        visible: visible,
-        child: OverlayBottomButtons(),
-      ),
-      AnimatedBuilder(
-        animation: controller,
-        builder: (_, __) => CustomOpacityTransition(
-          visible: visible && !controller.value.isPlaying,
-          child: Center(child: PlayAndPause(type: PlayAndPauseType.center)),
+        AnimatedBuilder(
+          animation: controller,
+          builder: (_, __) => CustomOpacityTransition(
+            visible: visible && !controller.value.isPlaying,
+            child: Center(child: PlayAndPause(type: PlayAndPauseType.center)),
+          ),
         ),
-      ),
-      CustomOpacityTransition(
-        visible: video.isShowingSettingsMenu,
-        child: SettingsMenu(),
-      ),
-    ]);
+        CustomOpacityTransition(
+          visible: video.isShowingSettingsMenu,
+          child: SettingsMenu(),
+        ),
+      ]),
+    );
   }
 }

@@ -12,6 +12,7 @@ import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/text_alert.dart';
 import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/layout.dart';
 import 'package:video_viewer/ui/video_core/widgets/aspect_ratio.dart';
+import 'package:video_viewer/ui/video_core/widgets/subtitle.dart';
 import 'package:video_viewer/ui/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 import 'package:video_viewer/ui/widgets/volume_bar.dart';
@@ -334,10 +335,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
             );
           },
         ),
-        CustomOpacityTransition(
-          visible: !video.isShowingThumbnail,
-          child: VideoOverlay(),
-        ),
+        ActiveSubtitleText(),
+        VideoOverlay(),
         CustomOpacityTransition(
           visible: _showForwardStatus,
           child: RewindAndForwardTextAlert(amount: _forwardAndRewindAmount),
