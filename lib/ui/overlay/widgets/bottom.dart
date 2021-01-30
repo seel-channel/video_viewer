@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'package:video_viewer/data/repositories/video.dart';
 
+import 'package:video_viewer/ui/overlay/widgets/progress_bar.dart';
 import 'package:video_viewer/ui/overlay/widgets/background.dart';
 import 'package:video_viewer/ui/widgets/play_and_pause.dart';
-import 'package:video_viewer/ui/widgets/progress_bar.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class OverlayBottomButtons extends StatefulWidget {

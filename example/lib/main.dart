@@ -250,7 +250,7 @@ class SubRipSubtitleVideoExample extends StatelessWidget {
       type: SubtitleType.srt,
     );
     return VideoViewer(
-      onFullscreenFixLandscape: false,
+      looping: true,
       language: VideoViewerLanguage.es,
       source: {
         "SubRip Text": VideoSource(

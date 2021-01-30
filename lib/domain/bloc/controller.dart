@@ -77,9 +77,6 @@ class VideoViewerController extends ChangeNotifier {
     _closeOverlayButtons?.cancel();
     await _controller?.pause();
     await _controller.dispose();
-    _closeOverlayButtons = null;
-    _timerPosition = null;
-    _controller = null;
     super.dispose();
   }
 
@@ -117,13 +114,15 @@ class VideoViewerController extends ChangeNotifier {
       notifyListeners();
     }
 
-    for (SubtitleData subtitle in subtitles) {
-      if (position > subtitle.start &&
-          position < subtitle.end &&
-          subtitle != _activeSubtitle) {
-        _activeSubtitle = subtitle;
-        notifyListeners();
-        break;
+    if (_subtitle != null) {
+      for (SubtitleData subtitle in subtitles) {
+        if (position > subtitle.start &&
+            position < subtitle.end &&
+            subtitle != _activeSubtitle) {
+          _activeSubtitle = subtitle;
+          notifyListeners();
+          break;
+        }
       }
     }
 
@@ -131,7 +130,6 @@ class VideoViewerController extends ChangeNotifier {
       if (isPlaying) {
         if (position >= value.duration && isLooping) {
           _controller.seekTo(Duration.zero);
-          notifyListeners();
         } else {
           if (_timerPosition == null) _createBufferTimer();
           if (_closeOverlayButtons == null) _startCloseOverlay();

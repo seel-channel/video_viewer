@@ -27,7 +27,7 @@ class VideoViewer extends StatefulWidget {
     this.rewindAmount = 10,
     this.forwardAmount = 10,
     this.defaultAspectRatio = 16 / 9,
-    this.onFullscreenFixLandscape = true,
+    this.onFullscreenFixLandscape = false,
     this.language = VideoViewerLanguage.en,
     this.settingsMenuItems,
   })  : this.style = style ?? VideoViewerStyle(),
