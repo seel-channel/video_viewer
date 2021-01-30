@@ -10,10 +10,16 @@ class ActiveSubtitleText extends StatelessWidget {
     final style = query.videoStyle(context).subtitleStyle;
     final subtitle = query.video(context, listen: true).activeSubtitle;
 
-    return Text(
-      subtitle.text ?? "",
-      style: style.style,
-      textAlign: style.align,
+    return Align(
+      alignment: style.alignment,
+      child: Padding(
+        padding: style.padding,
+        child: Text(
+          subtitle != null ? subtitle.text : "",
+          style: style.style,
+          textAlign: style.textAlign,
+        ),
+      ),
     );
   }
 }

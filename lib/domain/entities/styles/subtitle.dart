@@ -2,10 +2,19 @@ import 'package:flutter/material.dart';
 
 class SubtitleStyle {
   final TextStyle style;
-  final TextAlign align;
+  final TextAlign textAlign;
+  final Alignment alignment;
+  final EdgeInsetsGeometry padding;
 
   SubtitleStyle({
-    this.style,
-    this.align = TextAlign.center,
-  });
+    TextStyle style,
+    this.alignment = Alignment.bottomCenter,
+    this.textAlign = TextAlign.center,
+    this.padding = const EdgeInsets.all(20.0),
+  }) : this.style = style ??
+            TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              backgroundColor: Colors.black,
+            );
 }

@@ -29,15 +29,14 @@ class VideoViewerController extends ChangeNotifier {
   VideoViewerSubtitle _subtitle;
   VideoPlayerController _controller;
 
+  int _lastVideoPosition = 0;
   bool _isBuffering = false,
       _isShowingOverlay = false,
       _isFullScreen = false,
-      _isGoingToCloseBufferingWidget = false;
-  int _lastVideoPosition = 0, _activeSubtitleIndex = 0;
+      _isGoingToCloseBufferingWidget = false,
+      _isShowingThumbnail = true,
+      _isShowingSettingsMenu = false;
   Timer _closeOverlayButtons, _timerPosition;
-
-  bool _isShowingThumbnail = true;
-  bool _isShowingSettingsMenu = false;
 
   VideoPlayerController get controller => _controller;
   List<SubtitleData> get subtitles => _subtitle.subtitles;
@@ -109,24 +108,6 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _getSubtitle(int index) {
-    final position = _controller.value.position;
-    final currentSubtitle = subtitles[index];
-
-    if (currentSubtitle.start >= position && position <= currentSubtitle.end) {
-      _activeSubtitle = currentSubtitle;
-      _activeSubtitleIndex = index;
-      notifyListeners();
-    } else if (position >= currentSubtitle.start) {
-      _getSubtitle(index + 1);
-    } else if (position <= currentSubtitle.start) {
-      _getSubtitle(index - 1);
-    } else {
-      _activeSubtitle = SubtitleData();
-      notifyListeners();
-    }
-  }
-
   void _videoListener() {
     final value = _controller.value;
     final position = value.position;
@@ -136,7 +117,15 @@ class VideoViewerController extends ChangeNotifier {
       notifyListeners();
     }
 
-    _getSubtitle(_activeSubtitleIndex);
+    for (SubtitleData subtitle in subtitles) {
+      if (position > subtitle.start &&
+          position < subtitle.end &&
+          subtitle != _activeSubtitle) {
+        _activeSubtitle = subtitle;
+        notifyListeners();
+        break;
+      }
+    }
 
     if (_isShowingOverlay) {
       if (isPlaying) {
