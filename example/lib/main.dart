@@ -32,6 +32,45 @@ class HomePage extends StatelessWidget {
   }
 }
 
+class UsingVideoControllerExample extends StatefulWidget {
+  UsingVideoControllerExample({Key key}) : super(key: key);
+
+  @override
+  _UsingVideoControllerExampleState createState() =>
+      _UsingVideoControllerExampleState();
+}
+
+class _UsingVideoControllerExampleState
+    extends State<UsingVideoControllerExample> {
+  final GlobalKey<VideoViewerState> key = GlobalKey<VideoViewerState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return VideoViewer(
+      key: key,
+      source: {
+        "SubRip Text": VideoSource(
+          video: VideoPlayerController.network(
+              "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
+          subtitle: VideoViewerSubtitle.network(
+            "https://pastebin.com/raw/h9cP6N5N",
+            type: SubtitleType.srt,
+          ),
+        )
+      },
+    );
+  }
+
+  SubtitleData getActiveSubtitle() =>
+      key.currentState.controller.activeSubtitle;
+  VideoPlayerController getVideoPlayer() =>
+      key.currentState.controller.controller;
+  String getActiveSourceName() => key.currentState.controller.activeSource;
+  bool isFullScreen() => key.currentState.controller.isFullScreen;
+  bool isBuffering() => key.currentState.controller.isBuffering;
+  bool isPlaying() => key.currentState.controller.isPlaying;
+}
+
 class NetworkVideoExample extends StatelessWidget {
   const NetworkVideoExample({Key key}) : super(key: key);
 

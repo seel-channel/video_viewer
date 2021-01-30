@@ -28,7 +28,7 @@ First, add `video_viewer` as a dependency in your **pubspec.yaml.**
 
 ```yaml
 dependencies:
-  video_viewer: ^1.0.6
+  video_viewer: ^1.0.7
 ```
 
 ### Android
@@ -49,8 +49,8 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 ```xml
 <key>NSAppTransportSecurity</key>
 <dict>
-  <key>NSAllowsArbitraryLoads</key>
-  <true/>
+   <key>NSAllowsArbitraryLoads</key>
+   <true/>
 </dict>
 ```
 
@@ -58,7 +58,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## **Global Gestures**
+## **GLOBAL GESTURES**
 
 - **One Tap:** Show or hide the overlay that contains the PlayAndPauseWidget and the ProgressBar
 - **Double tap:**
@@ -74,7 +74,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## **Android and iOS**
+## **ANDROID AND IOS**
 
 |                Playing                 |                Paused                 |
 | :------------------------------------: | :-----------------------------------: |
@@ -112,11 +112,9 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
----
-
 <br><br>
 
-## **Web**
+## **WEB**
 
 |               Playing                |               Paused                |
 | :----------------------------------: | :---------------------------------: |
@@ -156,6 +154,48 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 <br><br>
 
 ## **EXAMPLES**
+
+### Using **VideoViewerController**
+
+```dart
+class UsingVideoControllerExample extends StatefulWidget {
+  UsingVideoControllerExample({Key key}) : super(key: key);
+
+  @override
+  _UsingVideoControllerExampleState createState() => _UsingVideoControllerExampleState();
+}
+
+class _UsingVideoControllerExampleState extends State<UsingVideoControllerExample> {
+  final GlobalKey<VideoViewerState> key = GlobalKey<VideoViewerState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return VideoViewer(
+      key: key,
+      source: {
+        "SubRip Text": VideoSource(
+          video: VideoPlayerController.network(
+              "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
+          subtitle: VideoViewerSubtitle.network(
+            "https://pastebin.com/raw/h9cP6N5N",
+            type: SubtitleType.srt,
+          ),
+        )
+      },
+    );
+  }
+
+  VideoPlayerController getVideoPlayer() => key.currentState.controller.controller;
+  SubtitleData getActiveSubtitle() => key.currentState.controller.activeSubtitle;
+  String getActiveSourceName() => key.currentState.controller.activeSource;
+  bool isFullScreen() => key.currentState.controller.isFullScreen;
+  bool isBuffering() => key.currentState.controller.isBuffering;
+  bool isPlaying() => key.currentState.controller.isPlaying;
+
+}
+```
+
+<br><br>
 
 ### Network Videos
 
@@ -291,7 +331,6 @@ class WebVTTSubtitleVideoExample extends StatelessWidget {
 ### Network Video with SubRip Subtitles
 
 ```dart
-
 class SubRipSubtitleVideoExample extends StatelessWidget {
   const SubRipSubtitleVideoExample({Key key}) : super(key: key);
 
@@ -427,5 +466,4 @@ class SubRipSubtitleVideoExample extends StatelessWidget {
     );
   }
 }
-
 ```
