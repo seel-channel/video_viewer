@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(child: SubRipSubtitleVideoExample()),
+      body: Center(child: WebVTTSubtitleVideoExample()),
     );
   }
 }
@@ -122,6 +122,26 @@ class HLSVideoExample extends StatelessWidget {
     }
 
     return sources;
+  }
+}
+
+class WebVTTSubtitleVideoExample extends StatelessWidget {
+  const WebVTTSubtitleVideoExample({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return VideoViewer(
+      source: {
+        "SubRip Text": VideoSource(
+          video: VideoPlayerController.network(
+              "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
+          subtitle: VideoViewerSubtitle.network(
+            "https://pastebin.com/raw/h9cP6N5N",
+            type: SubtitleType.srt,
+          ),
+        )
+      },
+    );
   }
 }
 
@@ -250,8 +270,6 @@ class SubRipSubtitleVideoExample extends StatelessWidget {
       type: SubtitleType.srt,
     );
     return VideoViewer(
-      looping: true,
-      language: VideoViewerLanguage.es,
       source: {
         "SubRip Text": VideoSource(
           video: VideoPlayerController.network(
