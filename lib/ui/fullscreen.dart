@@ -19,8 +19,8 @@ class _FullScreenPageState extends State<FullScreenPage> {
 
   @override
   void initState() {
-    _resetSystem();
     Misc.onLayoutRendered(() {
+      _resetSystem();
       final metadata = _query.videoMetadata(context, listen: false);
       _systemResetTimer = Misc.periodic(3000, _resetSystem);
       _fixedLandscape = metadata.onFullscreenFixLandscape;

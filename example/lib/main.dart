@@ -84,7 +84,7 @@ class NetworkVideoExample extends StatelessWidget {
     };
 
     return VideoViewer(
-      onFullscreenFixLandscape: false,
+      onFullscreenFixLandscape: true,
       language: VideoViewerLanguage.es,
       source: VideoSource.getNetworkVideoSources(src),
       style: VideoViewerStyle(
@@ -171,7 +171,7 @@ class WebVTTSubtitleVideoExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return VideoViewer(
       source: {
-        "SubRip Text": VideoSource(
+        "WebVTT Caption": VideoSource(
           video: VideoPlayerController.network(
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
           subtitle: VideoViewerSubtitle.network(
@@ -310,7 +310,7 @@ class SubRipSubtitleVideoExample extends StatelessWidget {
     );
     return VideoViewer(
       source: {
-        "SubRip Text": VideoSource(
+        "SubRip Caption": VideoSource(
           video: VideoPlayerController.network(
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
           subtitle: subtitle,

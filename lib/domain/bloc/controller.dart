@@ -114,6 +114,17 @@ class VideoViewerController extends ChangeNotifier {
       notifyListeners();
     }
 
+    if (_isShowingOverlay) {
+      if (isPlaying) {
+        if (position >= value.duration && isLooping) {
+          _controller.seekTo(Duration.zero);
+        } else {
+          if (_timerPosition == null) _createBufferTimer();
+          if (_closeOverlayButtons == null) _startCloseOverlay();
+        }
+      } else if (_isGoingToCloseBufferingWidget) cancelCloseOverlay();
+    }
+
     if (_subtitle != null) {
       for (SubtitleData subtitle in subtitles) {
         if (position > subtitle.start &&
@@ -124,17 +135,6 @@ class VideoViewerController extends ChangeNotifier {
           break;
         }
       }
-    }
-
-    if (_isShowingOverlay) {
-      if (isPlaying) {
-        if (position >= value.duration && isLooping) {
-          _controller.seekTo(Duration.zero);
-        } else {
-          if (_timerPosition == null) _createBufferTimer();
-          if (_closeOverlayButtons == null) _startCloseOverlay();
-        }
-      } else if (_isGoingToCloseBufferingWidget) cancelCloseOverlay();
     }
   }
 
