@@ -1,4 +1,4 @@
-## [1.0.6]
+## [1.0.7]
 
 - Performance boost.
 - VideoViewerController added.

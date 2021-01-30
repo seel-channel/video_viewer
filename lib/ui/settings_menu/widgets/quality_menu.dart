@@ -26,7 +26,7 @@ class QualityMenu extends StatelessWidget {
               if (entry.key != activeSource)
                 query.video(context).changeSource(
                       source: entry.value,
-                      activeSource: entry.key,
+                      sourceName: entry.key,
                     );
               closeMenu?.call();
             },

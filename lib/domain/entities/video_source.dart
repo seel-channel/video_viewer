@@ -6,10 +6,44 @@ import 'package:video_viewer/video_viewer.dart';
 export 'package:video_player/video_player.dart';
 
 class VideoSource {
-  VideoSource({this.video, this.subtitle});
+  VideoSource({
+    this.video,
+    this.subtitle,
+    this.inheritValues = true,
+  });
 
+  ///VideoPlayerController
+  ///
+  ///```dart
+  ///   VideoPlayerController.network("https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
+  ///```
   final VideoPlayerController video;
-  final VideoViewerSubtitle subtitle;
+
+  ///Multisupport subtitles
+  ///
+  ///```dart
+  ///  {
+  ///    "English": VideoViewerSubtitle.network(
+  ///      "https://pastebin.com/raw/h9cP6N5N",
+  ///      type: SubtitleType.webvtt,
+  ///    ),
+  ///    "Spanish": VideoViewerSubtitle.network(
+  ///      "https://pastebin.com/raw/wrz69aay",
+  ///      type: SubtitleType.webvtt,
+  ///    ),
+  ///  },
+  ///```
+  final Map<String, VideoViewerSubtitle> subtitle;
+
+  ///This argument has the function to inherit last controller values.
+  ///It's useful on changed quality video.
+  ///
+  ///For example:
+  ///```dart
+  ///   _controller.setPlaybackSpeed(lastController.value.playbackSpeed);
+  ///   _controller.seekTo(lastController.value.position);
+  /// ```
+  final bool inheritValues;
 
   /// It is a function that returns a map from VideoPlayerController.network, the input
   /// data must be of type URL.

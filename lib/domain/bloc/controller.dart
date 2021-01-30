@@ -16,18 +16,21 @@ class VideoViewerController extends ChangeNotifier {
     String activeSource,
     this.isLooping,
     VideoViewerSubtitle subtitle,
+    String activeSubtitle,
   }) {
     this._subtitle = subtitle;
-    this._activeSource = activeSource;
     this._controller = controller;
+    this._activeSource = activeSource;
+    this._activeSubtitle = activeSubtitle;
     this._controller.addListener(_videoListener);
   }
 
   final bool isLooping;
   String _activeSource;
-  SubtitleData _activeSubtitle;
+  String _activeSubtitle;
   VideoViewerSubtitle _subtitle;
   VideoPlayerController _controller;
+  SubtitleData _activeSubtitleData;
 
   int _lastVideoPosition = 0;
   bool _isBuffering = false,
@@ -40,7 +43,8 @@ class VideoViewerController extends ChangeNotifier {
 
   VideoPlayerController get controller => _controller;
   List<SubtitleData> get subtitles => _subtitle.subtitles;
-  SubtitleData get activeSubtitle => _activeSubtitle;
+  SubtitleData get activeCaptionData => _activeSubtitleData;
+  String get activeCaption => _activeSubtitle;
 
   String get activeSource => _activeSource;
   bool get isShowingOverlay => _isShowingOverlay;
@@ -85,23 +89,37 @@ class VideoViewerController extends ChangeNotifier {
   //----------------//
   Future<void> changeSource({
     @required VideoSource source,
-    @required String activeSource,
+    @required String sourceName,
   }) async {
     final double speed = _controller.value.playbackSpeed;
-    final Duration seekTo = _controller.value.position;
+    final Duration position = _controller.value.position;
+    final VideoViewerSubtitle subtitle = source.subtitle.values.toList().first;
 
     await source.video.initialize();
-    await source.subtitle?.initialize();
+    await subtitle?.initialize();
 
-    _subtitle = source.subtitle;
+    _subtitle = subtitle;
     _controller = source.video;
-    _activeSource = activeSource;
+    _activeSource = sourceName;
 
     _controller.addListener(_videoListener);
-    await _controller.setPlaybackSpeed(speed);
+    if (source.inheritValues) {
+      await _controller.setPlaybackSpeed(speed);
+      await _controller.seekTo(position);
+    }
     await _controller.setLooping(isLooping);
-    await _controller.seekTo(seekTo);
     await _controller.play();
+    notifyListeners();
+  }
+
+  Future<void> changeSubtitle({
+    @required VideoViewerSubtitle subtitle,
+    @required String subtitleName,
+  }) async {
+    await subtitle?.initialize();
+    _subtitle = subtitle;
+    _activeSubtitle = subtitleName;
+    _activeSubtitleData = null;
     notifyListeners();
   }
 
@@ -129,8 +147,8 @@ class VideoViewerController extends ChangeNotifier {
       for (SubtitleData subtitle in subtitles) {
         if (position > subtitle.start &&
             position < subtitle.end &&
-            subtitle != _activeSubtitle) {
-          _activeSubtitle = subtitle;
+            _activeSubtitleData != subtitle) {
+          _activeSubtitleData = subtitle;
           notifyListeners();
           break;
         }

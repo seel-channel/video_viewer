@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
 import 'package:video_viewer/ui/settings_menu/widgets/seconday_menu.dart';
+import 'package:video_viewer/ui/settings_menu/widgets/caption_menu.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/quality_menu.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/speed_menu.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/main_menu.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
+
+const int kDefaultMenus = 3;
 
 class SettingsMenu extends StatefulWidget {
   SettingsMenu({Key key}) : super(key: key);
@@ -70,10 +73,14 @@ class _SettingsMenuState extends State<SettingsMenu> {
           visible: show[1],
           child: SpeedMenu(closeMenu: closeAllAndShowMenu),
         ),
+        CustomOpacityTransition(
+          visible: show[2],
+          child: CaptionMenu(closeMenu: closeAllAndShowMenu),
+        ),
         if (items != null)
           for (int i = 0; i < items.length; i++)
             CustomOpacityTransition(
-              visible: show[i + 2],
+              visible: show[i + kDefaultMenus],
               child: SecondaryMenu(
                 children: [items[i].secondaryMenu],
                 closeMenu: closeAllAndShowMenu,

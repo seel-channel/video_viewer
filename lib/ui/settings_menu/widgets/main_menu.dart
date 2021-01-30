@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
+import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
+import 'package:video_viewer/ui/settings_menu/settings_menu.dart';
 
 class MainMenu extends StatelessWidget {
   const MainMenu({Key key, @required this.onOpenMenu}) : super(key: key);
@@ -41,11 +42,21 @@ class MainMenu extends StatelessWidget {
                   speed == 1.0 ? metadata.language.normalSpeed : "x$speed",
             ),
           ),
+          SizedBox(width: style.paddingBetween),
+          GestureDetector(
+            onTap: () => onOpenMenu(2),
+            behavior: HitTestBehavior.opaque,
+            child: _MainMenuItem(
+              icon: style.caption,
+              title: metadata.language.caption,
+              subtitle: video.activeCaption ?? metadata.language.captionNone,
+            ),
+          ),
           if (items != null)
             for (int i = 0; i < items.length; i++) ...[
               SizedBox(width: style.paddingBetween),
               GestureDetector(
-                onTap: () => onOpenMenu(i + 2),
+                onTap: () => onOpenMenu(i + kDefaultMenus),
                 behavior: HitTestBehavior.opaque,
                 child: items[i].mainMenu,
               ),

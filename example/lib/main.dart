@@ -52,20 +52,21 @@ class _UsingVideoControllerExampleState
         "SubRip Text": VideoSource(
           video: VideoPlayerController.network(
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
-          subtitle: VideoViewerSubtitle.network(
-            "https://pastebin.com/raw/h9cP6N5N",
-            type: SubtitleType.webvtt,
-          ),
+          subtitle: {
+            "English": VideoViewerSubtitle.network(
+              "https://pastebin.com/raw/h9cP6N5N",
+              type: SubtitleType.webvtt,
+            ),
+          },
         )
       },
     );
   }
 
-  SubtitleData getActiveSubtitle() =>
-      key.currentState.controller.activeSubtitle;
   VideoPlayerController getVideoPlayer() =>
       key.currentState.controller.controller;
   String getActiveSourceName() => key.currentState.controller.activeSource;
+  String getActiveCaption() => key.currentState.controller.activeCaption;
   bool isFullScreen() => key.currentState.controller.isFullScreen;
   bool isBuffering() => key.currentState.controller.isBuffering;
   bool isPlaying() => key.currentState.controller.isPlaying;
@@ -174,10 +175,16 @@ class WebVTTSubtitleVideoExample extends StatelessWidget {
         "WebVTT Caption": VideoSource(
           video: VideoPlayerController.network(
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
-          subtitle: VideoViewerSubtitle.network(
-            "https://pastebin.com/raw/h9cP6N5N",
-            type: SubtitleType.webvtt,
-          ),
+          subtitle: {
+            "English": VideoViewerSubtitle.network(
+              "https://pastebin.com/raw/h9cP6N5N",
+              type: SubtitleType.webvtt,
+            ),
+            "Spanish": VideoViewerSubtitle.network(
+              "https://pastebin.com/raw/wrz69aay",
+              type: SubtitleType.webvtt,
+            ),
+          },
         )
       },
     );
@@ -189,8 +196,7 @@ class SubRipSubtitleVideoExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitle = VideoViewerSubtitle.content(
-      '''
+    final String content = '''
       1
       00:00:03,400 --> 00:00:06,177
       In this lesson, we're going to
@@ -305,15 +311,19 @@ class SubRipSubtitleVideoExample extends StatelessWidget {
       00:01:46,860 --> 00:01:49,970
       find an institution that will pay
       me a higher interest rate.
-      ''',
-      type: SubtitleType.srt,
-    );
+      ''';
+
     return VideoViewer(
       source: {
         "SubRip Caption": VideoSource(
           video: VideoPlayerController.network(
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
-          subtitle: subtitle,
+          subtitle: {
+            "English": VideoViewerSubtitle.content(
+              content,
+              type: SubtitleType.srt,
+            ),
+          },
         )
       },
     );

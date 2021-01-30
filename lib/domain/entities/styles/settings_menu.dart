@@ -6,6 +6,7 @@ class SettingsMenuStyle {
   SettingsMenuStyle({
     Widget settings,
     Widget speed,
+    Widget caption,
     Widget selected,
     Widget chevron,
     this.paddingBetween = 24,
@@ -15,18 +16,32 @@ class SettingsMenuStyle {
               color: Colors.white,
               size: 20,
             ),
+        this.caption = caption ??
+            Icon(
+              Icons.closed_caption_outlined,
+              color: Colors.white,
+              size: 20,
+            ),
         this.speed = speed ?? Icon(Icons.speed, color: Colors.white, size: 20),
         this.selected =
             selected ?? Icon(Icons.done, color: Colors.white, size: 20),
         this.chevron = chevron ?? Icon(Icons.chevron_left, color: Colors.white);
 
-  /// It is the icon that will have the speed change option
+  /// It is the icon that will have the [speed] change option
   ///
   ///DEFAULT:
   ///```dart
-  ///  Icon(Icons.speed, color: Colors.white, size: 20;
+  ///  Icon(Icons.speed, color: Colors.white, size: 20);
   ///```
   final Widget speed;
+
+  /// It is the icon that will have the [caption] change option
+  ///
+  ///DEFAULT:
+  ///```dart
+  ///   Icon(Icons.closed_caption_outlined, color: Colors.white, size: 20);
+  ///```
+  final Widget caption;
 
   /// It is the chevron or icon that appears to return to the Settings Menu
   /// when you are changing Quality or Speed

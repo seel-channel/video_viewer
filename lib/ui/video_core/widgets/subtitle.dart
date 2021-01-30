@@ -8,7 +8,7 @@ class ActiveSubtitleText extends StatelessWidget {
   Widget build(BuildContext context) {
     final query = VideoQuery();
     final style = query.videoStyle(context).subtitleStyle;
-    final subtitle = query.video(context, listen: true).activeSubtitle;
+    final subtitle = query.video(context, listen: true).activeCaptionData;
 
     return Align(
       alignment: style.alignment,

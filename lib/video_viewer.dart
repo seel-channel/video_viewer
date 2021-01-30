@@ -16,6 +16,7 @@ export 'package:video_viewer/domain/entities/settings_menu_item.dart';
 export 'package:video_viewer/domain/entities/video_source.dart';
 export 'package:video_viewer/domain/entities/subtitle.dart';
 export 'package:video_viewer/domain/entities/language.dart';
+export 'package:video_viewer/domain/bloc/controller.dart';
 
 class VideoViewer extends StatefulWidget {
   VideoViewer({
@@ -107,17 +108,19 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   void _initVideoViewer() async {
-    final activedSource = widget.source.keys.toList()[0];
-    final source = widget.source.values.toList()[0];
+    final activedSource = widget.source.keys.toList().first;
+    final source = widget.source.values.toList().first;
+    final subtitle = source.subtitle.entries.toList().first;
 
     await source.video?.initialize();
-    await source.subtitle?.initialize();
+    await subtitle.value?.initialize();
 
     _controller = VideoViewerController(
-      subtitle: source.subtitle,
+      subtitle: subtitle.value,
       isLooping: widget.looping,
       controller: source.video,
       activeSource: activedSource,
+      activeSubtitle: subtitle.key,
     );
 
     if (widget.autoPlay) source.video.play();
