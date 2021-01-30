@@ -1,7 +1,7 @@
 name: video_viewer
 description: Multiplatform minimalist video viewer with spectacular user experience.
 homepage: https://github.com/seel-channel/video_viewer
-version: 1.0.7
+version: 1.0.8
 
 environment:
   sdk: ">=2.7.0 <3.0.0"

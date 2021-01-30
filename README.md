@@ -14,10 +14,10 @@
 
 - Amazing UI / UX.
 - Fancy animations.
-- Subtitles support.
 - Fully customizable.
 - Multiplataform support.
 - HLS (m3u8) format support.
+- Captions (Subtitles) support.
 - Easy and powerful implementation! :)
 
 <br><br>

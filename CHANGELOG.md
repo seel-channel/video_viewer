@@ -1,8 +1,12 @@
+## [1.0.8]
+
+- Multi-captions (Subtitles) support added.
+
 ## [1.0.7]
 
 - Performance boost.
 - VideoViewerController added.
-- Captions (Subtitles) support added.
+- Mono-captions (Subtitles) support added.
 
 ## [1.0.6]
 
