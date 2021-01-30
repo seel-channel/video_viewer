@@ -178,7 +178,7 @@ class _UsingVideoControllerExampleState extends State<UsingVideoControllerExampl
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
           subtitle: VideoViewerSubtitle.network(
             "https://pastebin.com/raw/h9cP6N5N",
-            type: SubtitleType.srt,
+            type: SubtitleType.webvtt,
           ),
         )
       },
@@ -317,7 +317,7 @@ class WebVTTSubtitleVideoExample extends StatelessWidget {
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
           subtitle: VideoViewerSubtitle.network(
             "https://pastebin.com/raw/h9cP6N5N",
-            type: SubtitleType.srt,
+            type: SubtitleType.webvtt,
           ),
         )
       },

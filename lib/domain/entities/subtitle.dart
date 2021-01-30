@@ -56,7 +56,7 @@ class VideoViewerSubtitle {
 
   List<SubtitleData> get subtitles => _subtitles;
 
-  void _getSubtitlesData() async {
+  void _getSubtitlesData() {
     RegExp regExp;
 
     switch (type) {
