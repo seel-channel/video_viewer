@@ -1,5 +1,11 @@
 ## [1.0.6]
 
+- Performance boost.
+- VideoViewerController added.
+- Captions (Subtitles) support added.
+
+## [1.0.6]
+
 - Custom SettingMenuItems added.
 - VideoViewerLanguage on fullscreen bug fixed.
 
