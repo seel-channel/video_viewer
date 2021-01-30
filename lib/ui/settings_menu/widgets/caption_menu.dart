@@ -36,7 +36,7 @@ class CaptionMenu extends StatelessWidget {
           ),
         ),
         for (MapEntry<String, VideoSource> entry in metadata.source.entries)
-          if (entry.key == activeSource)
+          if (entry.key == activeSource && entry.value.subtitle != null)
             for (MapEntry<String, VideoViewerSubtitle> subtitle
                 in entry.value.subtitle.entries)
               CustomInkWell(

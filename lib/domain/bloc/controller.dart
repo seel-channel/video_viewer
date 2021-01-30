@@ -15,13 +15,9 @@ class VideoViewerController extends ChangeNotifier {
     VideoPlayerController controller,
     String activeSource,
     this.isLooping,
-    VideoViewerSubtitle subtitle,
-    String activeSubtitle,
   }) {
-    this._subtitle = subtitle;
     this._controller = controller;
     this._activeSource = activeSource;
-    this._activeSubtitle = activeSubtitle;
     this._controller.addListener(_videoListener);
   }
 

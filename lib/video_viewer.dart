@@ -110,18 +110,23 @@ class VideoViewerState extends State<VideoViewer> {
   void _initVideoViewer() async {
     final activedSource = widget.source.keys.toList().first;
     final source = widget.source.values.toList().first;
-    final subtitle = source.subtitle.entries.toList().first;
 
     await source.video?.initialize();
-    await subtitle.value?.initialize();
 
     _controller = VideoViewerController(
-      subtitle: subtitle.value,
       isLooping: widget.looping,
       controller: source.video,
       activeSource: activedSource,
-      activeSubtitle: subtitle.key,
     );
+
+    if (source.subtitle != null) {
+      final subtitle = source.subtitle.entries.toList().first;
+      await subtitle.value?.initialize();
+      _controller.changeSubtitle(
+        subtitle: subtitle.value,
+        subtitleName: subtitle.key,
+      );
+    }
 
     if (widget.autoPlay) source.video.play();
     _controller.isShowingThumbnail = widget.style.thumbnail != null;

@@ -32,7 +32,7 @@ class VideoViewerLanguage {
     quality: "Calidad",
     speed: "Velocidad",
     caption: "Subtítulos",
-    captionNone: "Nínguno",
+    captionNone: "Ninguno",
     normalSpeed: "Normal",
   );
 
