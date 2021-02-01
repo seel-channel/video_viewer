@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/entities/settings_menu_item.dart';
 
-import 'package:video_viewer/ui/settings_menu/widgets/seconday_menu.dart';
+import 'package:video_viewer/ui/settings_menu/widgets/secondary_menu.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/caption_menu.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/quality_menu.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/speed_menu.dart';

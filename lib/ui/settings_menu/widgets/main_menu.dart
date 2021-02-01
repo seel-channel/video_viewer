@@ -44,13 +44,20 @@ class MainMenu extends StatelessWidget {
           if (items != null)
             for (int i = 0; i < items.length; i++) ...[
               SizedBox(width: style.paddingBetween),
-              GestureDetector(
-                onTap: () => query
-                    .video(context)
-                    .openSecondarySettingMenu(i + kDefaultMenus),
-                behavior: HitTestBehavior.opaque,
-                child: items[i].mainMenu,
-              ),
+              items[i].themed == null
+                  ? GestureDetector(
+                      onTap: () => query
+                          .video(context)
+                          .openSecondarySettingMenu(i + kDefaultMenus),
+                      behavior: HitTestBehavior.opaque,
+                      child: items[i].mainMenu,
+                    )
+                  : _MainMenuItem(
+                      index: i + kDefaultMenus,
+                      icon: items[i].themed.icon,
+                      title: items[i].themed.title,
+                      subtitle: items[i].themed.subtitle,
+                    ),
             ],
         ],
       ),
@@ -61,10 +68,10 @@ class MainMenu extends StatelessWidget {
 class _MainMenuItem extends StatelessWidget {
   const _MainMenuItem({
     Key key,
-    this.index,
-    this.title,
-    this.subtitle,
-    this.icon,
+    @required this.index,
+    @required this.icon,
+    @required this.title,
+    @required this.subtitle,
   }) : super(key: key);
 
   final String title, subtitle;
