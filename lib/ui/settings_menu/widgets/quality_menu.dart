@@ -5,9 +5,7 @@ import 'package:video_viewer/ui/settings_menu/widgets/helpers.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/seconday_menu.dart';
 
 class QualityMenu extends StatelessWidget {
-  const QualityMenu({Key key, @required this.closeMenu}) : super(key: key);
-
-  final void Function() closeMenu;
+  const QualityMenu({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +16,6 @@ class QualityMenu extends StatelessWidget {
     final activeSource = video.activeSource;
 
     return SecondaryMenu(
-      closeMenu: closeMenu,
       children: [
         for (MapEntry<String, VideoSource> entry in metadata.source.entries)
           CustomInkWell(
@@ -28,7 +25,6 @@ class QualityMenu extends StatelessWidget {
                       source: entry.value,
                       sourceName: entry.key,
                     );
-              closeMenu?.call();
             },
             child: CustomText(
               text: entry.key,

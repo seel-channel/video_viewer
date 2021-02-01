@@ -13,6 +13,11 @@
 - Custom SettingMenuItems added.
 - VideoViewerLanguage on fullscreen bug fixed.
 
+## [1.0.5]
+
+- Arabic Lenguage added.
+- HLS (m3u8) format support added.
+
 ## [1.0.4]
 
 - Custom VideoViewerLanguage added.

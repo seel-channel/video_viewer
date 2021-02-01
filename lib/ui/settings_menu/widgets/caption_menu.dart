@@ -6,9 +6,7 @@ import 'package:video_viewer/ui/settings_menu/widgets/helpers.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/seconday_menu.dart';
 
 class CaptionMenu extends StatelessWidget {
-  const CaptionMenu({Key key, @required this.closeMenu}) : super(key: key);
-
-  final void Function() closeMenu;
+  const CaptionMenu({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +19,12 @@ class CaptionMenu extends StatelessWidget {
     final none = metadata.language.captionNone;
 
     return SecondaryMenu(
-      closeMenu: closeMenu,
       children: [
         CustomInkWell(
           onTap: () {
             query
                 .video(context)
                 .changeSubtitle(subtitle: null, subtitleName: none);
-            closeMenu?.call();
           },
           child: CustomText(
             text: none,
@@ -45,7 +41,6 @@ class CaptionMenu extends StatelessWidget {
                         subtitle: subtitle.value,
                         subtitleName: subtitle.key,
                       );
-                  closeMenu?.call();
                 },
                 child: CustomText(
                   text: subtitle.key,

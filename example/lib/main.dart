@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_viewer/video_viewer.dart';
-import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(App());
 
@@ -147,7 +146,6 @@ class HLSVideoExample extends StatelessWidget {
 
   ///USE [path_provider] AND [dart.io] **(Only available on Android and iOS)**
   Future<Map<String, VideoSource>> createHLSFiles(String url) async {
-    final Directory directory = await getApplicationDocumentsDirectory();
     final Map<String, String> files =
         await VideoSource.getm3u8VideoFileData(url);
     Map<String, VideoSource> sources = {
@@ -155,7 +153,7 @@ class HLSVideoExample extends StatelessWidget {
     };
 
     for (String quality in files.keys) {
-      final File file = File('${directory.path}/hls$quality.m3u8');
+      final File file = File('hls$quality.m3u8');
       await file.writeAsString(files[quality]);
       sources["${quality.split("x").last}p"] =
           VideoSource(video: VideoPlayerController.file(file));

@@ -19,6 +19,7 @@ class VideoViewerController extends ChangeNotifier {
     this._controller = controller;
     this._activeSource = activeSource;
     this._controller.addListener(_videoListener);
+    this.isShowingSecondarySettingsMenus = List.filled(12, false);
   }
 
   final bool isLooping;
@@ -34,15 +35,18 @@ class VideoViewerController extends ChangeNotifier {
       _isFullScreen = false,
       _isGoingToCloseBufferingWidget = false,
       _isShowingThumbnail = true,
-      _isShowingSettingsMenu = false;
+      _isShowingSettingsMenu = false,
+      _isShowingMainSettingsMenu = false;
   Timer _closeOverlayButtons, _timerPosition;
+  List<bool> isShowingSecondarySettingsMenus = [];
 
   VideoPlayerController get controller => _controller;
-  List<SubtitleData> get subtitles => _subtitle.subtitles;
   SubtitleData get activeCaptionData => _activeSubtitleData;
+  List<SubtitleData> get subtitles => _subtitle.subtitles;
   String get activeCaption => _activeSubtitle;
-
   String get activeSource => _activeSource;
+
+  bool get isShowingMainSettingsMenu => _isShowingMainSettingsMenu;
   bool get isShowingOverlay => _isShowingOverlay;
   bool get isFullScreen => _isFullScreen;
   bool get isPlaying => _controller.value.isPlaying;
@@ -211,6 +215,35 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void closeAllSecondarySettingsMenus() {
+    _isShowingMainSettingsMenu = true;
+    isShowingSecondarySettingsMenus.fillRange(
+      0,
+      isShowingSecondarySettingsMenus.length,
+      false,
+    );
+    notifyListeners();
+  }
+
+  void openSecondarySettingMenu(int index) {
+    _isShowingSettingsMenu = true;
+    _isShowingMainSettingsMenu = false;
+    isShowingSecondarySettingsMenus[index] = true;
+    notifyListeners();
+  }
+
+  void showSettingsMenu() {
+    _isShowingSettingsMenu = true;
+    _isShowingMainSettingsMenu = true;
+    notifyListeners();
+  }
+
+  void hideSettingsMenu() {
+    _isShowingSettingsMenu = false;
+    _isShowingMainSettingsMenu = false;
+    notifyListeners();
+  }
+
   //----------//
   //FULLSCREEN//
   //----------//
@@ -223,18 +256,20 @@ class VideoViewerController extends ChangeNotifier {
     } else {
       _isFullScreen = true;
       notifyListeners();
-      await PushRoute.page(
+      await Navigator.push(
         context,
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider.value(
-              value: VideoQuery().video(context, listen: false),
-            ),
-            Provider.value(
-              value: VideoQuery().videoMetadata(context, listen: false),
-            ),
-          ],
-          child: FullScreenPage(),
+        MaterialPageRoute(
+          builder: (_) => MultiProvider(
+            providers: [
+              ChangeNotifierProvider.value(
+                value: VideoQuery().video(context, listen: false),
+              ),
+              Provider.value(
+                value: VideoQuery().videoMetadata(context, listen: false),
+              ),
+            ],
+            child: FullScreenPage(),
+          ),
         ),
       );
     }

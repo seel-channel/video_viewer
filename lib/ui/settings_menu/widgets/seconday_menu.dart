@@ -2,18 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
 class SecondaryMenu extends StatelessWidget {
-  const SecondaryMenu({
-    Key key,
-    this.children,
-    this.closeMenu,
-  }) : super(key: key);
+  const SecondaryMenu({Key key, this.children}) : super(key: key);
 
   final List<Widget> children;
-  final void Function() closeMenu;
 
   @override
   Widget build(BuildContext context) {
-    final metadata = VideoQuery().videoMetadata(context, listen: true);
+    final query = VideoQuery();
+    final metadata = query.videoMetadata(context, listen: true);
     final style = metadata.style.settingsStyle;
 
     return Center(
@@ -26,7 +22,7 @@ class SecondaryMenu extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             GestureDetector(
-              onTap: closeMenu,
+              onTap: query.video(context).closeAllSecondarySettingsMenus,
               child: Row(children: [
                 style.chevron,
                 Expanded(

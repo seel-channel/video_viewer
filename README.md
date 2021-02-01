@@ -28,7 +28,7 @@ First, add `video_viewer` as a dependency in your **pubspec.yaml.**
 
 ```yaml
 dependencies:
-  video_viewer: ^1.0.7
+  video_viewer: ^1.0.9
 ```
 
 ### Android
@@ -342,8 +342,7 @@ class SubRipSubtitleVideoExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitle = VideoViewerSubtitle.content(
-      '''
+    final String content = '''
       1
       00:00:03,400 --> 00:00:06,177
       In this lesson, we're going to
@@ -458,15 +457,19 @@ class SubRipSubtitleVideoExample extends StatelessWidget {
       00:01:46,860 --> 00:01:49,970
       find an institution that will pay
       me a higher interest rate.
-      ''',
-      type: SubtitleType.srt,
-    );
+      ''';
+
     return VideoViewer(
       source: {
-        "SubRip Text": VideoSource(
+        "SubRip Caption": VideoSource(
           video: VideoPlayerController.network(
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
-          subtitle: subtitle,
+          subtitle: {
+            "English": VideoViewerSubtitle.content(
+              content,
+              type: SubtitleType.srt,
+            ),
+          },
         )
       },
     );
