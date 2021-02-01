@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
 class SecondaryMenu extends StatelessWidget {
-  const SecondaryMenu({Key key, this.children}) : super(key: key);
+  const SecondaryMenu({
+    Key key,
+    this.children,
+    this.width = 150,
+  }) : super(key: key);
 
   final List<Widget> children;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +19,7 @@ class SecondaryMenu extends StatelessWidget {
 
     return Center(
       child: Container(
-        width: 150,
+        width: width,
         color: Colors.transparent,
         child: Column(
           mainAxisSize: MainAxisSize.min,

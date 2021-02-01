@@ -232,13 +232,13 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void showSettingsMenu() {
+  void openSettingsMenu() {
     _isShowingSettingsMenu = true;
     _isShowingMainSettingsMenu = true;
     notifyListeners();
   }
 
-  void hideSettingsMenu() {
+  void closeSettingsMenu() {
     _isShowingSettingsMenu = false;
     _isShowingMainSettingsMenu = false;
     notifyListeners();
@@ -264,7 +264,7 @@ class VideoViewerController extends ChangeNotifier {
               ChangeNotifierProvider.value(
                 value: VideoQuery().video(context, listen: false),
               ),
-              Provider.value(
+              ChangeNotifierProvider.value(
                 value: VideoQuery().videoMetadata(context, listen: false),
               ),
             ],

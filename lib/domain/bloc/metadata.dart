@@ -4,9 +4,9 @@ import 'package:video_viewer/domain/entities/settings_menu_item.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/domain/entities/language.dart';
 
-class VideoMetadata {
+class VideoMetadata extends ChangeNotifier {
   VideoMetadata({
-    @required this.source,
+    @required Map<String, VideoSource> source,
     @required VideoViewerStyle style,
     @required this.rewindAmount,
     @required this.forwardAmount,
@@ -14,7 +14,8 @@ class VideoMetadata {
     @required this.onFullscreenFixLandscape,
     @required this.language,
     @required this.settingsMenuItems,
-  }) : this.style = style ?? VideoViewerStyle() {
+  })  : this._source = source,
+        this.style = style ?? VideoViewerStyle() {
     originalStyle = this.style;
     responsiveStyle = originalStyle.copywith(
       textStyle: originalStyle.textStyle.merge(
@@ -30,10 +31,17 @@ class VideoMetadata {
   final bool onFullscreenFixLandscape;
   final double defaultAspectRatio;
   final VideoViewerLanguage language;
-  final Map<String, VideoSource> source;
   final List<SettingsMenuItem> settingsMenuItems;
 
   VideoViewerStyle style;
   VideoViewerStyle originalStyle;
   VideoViewerStyle responsiveStyle;
+
+  Map<String, VideoSource> _source;
+
+  Map<String, VideoSource> get source => _source;
+  set source(Map<String, VideoSource> source) {
+    _source = source;
+    notifyListeners();
+  }
 }

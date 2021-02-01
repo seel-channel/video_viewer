@@ -7,12 +7,15 @@ class SettingsMenuItem {
     @required this.secondaryMenu,
     this.mainMenu,
     this.themed,
+    this.secondaryMenuWidth = 150,
   });
 
   ///If **themed** is not-null, this argument is ignored.
   final Widget mainMenu;
 
   final Widget secondaryMenu;
+
+  final double secondaryMenuWidth;
 
   final SettingsMenuItemThemed themed;
 }

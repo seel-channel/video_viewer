@@ -91,12 +91,24 @@ class VideoViewer extends StatefulWidget {
 
 class VideoViewerState extends State<VideoViewer> {
   VideoViewerController _controller;
+  VideoMetadata _metadata;
   bool _initialized = false;
 
   VideoViewerController get controller => _controller;
+  VideoMetadata get metadata => _metadata;
 
   @override
   void initState() {
+    _metadata = VideoMetadata(
+      style: widget.style,
+      source: widget.source,
+      language: widget.language,
+      rewindAmount: widget.rewindAmount,
+      forwardAmount: widget.forwardAmount,
+      settingsMenuItems: widget.settingsMenuItems,
+      defaultAspectRatio: widget.defaultAspectRatio,
+      onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
+    );
     _initVideoViewer();
     super.initState();
   }
@@ -139,18 +151,7 @@ class VideoViewerState extends State<VideoViewer> {
         ? MultiProvider(
             providers: [
               ChangeNotifierProvider.value(value: _controller),
-              Provider(
-                create: (_) => VideoMetadata(
-                  style: widget.style,
-                  source: widget.source,
-                  language: widget.language,
-                  rewindAmount: widget.rewindAmount,
-                  forwardAmount: widget.forwardAmount,
-                  settingsMenuItems: widget.settingsMenuItems,
-                  defaultAspectRatio: widget.defaultAspectRatio,
-                  onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
-                ),
-              ),
+              ChangeNotifierProvider.value(value: _metadata),
             ],
             builder: (_, __) => VideoViewerCore(),
           )

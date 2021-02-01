@@ -94,7 +94,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
             Align(
               alignment: Alignment.topRight,
               child: GestureDetector(
-                onTap: () => video.isShowingSettingsMenu = true,
+                onTap: video.openSettingsMenu,
                 child: Container(
                   color: Colors.transparent,
                   child: style.settingsStyle.settings,

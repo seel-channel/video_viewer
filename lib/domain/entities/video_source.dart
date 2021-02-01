@@ -1,5 +1,6 @@
 import 'dart:convert' show utf8;
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_viewer/video_viewer.dart';
 
@@ -7,7 +8,7 @@ export 'package:video_player/video_player.dart';
 
 class VideoSource {
   VideoSource({
-    this.video,
+    @required this.video,
     this.subtitle,
     this.inheritValues = true,
   });

@@ -26,7 +26,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(child: WebVTTSubtitleVideoExample()),
+      body: Center(child: HLSVideoExample()),
     );
   }
 }
@@ -69,6 +69,109 @@ class _UsingVideoControllerExampleState
   bool isFullScreen() => key.currentState.controller.isFullScreen;
   bool isBuffering() => key.currentState.controller.isBuffering;
   bool isPlaying() => key.currentState.controller.isPlaying;
+}
+
+class SerieExample extends StatefulWidget {
+  SerieExample({Key key}) : super(key: key);
+
+  @override
+  _SerieExampleState createState() => _SerieExampleState();
+}
+
+class _SerieExampleState extends State<SerieExample> {
+  final GlobalKey<VideoViewerState> key = GlobalKey<VideoViewerState>();
+  final Map<String, Map<String, VideoSource>> database = {
+    "Episode 1": VideoSource.getNetworkVideoSources({
+      "1080p":
+          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    }),
+    "Episode 2": VideoSource.getNetworkVideoSources({
+      "720p":
+          "https://file-examples-com.github.io/uploads/2017/04/file_example_MP4_480_1_5MG.mp4"
+    }),
+  };
+
+  final Map<String, String> thumbnails = {
+    "Episode 1":
+        "https://cloudfront-us-east-1.images.arcpublishing.com/semana/FUM2RCCVW5EL5LQYCDVC6VRO2U.jpg",
+    "Episode 2":
+        "https://www.elcomercio.com/files/article_main/uploads/2019/03/29/5c9e3ddfc85ca.jpeg",
+  };
+
+  String episode = "Episode 1";
+
+  @override
+  Widget build(BuildContext context) {
+    return VideoViewer(
+      key: key,
+      onFullscreenFixLandscape: true,
+      language: VideoViewerLanguage.es,
+      source: database.entries.first.value,
+      style: VideoViewerStyle(
+        header: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                episode,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+        settingsStyle: SettingsMenuStyle(paddingBetween: 10),
+      ),
+      settingsMenuItems: [
+        SettingsMenuItem(
+          themed: SettingsMenuItemThemed(
+            icon: Icon(Icons.view_module_outlined, color: Colors.white),
+            title: "Episodes",
+            subtitle: episode,
+          ),
+          secondaryMenuWidth: 200,
+          secondaryMenu: Padding(
+            padding: EdgeInsets.only(top: 20),
+            child: Center(
+              child: Container(
+                child: Wrap(
+                  spacing: 20,
+                  runSpacing: 10,
+                  children: [
+                    for (var entry in database.entries)
+                      episodeImage(thumbnails[entry.key], entry.value)
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget episodeImage(String imageUrl, Map<String, VideoSource> data) {
+    return InkWell(
+      onTap: () {
+        final entry = data.entries.first;
+        key.currentState.metadata.source = data;
+        key.currentState.controller
+            .changeSource(source: entry.value, sourceName: entry.key);
+      },
+      child: Container(
+        width: 80,
+        height: 80,
+        color: Colors.white,
+        child: Image.network(imageUrl, fit: BoxFit.cover),
+      ),
+    );
+  }
 }
 
 class NetworkVideoExample extends StatelessWidget {
