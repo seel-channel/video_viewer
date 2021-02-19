@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(child: SerieExample()),
+      body: Center(child: HLSVideoExample()),
     );
   }
 }
@@ -110,65 +110,77 @@ class _SerieExampleState extends State<SerieExample> {
   Widget build(BuildContext context) {
     return SerieEpisode(
       episode: episode,
-      child: VideoViewer(
-        source: database.entries.first.value,
-        controller: controller,
-        language: VideoViewerLanguage.es,
-        onFullscreenFixLandscape: true,
-        style: VideoViewerStyle(
-          header: Builder(
-            builder: (innerContext) {
-              return Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      SerieEpisode.of(innerContext).episode,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+      child: MaterialApp(
+        title: 'Video Viewer Example',
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          backgroundColor: Colors.grey[100],
+          body: Center(
+            child: VideoViewer(
+              source: database.entries.first.value,
+              controller: controller,
+              language: VideoViewerLanguage.es,
+              onFullscreenFixLandscape: true,
+              style: VideoViewerStyle(
+                header: Builder(
+                  builder: (innerContext) {
+                    return Container(
+                      width: double.infinity,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Game of Thrones: " +
+                                SerieEpisode.of(innerContext).episode,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                settingsStyle: SettingsMenuStyle(
+                  paddingBetween: 10,
+                  items: [
+                    SettingsMenuItem(
+                      themed: SettingsMenuItemThemed(
+                        icon: Icon(Icons.view_module_outlined,
+                            color: Colors.white),
+                        title: Text("Episodes"),
+                        subtitle: Builder(
+                          builder: (innerContext) {
+                            return Text(SerieEpisode.of(innerContext).episode);
+                          },
+                        ),
+                      ),
+                      secondaryMenuWidth: 200,
+                      secondaryMenu: Padding(
+                        padding: EdgeInsets.only(top: 5),
+                        child: Center(
+                          child: Container(
+                            child: Wrap(
+                              spacing: 20,
+                              runSpacing: 10,
+                              children: [
+                                for (var entry in database.entries)
+                                  episodeImage(entry)
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              );
-            },
-          ),
-          settingsStyle: SettingsMenuStyle(
-            paddingBetween: 10,
-            items: [
-              SettingsMenuItem(
-                themed: SettingsMenuItemThemed(
-                  icon: Icon(Icons.view_module_outlined, color: Colors.white),
-                  title: Text("Episodes"),
-                  subtitle: Builder(
-                    builder: (innerContext) {
-                      return Text(SerieEpisode.of(innerContext).episode);
-                    },
-                  ),
-                ),
-                secondaryMenuWidth: 200,
-                secondaryMenu: Padding(
-                  padding: EdgeInsets.only(top: 5),
-                  child: Center(
-                    child: Container(
-                      child: Wrap(
-                        spacing: 20,
-                        runSpacing: 10,
-                        children: [
-                          for (var entry in database.entries)
-                            episodeImage(entry)
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
               ),
-            ],
+            ),
           ),
         ),
       ),
