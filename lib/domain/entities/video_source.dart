@@ -103,7 +103,7 @@ class VideoSource {
     List<String> audioList = [];
     String content;
 
-    final http.Response response = await http.get(Uri.parse(m3u8));
+    final http.Response response = await http.get(m3u8);
     if (response.statusCode == 200) content = utf8.decode(response.bodyBytes);
 
     List<RegExpMatch> matches = regExp.allMatches(content).toList();

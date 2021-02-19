@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:video_viewer/domain/entities/settings_menu_item.dart';
 import 'package:video_viewer/data/repositories/video.dart';
+import 'package:video_viewer/ui/widgets/helpers.dart';
 
 class MainMenu extends StatelessWidget {
   const MainMenu({Key key}) : super(key: key);
@@ -27,7 +28,6 @@ class MainMenu extends StatelessWidget {
             title: Text(metadata.language.quality),
             subtitle: Text(video.activeSource),
           ),
-          SizedBox(width: style.paddingBetween),
           _MainMenuItem(
             index: 1,
             icon: style.speed,
@@ -35,7 +35,6 @@ class MainMenu extends StatelessWidget {
             subtitle:
                 Text(speed == 1.0 ? metadata.language.normalSpeed : "x$speed"),
           ),
-          SizedBox(width: style.paddingBetween),
           _MainMenuItem(
             index: 2,
             icon: style.caption,
@@ -45,13 +44,12 @@ class MainMenu extends StatelessWidget {
           ),
           if (items != null)
             for (int i = 0; i < items.length; i++) ...[
-              SizedBox(width: style.paddingBetween),
               items[i].themed == null
-                  ? GestureDetector(
+                  ? SplashCircularIcon(
                       onTap: () => query
                           .video(context)
                           .openSecondarySettingsMenu(i + kDefaultMenus),
-                      behavior: HitTestBehavior.opaque,
+                      padding: Margin.all(style.paddingBetween / 2),
                       child: items[i].mainMenu,
                     )
                   : _MainMenuItem(
@@ -87,27 +85,23 @@ class _MainMenuItem extends StatelessWidget {
     final style = metadata.style.settingsStyle;
     final textStyle = metadata.style.textStyle;
 
-    return GestureDetector(
+    return SplashCircularIcon(
+      padding: Margin.all(style.paddingBetween),
       onTap: () => query.video(context).openSecondarySettingsMenu(index),
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        color: Colors.transparent,
-        padding: Margin.all(style.paddingBetween / 2),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            icon,
-            DefaultTextStyle(child: title, style: textStyle),
-            DefaultTextStyle(
-              child: subtitle,
-              style: textStyle.merge(TextStyle(
-                fontWeight: FontWeight.normal,
-                fontSize: textStyle.fontSize -
-                    metadata.style.inLandscapeEnlargeTheTextBy,
-              )),
-            )
-          ],
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          icon,
+          DefaultTextStyle(child: title, style: textStyle),
+          DefaultTextStyle(
+            child: subtitle,
+            style: textStyle.merge(TextStyle(
+              fontWeight: FontWeight.normal,
+              fontSize: textStyle.fontSize -
+                  metadata.style.inLandscapeEnlargeTheTextBy,
+            )),
+          )
+        ],
       ),
     );
   }

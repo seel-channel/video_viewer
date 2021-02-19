@@ -5,6 +5,7 @@ import 'package:video_viewer/data/repositories/video.dart';
 
 import 'package:video_viewer/ui/overlay/widgets/progress_bar.dart';
 import 'package:video_viewer/ui/overlay/widgets/background.dart';
+import 'package:video_viewer/ui/widgets/helpers.dart';
 import 'package:video_viewer/ui/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
@@ -29,7 +30,6 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
     final controller = video.controller;
     final barStyle = style.progressBarStyle;
     final padding = barStyle.paddingBeetwen;
-    final edgeInset = Margin.vertical(padding);
 
     String position = "00:00", remaing = "-00:00";
 
@@ -61,7 +61,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
                   return VideoProgressBar(
                     controller,
                     style: barStyle,
-                    padding: edgeInset,
+                    padding: Margin.vertical(padding),
                     isBuffering: video.isBuffering,
                     changePosition: (double scale, double width) {
                       if (mounted) {
@@ -74,71 +74,41 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
               ),
             ),
             SizedBox(width: padding),
-            Container(
-              color: Colors.transparent,
-              alignment: Alignment.center,
-              child: GestureDetector(
+            Center(
+              child: SplashCircularIcon(
                 onTap: () {
                   setState(() => _showRemaingText = !_showRemaingText);
                   video.cancelCloseOverlay();
                 },
-                child: _ContainerPadding(
-                  padding: edgeInset,
-                  child: Text(
-                    _showRemaingText ? position : remaing,
-                    style: style.textStyle,
-                  ),
+                padding: Margin.zero,
+                child: Text(
+                  _showRemaingText ? position : remaing,
+                  style: style.textStyle,
                 ),
               ),
             ),
             Align(
               alignment: Alignment.topRight,
-              child: GestureDetector(
+              child: SplashCircularIcon(
                 onTap: video.openSettingsMenu,
-                child: Container(
-                  color: Colors.transparent,
-                  child: style.settingsStyle.settings,
-                  padding: Margin.horizontal(padding) + edgeInset,
-                ),
+                padding: Margin.all(padding),
+                child: style.settingsStyle.settings,
               ),
             ),
-            GestureDetector(
+            SplashCircularIcon(
               onTap: () async {
                 if (!isFullscreen)
                   await video.openFullScreen(context);
                 else
                   await video.closeFullScreen(context);
               },
-              child: _ContainerPadding(
-                  child: isFullscreen
-                      ? barStyle.fullScreenExit
-                      : barStyle.fullScreen,
-                  padding: edgeInset),
+              padding: Margin.all(padding),
+              child:
+                  isFullscreen ? barStyle.fullScreenExit : barStyle.fullScreen,
             ),
-            SizedBox(width: padding),
           ]),
         ),
       ]),
-    );
-  }
-}
-
-class _ContainerPadding extends StatelessWidget {
-  const _ContainerPadding({
-    Key key,
-    @required this.child,
-    @required this.padding,
-  }) : super(key: key);
-
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.transparent,
-      child: child,
-      padding: padding,
     );
   }
 }

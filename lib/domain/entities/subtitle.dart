@@ -39,7 +39,7 @@ class VideoViewerSubtitle {
   Future<void> initialize() async {
     switch (_intializedType) {
       case _SubtitleIntializeType.network:
-        final http.Response response = await http.get(Uri.parse(_url));
+        final http.Response response = await http.get(_url);
         if (response.statusCode == 200) {
           content = utf8.decode(
             response.bodyBytes,

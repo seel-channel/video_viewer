@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
+import 'package:video_viewer/ui/widgets/helpers.dart';
 
 class SecondaryMenu extends StatelessWidget {
   const SecondaryMenu({
@@ -26,7 +27,7 @@ class SecondaryMenu extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
+            CustomInkWell(
               onTap: query.video(context).closeAllSecondarySettingsMenus,
               child: Row(children: [
                 style.chevron,

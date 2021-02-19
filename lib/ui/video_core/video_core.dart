@@ -232,7 +232,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(builder: (_, orientation) {
+    return OrientationBuilder(builder: (_, Orientation orientation) {
+      final size = GetMedia(context).size;
       final video = _query.video(context, listen: false);
       final metadata = _query.videoMetadata(context, listen: false);
 
@@ -243,129 +244,124 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           ? metadata.responsiveStyle
           : metadata.originalStyle;
 
-      return isFullScreenLandscape
-          ? _player(orientation, isFullScreenLandscape)
-          : VideoAspectRadio(
-              child: _player(orientation, isFullScreenLandscape),
-            );
-    });
-  }
-
-  Widget _player(Orientation orientation, bool isFullScreenLandscape) {
-    final size = GetMedia(context).size;
-    final style = _query.videoStyle(context);
-    final video = _query.video(context, listen: true);
-    final controller = video.controller;
-
-    return _globalGesture(
-      Stack(children: [
-        CustomOpacityTransition(
-          visible: !video.isShowingThumbnail,
-          child: isFullScreenLandscape
-              ? ValueListenableBuilder(
-                  valueListenable: _scale,
-                  builder: (_, double value, __) {
-                    return Transform.scale(
-                      scale: value,
-                      child: Center(
-                        child: VideoAspectRadio(child: VideoPlayer(controller)),
-                      ),
-                    );
+      Widget player = _globalGesture(
+        Stack(children: [
+          CustomOpacityTransition(
+            visible: !video.isShowingThumbnail,
+            child: isFullScreenLandscape
+                ? ValueListenableBuilder(
+                    valueListenable: _scale,
+                    builder: (_, double value, __) {
+                      return Transform.scale(
+                        scale: value,
+                        child: Center(
+                          child: VideoAspectRadio(
+                              child: VideoPlayer(video.controller)),
+                        ),
+                      );
+                    },
+                  )
+                : VideoPlayer(video.controller),
+          ),
+          kIsWeb
+              ? MouseRegion(
+                  onHover: (_) {
+                    if (!video.isShowingOverlay) _showAndHideOverlay(true);
                   },
+                  child: GestureDetector(
+                    onTap: _showAndHideOverlay,
+                    child: Container(color: Colors.transparent),
+                  ),
                 )
-              : VideoPlayer(video.controller),
-        ),
-        kIsWeb
-            ? MouseRegion(
-                onHover: (_) {
-                  if (!video.isShowingOverlay) _showAndHideOverlay(true);
-                },
-                child: GestureDetector(
+              : GestureDetector(
                   onTap: _showAndHideOverlay,
+                  onScaleStart: isFullScreenLandscape ? _onScaleStart : null,
+                  onScaleUpdate: isFullScreenLandscape ? _onScaleUpdate : null,
                   child: Container(color: Colors.transparent),
                 ),
-              )
-            : GestureDetector(
-                onTap: _showAndHideOverlay,
-                onScaleStart: isFullScreenLandscape ? _onScaleStart : null,
-                onScaleUpdate: isFullScreenLandscape ? _onScaleUpdate : null,
-                child: Container(color: Colors.transparent),
-              ),
-        CustomOpacityTransition(
-          visible: video.isShowingThumbnail,
-          child: GestureDetector(
-            onTap: controller.play,
-            child: Container(
-              color: Colors.transparent,
-              child: style.thumbnail,
-            ),
-          ),
-        ),
-        RewindAndForwardLayout(
-          rewind: GestureDetector(onDoubleTap: _rewind),
-          forward: GestureDetector(onDoubleTap: _forward),
-        ),
-        Center(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: _onTapPlayAndPause,
-            child: Container(
-              width: size.width * 0.2,
-              height: size.height * 0.2,
-              decoration: BoxDecoration(
+          CustomOpacityTransition(
+            visible: video.isShowingThumbnail,
+            child: GestureDetector(
+              onTap: video.controller.play,
+              child: Container(
                 color: Colors.transparent,
-                shape: BoxShape.circle,
+                child: metadata.style.thumbnail,
               ),
             ),
           ),
-        ),
-        CustomOpacityTransition(
-          visible: video.isBuffering,
-          child: style.buffering,
-        ),
-        AnimatedBuilder(
-          animation: video.controller,
-          builder: (_, __) {
-            final position = video.controller.value.position;
-            final duration = video.controller.value.duration;
-            return Center(
-              child: CustomOpacityTransition(
-                visible: _showAMomentPlayAndPause || position >= duration,
-                child: PlayAndPause(type: PlayAndPauseType.center),
+          RewindAndForwardLayout(
+            rewind: GestureDetector(onDoubleTap: _rewind),
+            forward: GestureDetector(onDoubleTap: _forward),
+          ),
+          Center(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _onTapPlayAndPause,
+              child: Container(
+                width: size.width * 0.2,
+                height: size.height * 0.2,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  shape: BoxShape.circle,
+                ),
               ),
-            );
-          },
-        ),
-        ActiveSubtitleText(),
-        VideoOverlay(),
-        CustomOpacityTransition(
-          visible: _showForwardStatus,
-          child: RewindAndForwardTextAlert(amount: _forwardAndRewindAmount),
-        ),
-        CustomSwipeTransition(
-          visible: _showVolumeStatus,
-          direction: style.volumeBarStyle.alignment == Alignment.centerLeft
-              ? SwipeDirection.fromLeft
-              : SwipeDirection.fromRight,
-          child: ValueListenableBuilder(
-            valueListenable: _currentVolume,
-            builder: (_, double value, __) {
-              return VideoVolumeBar(progress: value / _maxVolume);
+            ),
+          ),
+          CustomOpacityTransition(
+            visible: video.isBuffering,
+            child: metadata.style.buffering,
+          ),
+          AnimatedBuilder(
+            animation: video.controller,
+            builder: (_, __) {
+              final position = video.controller.value.position;
+              final duration = video.controller.value.duration;
+              return Center(
+                child: CustomOpacityTransition(
+                  visible: _showAMomentPlayAndPause || position >= duration,
+                  child: PlayAndPause(type: PlayAndPauseType.center),
+                ),
+              );
             },
           ),
-        ),
-        RewindAndForwardLayout(
-          rewind: CustomOpacityTransition(
-            visible: _showAMomentRewindIcons[0],
-            child: Center(child: style.forwardAndRewindStyle.rewind),
+          ActiveSubtitleText(),
+          VideoOverlay(),
+          CustomOpacityTransition(
+            visible: _showForwardStatus,
+            child: RewindAndForwardTextAlert(amount: _forwardAndRewindAmount),
           ),
-          forward: CustomOpacityTransition(
-            visible: _showAMomentRewindIcons[1],
-            child: Center(child: style.forwardAndRewindStyle.forward),
+          CustomSwipeTransition(
+            visible: _showVolumeStatus,
+            direction:
+                metadata.style.volumeBarStyle.alignment == Alignment.centerLeft
+                    ? SwipeDirection.fromLeft
+                    : SwipeDirection.fromRight,
+            child: ValueListenableBuilder(
+              valueListenable: _currentVolume,
+              builder: (_, double value, __) {
+                return VideoVolumeBar(progress: value / _maxVolume);
+              },
+            ),
           ),
-        ),
-      ]),
-    );
+          RewindAndForwardLayout(
+            rewind: CustomOpacityTransition(
+              visible: _showAMomentRewindIcons[0],
+              child: Center(
+                child: metadata.style.forwardAndRewindStyle.rewind,
+              ),
+            ),
+            forward: CustomOpacityTransition(
+              visible: _showAMomentRewindIcons[1],
+              child: Center(
+                child: metadata.style.forwardAndRewindStyle.forward,
+              ),
+            ),
+          ),
+        ]),
+      );
+
+      return isFullScreenLandscape ? player : VideoAspectRadio(child: player);
+    });
   }
 
   //--------//

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
+import 'package:video_viewer/ui/widgets/helpers.dart';
 
 enum PlayAndPauseType { center, bottom }
 
@@ -19,19 +20,16 @@ class PlayAndPause extends StatelessWidget {
     final video = query.video(context, listen: true);
     final style = query.videoMetadata(context).style.playAndPauseStyle;
 
-    return GestureDetector(
+    return SplashCircularIcon(
       onTap: video.onTapPlayAndPause,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: padding,
-        child: type == PlayAndPauseType.bottom
-            ? !video.isPlaying
-                ? style.play
-                : style.pause
-            : !video.isPlaying
-                ? style.playWidget
-                : style.pauseWidget,
-      ),
+      padding: padding,
+      child: type == PlayAndPauseType.bottom
+          ? !video.isPlaying
+              ? style.play
+              : style.pause
+          : !video.isPlaying
+              ? style.playWidget
+              : style.pauseWidget,
     );
   }
 }

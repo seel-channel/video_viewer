@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:video_viewer/video_viewer.dart';
 import 'package:path_provider/path_provider.dart';
 
-void main() => runApp(App());
+void main() => runApp(SerieExample());
 
 class App extends StatelessWidget {
   @override

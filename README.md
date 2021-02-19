@@ -160,6 +160,8 @@ SerieExample works to change an episode directly from VideoViewer without leavin
 It has different sources because some videos have different qualities.
 
 ```dart
+void main() => runApp(SerieExample());
+
 class SerieExample extends StatefulWidget {
   SerieExample({Key key}) : super(key: key);
 
@@ -338,6 +340,8 @@ class SerieEpisode extends InheritedWidget {
   bool updateShouldNotify(SerieEpisode old) => episode != old.episode;
 }
 ```
+
+<br><br>
 
 ### Using **VideoViewerController**
 

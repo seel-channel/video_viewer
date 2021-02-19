@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
-import 'package:video_viewer/ui/settings_menu/widgets/helpers.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/secondary_menu.dart';
+import 'package:video_viewer/ui/widgets/helpers.dart';
 
 class SpeedMenu extends StatelessWidget {
   const SpeedMenu({Key key}) : super(key: key);
