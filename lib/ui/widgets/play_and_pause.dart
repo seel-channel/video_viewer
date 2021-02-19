@@ -17,8 +17,7 @@ class PlayAndPause extends StatelessWidget {
   Widget build(BuildContext context) {
     final query = VideoQuery();
     final video = query.video(context, listen: true);
-    final style =
-        query.videoMetadata(context, listen: true).style.playAndPauseStyle;
+    final style = query.videoMetadata(context).style.playAndPauseStyle;
 
     return GestureDetector(
       onTap: video.onTapPlayAndPause,

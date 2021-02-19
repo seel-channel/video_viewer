@@ -6,7 +6,6 @@ import 'package:video_viewer/domain/bloc/controller.dart';
 import 'package:video_viewer/domain/bloc/metadata.dart';
 
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
-import 'package:video_viewer/domain/entities/settings_menu_item.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/domain/entities/language.dart';
 import 'package:video_viewer/ui/video_core/video_core.dart';
@@ -23,6 +22,7 @@ class VideoViewer extends StatefulWidget {
     Key key,
     @required this.source,
     VideoViewerStyle style,
+    VideoViewerController controller,
     this.looping = false,
     this.autoPlay = false,
     this.rewindAmount = 10,
@@ -30,8 +30,8 @@ class VideoViewer extends StatefulWidget {
     this.defaultAspectRatio = 16 / 9,
     this.onFullscreenFixLandscape = false,
     this.language = VideoViewerLanguage.en,
-    this.settingsMenuItems,
-  })  : this.style = style ?? VideoViewerStyle(),
+  })  : this.controller = controller ?? VideoViewerController(),
+        this.style = style ?? VideoViewerStyle(),
         super(key: key);
 
   /// Once the video is initialized, it will be played
@@ -82,8 +82,7 @@ class VideoViewer extends StatefulWidget {
   /// ```
   final VideoViewerLanguage language;
 
-  ///ADD CUSTOM SECTIONS TO SETTINGS MENU
-  final List<SettingsMenuItem> settingsMenuItems;
+  final VideoViewerController controller;
 
   @override
   VideoViewerState createState() => VideoViewerState();
@@ -91,21 +90,18 @@ class VideoViewer extends StatefulWidget {
 
 class VideoViewerState extends State<VideoViewer> {
   VideoViewerController _controller;
-  VideoMetadata _metadata;
+  VideoViewerMetadata _metadata;
   bool _initialized = false;
 
-  VideoViewerController get controller => _controller;
-  VideoMetadata get metadata => _metadata;
+  VideoViewerMetadata get metadata => _metadata;
 
   @override
   void initState() {
-    _metadata = VideoMetadata(
+    _metadata = VideoViewerMetadata(
       style: widget.style,
-      source: widget.source,
       language: widget.language,
       rewindAmount: widget.rewindAmount,
       forwardAmount: widget.forwardAmount,
-      settingsMenuItems: widget.settingsMenuItems,
       defaultAspectRatio: widget.defaultAspectRatio,
       onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
     );
@@ -125,11 +121,11 @@ class VideoViewerState extends State<VideoViewer> {
 
     await source.video?.initialize();
 
-    _controller = VideoViewerController(
-      isLooping: widget.looping,
-      controller: source.video,
-      activeSource: activedSource,
-    );
+    _controller = widget.controller;
+    _controller.source = widget.source;
+    _controller.looping = widget.looping;
+
+    await _controller.changeSource(source: source, name: activedSource);
 
     if (source.subtitle != null) {
       final subtitle = source.subtitle.entries.toList().first;

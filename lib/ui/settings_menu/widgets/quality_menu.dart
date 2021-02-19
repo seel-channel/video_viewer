@@ -11,20 +11,18 @@ class QualityMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final query = VideoQuery();
     final video = query.video(context, listen: true);
-    final metadata = query.videoMetadata(context, listen: true);
 
     final activeSource = video.activeSource;
 
     return SecondaryMenu(
       children: [
-        for (MapEntry<String, VideoSource> entry in metadata.source.entries)
+        for (MapEntry<String, VideoSource> entry in video.source.entries)
           CustomInkWell(
             onTap: () {
               if (entry.key != activeSource)
-                query.video(context).changeSource(
-                      source: entry.value,
-                      sourceName: entry.key,
-                    );
+                query
+                    .video(context)
+                    .changeSource(source: entry.value, name: entry.key);
             },
             child: CustomText(
               text: entry.key,

@@ -17,7 +17,7 @@ class SettingsMenu extends StatelessWidget {
     final query = VideoQuery();
     final video = query.video(context, listen: true);
     final meta = query.videoMetadata(context);
-    final items = meta.settingsMenuItems;
+    final items = meta.style.settingsStyle.items;
 
     final bool main = video.isShowingMainSettingsMenu;
     final List<bool> secondary = video.isShowingSecondarySettingsMenus;

@@ -6,7 +6,7 @@ import 'package:video_viewer/domain/bloc/metadata.dart';
 
 abstract class VideoQueryRepository {
   String secondsFormatter(int seconds);
-  VideoMetadata videoMetadata(BuildContext context, {bool listen = true});
   VideoViewerStyle videoStyle(BuildContext context, {bool listen = true});
   VideoViewerController video(BuildContext context, {bool listen = false});
+  VideoViewerMetadata videoMetadata(BuildContext context, {bool listen = true});
 }

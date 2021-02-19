@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_viewer/video_viewer.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(App());
 
@@ -26,7 +27,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(child: HLSVideoExample()),
+      body: Center(child: SerieExample()),
     );
   }
 }
@@ -41,12 +42,12 @@ class UsingVideoControllerExample extends StatefulWidget {
 
 class _UsingVideoControllerExampleState
     extends State<UsingVideoControllerExample> {
-  final GlobalKey<VideoViewerState> key = GlobalKey<VideoViewerState>();
+  final VideoViewerController controller = VideoViewerController();
 
   @override
   Widget build(BuildContext context) {
     return VideoViewer(
-      key: key,
+      controller: controller,
       source: {
         "SubRip Text": VideoSource(
           video: VideoPlayerController.network(
@@ -62,13 +63,12 @@ class _UsingVideoControllerExampleState
     );
   }
 
-  VideoPlayerController getVideoPlayer() =>
-      key.currentState.controller.controller;
-  String getActiveSourceName() => key.currentState.controller.activeSource;
-  String getActiveCaption() => key.currentState.controller.activeCaption;
-  bool isFullScreen() => key.currentState.controller.isFullScreen;
-  bool isBuffering() => key.currentState.controller.isBuffering;
-  bool isPlaying() => key.currentState.controller.isPlaying;
+  VideoPlayerController getVideoPlayer() => controller.controller;
+  String getActiveSourceName() => controller.activeSource;
+  String getActiveCaption() => controller.activeCaption;
+  bool isFullScreen() => controller.isFullScreen;
+  bool isBuffering() => controller.isBuffering;
+  bool isPlaying() => controller.isPlaying;
 }
 
 class SerieExample extends StatefulWidget {
@@ -79,7 +79,8 @@ class SerieExample extends StatefulWidget {
 }
 
 class _SerieExampleState extends State<SerieExample> {
-  final GlobalKey<VideoViewerState> key = GlobalKey<VideoViewerState>();
+  final key = GlobalKey<VideoViewerState>();
+  final controller = VideoViewerController();
   final Map<String, Map<String, VideoSource>> database = {
     "Episode 1": VideoSource.getNetworkVideoSources({
       "1080p":
@@ -98,77 +99,90 @@ class _SerieExampleState extends State<SerieExample> {
         "https://www.elcomercio.com/files/article_main/uploads/2019/03/29/5c9e3ddfc85ca.jpeg",
   };
 
-  String episode = "Episode 1";
-
   @override
   Widget build(BuildContext context) {
+    final first = database.entries.first;
     return VideoViewer(
       key: key,
-      onFullscreenFixLandscape: true,
+      source: first.value,
+      controller: controller,
+      style: style(first.key),
       language: VideoViewerLanguage.es,
-      source: database.entries.first.value,
-      style: VideoViewerStyle(
-        header: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                episode,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-        settingsStyle: SettingsMenuStyle(paddingBetween: 10),
-      ),
-      settingsMenuItems: [
-        SettingsMenuItem(
-          themed: SettingsMenuItemThemed(
-            icon: Icon(Icons.view_module_outlined, color: Colors.white),
-            title: "Episodes",
-            subtitle: episode,
-          ),
-          secondaryMenuWidth: 200,
-          secondaryMenu: Padding(
-            padding: EdgeInsets.only(top: 20),
-            child: Center(
-              child: Container(
-                child: Wrap(
-                  spacing: 20,
-                  runSpacing: 10,
-                  children: [
-                    for (var entry in database.entries)
-                      episodeImage(thumbnails[entry.key], entry.value)
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+      onFullscreenFixLandscape: true,
     );
   }
 
-  Widget episodeImage(String imageUrl, Map<String, VideoSource> data) {
+  Widget episodeImage(MapEntry<String, Map<String, VideoSource>> entry) {
     return InkWell(
-      onTap: () {
-        final entry = data.entries.first;
-        key.currentState.metadata.source = data;
-        key.currentState.controller
-            .changeSource(source: entry.value, sourceName: entry.key);
+      onTap: () async {
+        final source = entry.value;
+        final video = source.entries.first;
+        await controller.changeSource(
+          source: video.value,
+          name: video.key,
+          inheritValues: false,
+        );
+
+        controller.closeAllSecondarySettingsMenus();
+        controller.source = source;
+        key.currentState.metadata.style = style(entry.key);
+        print(entry.key);
       },
       child: Container(
         width: 80,
         height: 80,
         color: Colors.white,
-        child: Image.network(imageUrl, fit: BoxFit.cover),
+        child: Image.network(thumbnails[entry.key], fit: BoxFit.cover),
+      ),
+    );
+  }
+
+  VideoViewerStyle style(String episode) {
+    return VideoViewerStyle(
+      header: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              episode,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+      settingsStyle: SettingsMenuStyle(
+        paddingBetween: 10,
+        items: [
+          SettingsMenuItem(
+            themed: SettingsMenuItemThemed(
+              icon: Icon(Icons.view_module_outlined, color: Colors.white),
+              title: "Episodes",
+              subtitle: episode,
+            ),
+            secondaryMenuWidth: 200,
+            secondaryMenu: Padding(
+              padding: EdgeInsets.only(top: 20),
+              child: Center(
+                child: Container(
+                  child: Wrap(
+                    spacing: 20,
+                    runSpacing: 10,
+                    children: [
+                      for (var entry in database.entries) episodeImage(entry)
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -209,23 +223,27 @@ class NetworkVideoExample extends StatelessWidget {
             ],
           ),
         ),
-      ),
-      settingsMenuItems: [
-        SettingsMenuItem(
-          mainMenu: Text("OTHERS",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white)),
-          secondaryMenu: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("CHANGE ROTATION", style: TextStyle(color: Colors.white)),
-              Text("SCREENSHOT", style: TextStyle(color: Colors.white)),
-            ],
-          ),
+        settingsStyle: SettingsMenuStyle(
+          paddingBetween: 10,
+          items: [
+            SettingsMenuItem(
+              mainMenu: Text("OTHERS",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white)),
+              secondaryMenu: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("CHANGE ROTATION",
+                      style: TextStyle(color: Colors.white)),
+                  Text("SCREENSHOT", style: TextStyle(color: Colors.white)),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -249,6 +267,7 @@ class HLSVideoExample extends StatelessWidget {
 
   ///USE [path_provider] AND [dart.io] **(Only available on Android and iOS)**
   Future<Map<String, VideoSource>> createHLSFiles(String url) async {
+    final Directory directory = await getApplicationDocumentsDirectory();
     final Map<String, String> files =
         await VideoSource.getm3u8VideoFileData(url);
     Map<String, VideoSource> sources = {
@@ -256,7 +275,7 @@ class HLSVideoExample extends StatelessWidget {
     };
 
     for (String quality in files.keys) {
-      final File file = File('hls$quality.m3u8');
+      final File file = File('${directory.path}/hls$quality.m3u8');
       await file.writeAsString(files[quality]);
       sources["${quality.split("x").last}p"] =
           VideoSource(video: VideoPlayerController.file(file));

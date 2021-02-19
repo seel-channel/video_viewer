@@ -8,8 +8,11 @@ import 'package:video_viewer/video_viewer.dart';
 
 class VideoQuery extends VideoQueryRepository {
   @override
-  VideoMetadata videoMetadata(BuildContext context, {bool listen = true}) {
-    return Provider.of<VideoMetadata>(context, listen: listen);
+  VideoViewerMetadata videoMetadata(
+    BuildContext context, {
+    bool listen = true,
+  }) {
+    return Provider.of<VideoViewerMetadata>(context, listen: listen);
   }
 
   @override
@@ -19,7 +22,7 @@ class VideoQuery extends VideoQueryRepository {
 
   @override
   VideoViewerStyle videoStyle(BuildContext context, {bool listen = true}) {
-    return Provider.of<VideoMetadata>(context, listen: listen).style;
+    return Provider.of<VideoViewerMetadata>(context, listen: listen).style;
   }
 
   @override

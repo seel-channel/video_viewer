@@ -15,7 +15,7 @@ class MainMenu extends StatelessWidget {
 
     final speed = video.controller.value.playbackSpeed;
     final style = metadata.style.settingsStyle;
-    final items = metadata.settingsMenuItems;
+    final items = style.items;
 
     return Center(
       child: Row(

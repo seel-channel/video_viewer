@@ -10,7 +10,6 @@ class VideoSource {
   VideoSource({
     @required this.video,
     this.subtitle,
-    this.inheritValues = true,
   });
 
   ///VideoPlayerController
@@ -35,16 +34,6 @@ class VideoSource {
   ///  },
   ///```
   final Map<String, VideoViewerSubtitle> subtitle;
-
-  ///This argument has the function to inherit last controller values.
-  ///It's useful on changed quality video.
-  ///
-  ///For example:
-  ///```dart
-  ///   _controller.setPlaybackSpeed(lastController.value.playbackSpeed);
-  ///   _controller.seekTo(lastController.value.position);
-  /// ```
-  final bool inheritValues;
 
   /// It is a function that returns a map from VideoPlayerController.network, the input
   /// data must be of type URL.

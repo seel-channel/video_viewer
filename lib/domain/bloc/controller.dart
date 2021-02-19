@@ -11,18 +11,32 @@ import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/ui/fullscreen.dart';
 
 class VideoViewerController extends ChangeNotifier {
-  VideoViewerController({
-    VideoPlayerController controller,
-    String activeSource,
-    this.isLooping,
-  }) {
-    this._controller = controller;
-    this._activeSource = activeSource;
-    this._controller.addListener(_videoListener);
+  /// Controls a platform video viewer, and provides updates when the state is
+  /// changing.
+  ///
+  /// Instances must be initialized with initialize.
+  ///
+  /// The video is displayed in a Flutter app by creating a [VideoPlayer] widget.
+  ///
+  /// To reclaim the resources used by the player call [dispose].
+  ///
+  /// After [dispose] all further calls are ignored.
+  VideoViewerController() {
     this.isShowingSecondarySettingsMenus = List.filled(12, false);
   }
 
-  final bool isLooping;
+  /// Receive a list of all the resources to be played.
+  ///
+  ///SYNTAX EXAMPLE:
+  ///```dart
+  ///{
+  ///    "720p": VideoSource(video: VideoPlayerController.network("https://github.com/intel-iot-devkit/sample-videos/blob/master/classroom.mp4")),
+  ///    "1080p": VideoSource(video: VideoPlayerController.network("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")),
+  ///}
+  ///```
+  Map<String, VideoSource> _source;
+
+  bool looping;
   String _activeSource;
   String _activeSubtitle;
   VideoViewerSubtitle _subtitle;
@@ -75,6 +89,12 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Map<String, VideoSource> get source => _source;
+  set source(Map<String, VideoSource> value) {
+    _source = value;
+    notifyListeners();
+  }
+
   @override
   void dispose() async {
     _timerPosition?.cancel();
@@ -87,28 +107,46 @@ class VideoViewerController extends ChangeNotifier {
   //----------------//
   //VIDEO CONTROLLER//
   //----------------//
+  ///[inheritValues] has the function to inherit last controller values.
+  ///It's useful on changed quality video.
+  ///
+  ///For example:
+  ///```dart
+  ///   _controller.setPlaybackSpeed(lastController.value.playbackSpeed);
+  ///   _controller.seekTo(lastController.value.position);
+  /// ```
   Future<void> changeSource({
     @required VideoSource source,
-    @required String sourceName,
+    @required String name,
+    bool inheritValues = true,
+    bool autoPlay = true,
   }) async {
-    final double speed = _controller.value.playbackSpeed;
-    final Duration position = _controller.value.position;
-    final VideoViewerSubtitle subtitle = source.subtitle.values.toList().first;
+    if (_controller == null) {
+      _controller = source.video;
+      _activeSource = name;
+      _controller.addListener(_videoListener);
+    } else {
+      await source.video.initialize();
+      if (source.subtitle != null) {
+        final VideoViewerSubtitle subtitle =
+            source.subtitle.values.toList().first;
+        await subtitle?.initialize();
+        _subtitle = subtitle;
+      }
 
-    await source.video.initialize();
-    await subtitle?.initialize();
+      _controller = source.video;
+      _activeSource = name;
+      _controller.addListener(_videoListener);
 
-    _subtitle = subtitle;
-    _controller = source.video;
-    _activeSource = sourceName;
-
-    _controller.addListener(_videoListener);
-    if (source.inheritValues) {
-      await _controller.setPlaybackSpeed(speed);
-      await _controller.seekTo(position);
+      if (inheritValues) {
+        final double speed = _controller.value.playbackSpeed;
+        final Duration position = _controller.value.position;
+        await _controller.setPlaybackSpeed(speed);
+        await _controller.seekTo(position);
+      }
+      await _controller.setLooping(looping);
+      if (autoPlay) await _controller.play();
     }
-    await _controller.setLooping(isLooping);
-    await _controller.play();
     notifyListeners();
   }
 
@@ -134,7 +172,7 @@ class VideoViewerController extends ChangeNotifier {
 
     if (_isShowingOverlay) {
       if (isPlaying) {
-        if (position >= value.duration && isLooping) {
+        if (position >= value.duration && looping) {
           _controller.seekTo(Duration.zero);
         } else {
           if (_timerPosition == null) _createBufferTimer();

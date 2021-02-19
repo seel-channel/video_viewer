@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
-import 'package:video_viewer/domain/entities/settings_menu_item.dart';
-import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/domain/entities/language.dart';
+import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 
-class VideoMetadata extends ChangeNotifier {
-  VideoMetadata({
-    @required Map<String, VideoSource> source,
-    @required VideoViewerStyle style,
-    @required this.rewindAmount,
-    @required this.forwardAmount,
-    @required this.defaultAspectRatio,
-    @required this.onFullscreenFixLandscape,
-    @required this.language,
-    @required this.settingsMenuItems,
-  })  : this._source = source,
-        this.style = style ?? VideoViewerStyle() {
+class VideoViewerMetadata extends ChangeNotifier {
+  VideoViewerMetadata({
+    VideoViewerStyle style,
+    this.rewindAmount = 10,
+    this.forwardAmount = 10,
+    this.defaultAspectRatio = 16 / 9,
+    this.onFullscreenFixLandscape = false,
+    this.language = VideoViewerLanguage.en,
+  }) : this.style = style ?? VideoViewerStyle() {
     originalStyle = this.style;
     responsiveStyle = originalStyle.copywith(
       textStyle: originalStyle.textStyle.merge(
@@ -27,21 +22,37 @@ class VideoMetadata extends ChangeNotifier {
     );
   }
 
-  final int rewindAmount, forwardAmount;
-  final bool onFullscreenFixLandscape;
+  /// It is the Aspect Ratio that the widget.style.loading will take when the video
+  /// is not initialized yet
   final double defaultAspectRatio;
-  final VideoViewerLanguage language;
-  final List<SettingsMenuItem> settingsMenuItems;
 
+  /// It is the amount of seconds that the video will be delayed when double tapping.
+  final int rewindAmount;
+
+  /// It is the amount of seconds that the video will be advanced when double tapping.
+  final int forwardAmount;
+
+  ///If it is `true`, when entering the fullscreen it will be fixed
+  ///in landscape mode and it will not be possible to rotate it in portrait.
+  ///If it is `false`, you can rotate the entire screen in any position.
+  final bool onFullscreenFixLandscape;
+
+  ///It's the custom language can you set to the VideoViewer.
+  ///
+  ///**EXAMPLE:** SETTING THE SPANISH LANGUAGE TO THE VIDEOVIEWER
+  ///```dart
+  /// //WAY 1
+  /// language: VideoViewerLanguage.es
+  /// //WAY 2
+  /// language: VideoViewerLanguage(quality: "Calidad", speed: "Velocidad", ...)
+  /// //WAY 3
+  /// language: VideoViewerLanguage.fromString("es")
+  /// ```
+  final VideoViewerLanguage language;
+
+  /// It is an argument where you can change the design of almost the entire VideoViewer
   VideoViewerStyle style;
+
   VideoViewerStyle originalStyle;
   VideoViewerStyle responsiveStyle;
-
-  Map<String, VideoSource> _source;
-
-  Map<String, VideoSource> get source => _source;
-  set source(Map<String, VideoSource> source) {
-    _source = source;
-    notifyListeners();
-  }
 }

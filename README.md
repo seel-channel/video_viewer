@@ -162,36 +162,37 @@ class UsingVideoControllerExample extends StatefulWidget {
   UsingVideoControllerExample({Key key}) : super(key: key);
 
   @override
-  _UsingVideoControllerExampleState createState() => _UsingVideoControllerExampleState();
+  _UsingVideoControllerExampleState createState() =>  _UsingVideoControllerExampleState();
 }
 
 class _UsingVideoControllerExampleState extends State<UsingVideoControllerExample> {
-  final GlobalKey<VideoViewerState> key = GlobalKey<VideoViewerState>();
+  final VideoViewerController controller = VideoViewerController();
 
   @override
   Widget build(BuildContext context) {
     return VideoViewer(
-      key: key,
+      controller: controller,
       source: {
         "SubRip Text": VideoSource(
           video: VideoPlayerController.network(
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
-          subtitle: VideoViewerSubtitle.network(
-            "https://pastebin.com/raw/h9cP6N5N",
-            type: SubtitleType.webvtt,
-          ),
+          subtitle: {
+            "English": VideoViewerSubtitle.network(
+              "https://pastebin.com/raw/h9cP6N5N",
+              type: SubtitleType.webvtt,
+            ),
+          },
         )
       },
     );
   }
 
-  VideoPlayerController getVideoPlayer() => key.currentState.controller.controller;
-  SubtitleData getActiveSubtitle() => key.currentState.controller.activeSubtitle;
-  String getActiveSourceName() => key.currentState.controller.activeSource;
-  bool isFullScreen() => key.currentState.controller.isFullScreen;
-  bool isBuffering() => key.currentState.controller.isBuffering;
-  bool isPlaying() => key.currentState.controller.isPlaying;
-
+  VideoPlayerController getVideoPlayer() => controller.controller;
+  String getActiveSourceName() => controller.activeSource;
+  String getActiveCaption() => controller.activeCaption;
+  bool isFullScreen() => controller.isFullScreen;
+  bool isBuffering() => controller.isBuffering;
+  bool isPlaying() => controller.isPlaying;
 }
 ```
 
@@ -282,8 +283,7 @@ class HLSVideoExample extends StatelessWidget {
   ///USE [path_provider] AND [dart.io] **(Only available on Android and iOS)**
   Future<Map<String, VideoSource>> createHLSFiles(String url) async {
     final Directory directory = await getApplicationDocumentsDirectory();
-    final Map<String, String> files =
-        await VideoSource.getm3u8VideoFileData(url);
+    final Map<String, String> files = await VideoSource.getm3u8VideoFileData(url);
     Map<String, VideoSource> sources = {
       "Auto": VideoSource(video: VideoPlayerController.network(url)),
     };

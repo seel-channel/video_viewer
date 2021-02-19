@@ -33,7 +33,7 @@ class CaptionMenu extends StatelessWidget {
             selected: activeCaption == none || activeCaption == null,
           ),
         ),
-        for (MapEntry<String, VideoSource> entry in metadata.source.entries)
+        for (MapEntry<String, VideoSource> entry in video.source.entries)
           if (entry.key == activeSource && entry.value.subtitle != null)
             for (MapEntry<String, VideoViewerSubtitle> subtitle
                 in entry.value.subtitle.entries)

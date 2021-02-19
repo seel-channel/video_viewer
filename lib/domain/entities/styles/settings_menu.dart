@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:video_viewer/domain/entities/settings_menu_item.dart';
 
 class SettingsMenuStyle {
   /// These are the styles of the settings sales, here you will change the icons and
@@ -10,6 +11,7 @@ class SettingsMenuStyle {
     Widget selected,
     Widget chevron,
     this.paddingBetween = 24,
+    this.items,
   })  : this.settings = settings ??
             Icon(
               Icons.settings_outlined,
@@ -71,4 +73,7 @@ class SettingsMenuStyle {
 
   /// It is the padding between all the elements of the SettingsMenu
   final double paddingBetween;
+
+  ///ADD CUSTOM SECTIONS TO SETTINGS MENU
+  final List<SettingsMenuItem> items;
 }
