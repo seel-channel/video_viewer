@@ -155,6 +155,178 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 ## **EXAMPLES**
 
+### Serie Example with 2 episodes
+SerieExample works to change an episode directly from VideoViewer without leaving VideoViewer.
+It has different sources because some videos have different qualities.
+
+```dart
+class SerieExample extends StatefulWidget {
+  SerieExample({Key key}) : super(key: key);
+
+  @override
+  _SerieExampleState createState() => _SerieExampleState();
+}
+
+class _SerieExampleState extends State<SerieExample> {
+  final VideoViewerController controller = VideoViewerController();
+  final Map<String, Map<String, VideoSource>> database = {
+    "Episode 1": VideoSource.getNetworkVideoSources({
+      "1080p":
+          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    }),
+    "Episode 2": VideoSource.getNetworkVideoSources({
+      "720p":
+          "https://file-examples-com.github.io/uploads/2017/04/file_example_MP4_480_1_5MG.mp4"
+    }),
+  };
+
+  final Map<String, String> thumbnails = {
+    "Episode 1":
+        "https://cloudfront-us-east-1.images.arcpublishing.com/semana/FUM2RCCVW5EL5LQYCDVC6VRO2U.jpg",
+    "Episode 2":
+        "https://www.elcomercio.com/files/article_main/uploads/2019/03/29/5c9e3ddfc85ca.jpeg",
+  };
+
+  String episode = "";
+
+  @override
+  void initState() {
+    episode = database.entries.first.key;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SerieEpisode(
+      episode: episode,
+      child: VideoViewer(
+        source: database.entries.first.value,
+        controller: controller,
+        language: VideoViewerLanguage.es,
+        onFullscreenFixLandscape: true,
+        style: VideoViewerStyle(
+          header: Builder(
+            builder: (innerContext) {
+              return Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      SerieEpisode.of(innerContext).episode,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          settingsStyle: SettingsMenuStyle(
+            paddingBetween: 10,
+            items: [
+              SettingsMenuItem(
+                themed: SettingsMenuItemThemed(
+                  icon: Icon(Icons.view_module_outlined, color: Colors.white),
+                  title: Text("Episodes"),
+                  subtitle: Builder(
+                    builder: (innerContext) {
+                      return Text(SerieEpisode.of(innerContext).episode);
+                    },
+                  ),
+                ),
+                secondaryMenuWidth: 200,
+                secondaryMenu: Padding(
+                  padding: EdgeInsets.only(top: 5),
+                  child: Center(
+                    child: Container(
+                      child: Wrap(
+                        spacing: 20,
+                        runSpacing: 10,
+                        children: [
+                          for (var entry in database.entries)
+                            episodeImage(entry)
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget episodeImage(MapEntry<String, Map<String, VideoSource>> entry) {
+    return ClipRRect(
+      borderRadius: BorderRadius.all(Radius.circular(5)),
+      child: Material(
+        child: InkWell(
+          onTap: () async {
+            final source = entry.value;
+            final video = source.entries.first;
+            await controller.changeSource(
+              source: video.value,
+              name: video.key,
+              inheritValues: false,
+            );
+
+            controller.closeAllSecondarySettingsMenus();
+            controller.source = source;
+            episode = entry.key;
+            setState(() {});
+          },
+          child: Stack(
+            alignment: AlignmentDirectional.bottomCenter,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                color: Colors.white,
+                child: Image.network(thumbnails[entry.key], fit: BoxFit.cover),
+              ),
+              Text(
+                entry.key,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SerieEpisode extends InheritedWidget {
+  const SerieEpisode({
+    Key key,
+    @required this.episode,
+    @required Widget child,
+  })  : assert(episode != null),
+        assert(child != null),
+        super(key: key, child: child);
+
+  final String episode;
+
+  static SerieEpisode of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SerieEpisode>();
+  }
+
+  @override
+  bool updateShouldNotify(SerieEpisode old) => episode != old.episode;
+}
+```
+
 ### Using **VideoViewerController**
 
 ```dart

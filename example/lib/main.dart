@@ -79,8 +79,7 @@ class SerieExample extends StatefulWidget {
 }
 
 class _SerieExampleState extends State<SerieExample> {
-  final key = GlobalKey<VideoViewerState>();
-  final controller = VideoViewerController();
+  final VideoViewerController controller = VideoViewerController();
   final Map<String, Map<String, VideoSource>> database = {
     "Episode 1": VideoSource.getNetworkVideoSources({
       "1080p":
@@ -99,93 +98,143 @@ class _SerieExampleState extends State<SerieExample> {
         "https://www.elcomercio.com/files/article_main/uploads/2019/03/29/5c9e3ddfc85ca.jpeg",
   };
 
+  String episode = "";
+
+  @override
+  void initState() {
+    episode = database.entries.first.key;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final first = database.entries.first;
-    return VideoViewer(
-      key: key,
-      source: first.value,
-      controller: controller,
-      style: style(first.key),
-      language: VideoViewerLanguage.es,
-      onFullscreenFixLandscape: true,
+    return SerieEpisode(
+      episode: episode,
+      child: VideoViewer(
+        source: database.entries.first.value,
+        controller: controller,
+        language: VideoViewerLanguage.es,
+        onFullscreenFixLandscape: true,
+        style: VideoViewerStyle(
+          header: Builder(
+            builder: (innerContext) {
+              return Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      SerieEpisode.of(innerContext).episode,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          settingsStyle: SettingsMenuStyle(
+            paddingBetween: 10,
+            items: [
+              SettingsMenuItem(
+                themed: SettingsMenuItemThemed(
+                  icon: Icon(Icons.view_module_outlined, color: Colors.white),
+                  title: Text("Episodes"),
+                  subtitle: Builder(
+                    builder: (innerContext) {
+                      return Text(SerieEpisode.of(innerContext).episode);
+                    },
+                  ),
+                ),
+                secondaryMenuWidth: 200,
+                secondaryMenu: Padding(
+                  padding: EdgeInsets.only(top: 5),
+                  child: Center(
+                    child: Container(
+                      child: Wrap(
+                        spacing: 20,
+                        runSpacing: 10,
+                        children: [
+                          for (var entry in database.entries)
+                            episodeImage(entry)
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget episodeImage(MapEntry<String, Map<String, VideoSource>> entry) {
-    return InkWell(
-      onTap: () async {
-        final source = entry.value;
-        final video = source.entries.first;
-        await controller.changeSource(
-          source: video.value,
-          name: video.key,
-          inheritValues: false,
-        );
+    return ClipRRect(
+      borderRadius: BorderRadius.all(Radius.circular(5)),
+      child: Material(
+        child: InkWell(
+          onTap: () async {
+            final source = entry.value;
+            final video = source.entries.first;
+            await controller.changeSource(
+              source: video.value,
+              name: video.key,
+              inheritValues: false,
+            );
 
-        controller.closeAllSecondarySettingsMenus();
-        controller.source = source;
-        key.currentState.metadata.style = style(entry.key);
-        print(entry.key);
-      },
-      child: Container(
-        width: 80,
-        height: 80,
-        color: Colors.white,
-        child: Image.network(thumbnails[entry.key], fit: BoxFit.cover),
-      ),
-    );
-  }
-
-  VideoViewerStyle style(String episode) {
-    return VideoViewerStyle(
-      header: Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              episode,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            controller.closeAllSecondarySettingsMenus();
+            controller.source = source;
+            episode = entry.key;
+            setState(() {});
+          },
+          child: Stack(
+            alignment: AlignmentDirectional.bottomCenter,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
                 color: Colors.white,
+                child: Image.network(thumbnails[entry.key], fit: BoxFit.cover),
               ),
-            ),
-          ],
+              Text(
+                entry.key,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            ],
+          ),
         ),
       ),
-      settingsStyle: SettingsMenuStyle(
-        paddingBetween: 10,
-        items: [
-          SettingsMenuItem(
-            themed: SettingsMenuItemThemed(
-              icon: Icon(Icons.view_module_outlined, color: Colors.white),
-              title: "Episodes",
-              subtitle: episode,
-            ),
-            secondaryMenuWidth: 200,
-            secondaryMenu: Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: Center(
-                child: Container(
-                  child: Wrap(
-                    spacing: 20,
-                    runSpacing: 10,
-                    children: [
-                      for (var entry in database.entries) episodeImage(entry)
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
+}
+
+class SerieEpisode extends InheritedWidget {
+  const SerieEpisode({
+    Key key,
+    @required this.episode,
+    @required Widget child,
+  })  : assert(episode != null),
+        assert(child != null),
+        super(key: key, child: child);
+
+  final String episode;
+
+  static SerieEpisode of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SerieEpisode>();
+  }
+
+  @override
+  bool updateShouldNotify(SerieEpisode old) => episode != old.episode;
 }
 
 class NetworkVideoExample extends StatelessWidget {

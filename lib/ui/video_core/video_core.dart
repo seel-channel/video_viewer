@@ -82,6 +82,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         _showAMomentPlayAndPause = true;
         _hidePlayAndPause?.cancel();
         _hidePlayAndPause = Misc.timer(600, () {
+          _hidePlayAndPause?.cancel();
           setState(() => _showAMomentPlayAndPause = false);
         });
       });
@@ -232,7 +233,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (_, orientation) {
-      final video = _query.video(context, listen: true);
+      final video = _query.video(context, listen: false);
       final metadata = _query.videoMetadata(context, listen: false);
 
       final isFullScreenLandscape =

@@ -21,9 +21,8 @@ class VideoViewerController extends ChangeNotifier {
   /// To reclaim the resources used by the player call [dispose].
   ///
   /// After [dispose] all further calls are ignored.
-  VideoViewerController() {
-    this.isShowingSecondarySettingsMenus = List.filled(12, false);
-  }
+  VideoViewerController()
+      : this.isShowingSecondarySettingsMenus = List.filled(12, false);
 
   /// Receive a list of all the resources to be played.
   ///
@@ -51,6 +50,7 @@ class VideoViewerController extends ChangeNotifier {
       _isShowingThumbnail = true,
       _isShowingSettingsMenu = false,
       _isShowingMainSettingsMenu = false;
+
   Timer _closeOverlayButtons, _timerPosition;
   List<bool> isShowingSecondarySettingsMenus = [];
 
@@ -104,9 +104,11 @@ class VideoViewerController extends ChangeNotifier {
     super.dispose();
   }
 
-  //----------------//
-  //VIDEO CONTROLLER//
-  //----------------//
+  //-----------------//
+  //SOURCE CONTROLLER//
+  //-----------------//
+  ///The [source.video] must be initialized previously
+  ///
   ///[inheritValues] has the function to inherit last controller values.
   ///It's useful on changed quality video.
   ///
@@ -150,6 +152,7 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  ///DON'T TOUCH >:]
   Future<void> changeSubtitle({
     @required VideoViewerSubtitle subtitle,
     @required String subtitleName,
@@ -161,6 +164,9 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  //---------//
+  //LISTENERS//
+  //---------//
   void _videoListener() {
     final value = _controller.value;
     final position = value.position;
@@ -182,14 +188,24 @@ class VideoViewerController extends ChangeNotifier {
     }
 
     if (_subtitle != null) {
-      for (SubtitleData subtitle in subtitles) {
-        if (position > subtitle.start &&
-            position < subtitle.end &&
-            _activeSubtitleData != subtitle) {
-          _activeSubtitleData = subtitle;
-          notifyListeners();
-          break;
-        }
+      if (_activeSubtitleData != null) {
+        if (!(position > _activeSubtitleData.start &&
+            position < _activeSubtitleData.end)) _findSubtitle();
+      } else {
+        _findSubtitle();
+      }
+    }
+  }
+
+  void _findSubtitle() {
+    final position = _controller.value.position;
+    for (SubtitleData subtitle in subtitles) {
+      if (position > subtitle.start &&
+          position < subtitle.end &&
+          _activeSubtitleData != subtitle) {
+        _activeSubtitleData = subtitle;
+        notifyListeners();
+        break;
       }
     }
   }
@@ -197,6 +213,7 @@ class VideoViewerController extends ChangeNotifier {
   //-----//
   //TIMER//
   //-----//
+  ///DON'T TOUCH >:]
   void cancelCloseOverlay() {
     _isGoingToCloseBufferingWidget = false;
     _closeOverlayButtons?.cancel();
@@ -253,6 +270,9 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  //-------------//
+  //SETTINGS MENU//
+  //-------------//
   void closeAllSecondarySettingsMenus() {
     _isShowingMainSettingsMenu = true;
     isShowingSecondarySettingsMenus.fillRange(
@@ -263,7 +283,7 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void openSecondarySettingMenu(int index) {
+  void openSecondarySettingsMenu(int index) {
     _isShowingSettingsMenu = true;
     _isShowingMainSettingsMenu = false;
     isShowingSecondarySettingsMenus[index] = true;
@@ -285,6 +305,8 @@ class VideoViewerController extends ChangeNotifier {
   //----------//
   //FULLSCREEN//
   //----------//
+  ///When you want to open FullScreen Page, you need pass the FullScreen's context,
+  ///because this function do **Navigator.push(context, MaterialPageRoute(...))**
   Future<void> openFullScreen(BuildContext context) async {
     if (kIsWeb) {
       html.document.documentElement.requestFullscreen();
@@ -313,6 +335,8 @@ class VideoViewerController extends ChangeNotifier {
     }
   }
 
+  ///When you want to close FullScreen Page, you need pass the FullScreen's context,
+  ///because this function do **Navigator.pop(context);**
   Future<void> closeFullScreen(BuildContext context) async {
     if (kIsWeb)
       html.document.exitFullscreen();

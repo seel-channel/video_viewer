@@ -24,22 +24,24 @@ class MainMenu extends StatelessWidget {
           _MainMenuItem(
             index: 0,
             icon: style.settings,
-            title: metadata.language.quality,
-            subtitle: video.activeSource,
+            title: Text(metadata.language.quality),
+            subtitle: Text(video.activeSource),
           ),
           SizedBox(width: style.paddingBetween),
           _MainMenuItem(
             index: 1,
             icon: style.speed,
-            title: metadata.language.speed,
-            subtitle: speed == 1.0 ? metadata.language.normalSpeed : "x$speed",
+            title: Text(metadata.language.speed),
+            subtitle:
+                Text(speed == 1.0 ? metadata.language.normalSpeed : "x$speed"),
           ),
           SizedBox(width: style.paddingBetween),
           _MainMenuItem(
             index: 2,
             icon: style.caption,
-            title: metadata.language.caption,
-            subtitle: video.activeCaption ?? metadata.language.captionNone,
+            title: Text(metadata.language.caption),
+            subtitle:
+                Text(video.activeCaption ?? metadata.language.captionNone),
           ),
           if (items != null)
             for (int i = 0; i < items.length; i++) ...[
@@ -48,7 +50,7 @@ class MainMenu extends StatelessWidget {
                   ? GestureDetector(
                       onTap: () => query
                           .video(context)
-                          .openSecondarySettingMenu(i + kDefaultMenus),
+                          .openSecondarySettingsMenu(i + kDefaultMenus),
                       behavior: HitTestBehavior.opaque,
                       child: items[i].mainMenu,
                     )
@@ -74,8 +76,7 @@ class _MainMenuItem extends StatelessWidget {
     @required this.subtitle,
   }) : super(key: key);
 
-  final String title, subtitle;
-  final Widget icon;
+  final Widget title, subtitle, icon;
   final int index;
 
   @override
@@ -87,7 +88,7 @@ class _MainMenuItem extends StatelessWidget {
     final textStyle = metadata.style.textStyle;
 
     return GestureDetector(
-      onTap: () => query.video(context).openSecondarySettingMenu(index),
+      onTap: () => query.video(context).openSecondarySettingsMenu(index),
       behavior: HitTestBehavior.opaque,
       child: Container(
         color: Colors.transparent,
@@ -96,15 +97,15 @@ class _MainMenuItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             icon,
-            Text(title, style: textStyle),
-            Text(
-              subtitle,
+            DefaultTextStyle(child: title, style: textStyle),
+            DefaultTextStyle(
+              child: subtitle,
               style: textStyle.merge(TextStyle(
                 fontWeight: FontWeight.normal,
                 fontSize: textStyle.fontSize -
                     metadata.style.inLandscapeEnlargeTheTextBy,
               )),
-            ),
+            )
           ],
         ),
       ),

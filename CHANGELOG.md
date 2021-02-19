@@ -1,3 +1,8 @@
+## [1.0.9]
+
+- VideoViewerController added.
+- SerieExample added.
+
 ## [1.0.8]
 
 - Multi-captions (Subtitles) support added.
