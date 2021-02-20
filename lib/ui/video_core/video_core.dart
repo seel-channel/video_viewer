@@ -234,8 +234,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (_, Orientation orientation) {
       final size = GetMedia(context).size;
-      final video = _query.video(context, listen: false);
-      final metadata = _query.videoMetadata(context, listen: false);
+      final video = _query.video(context, listen: true);
+      final metadata = _query.videoMetadata(context);
 
       final isFullScreenLandscape =
           video.isFullScreen && orientation == Orientation.landscape;
@@ -279,16 +279,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
                   onScaleUpdate: isFullScreenLandscape ? _onScaleUpdate : null,
                   child: Container(color: Colors.transparent),
                 ),
-          CustomOpacityTransition(
-            visible: video.isShowingThumbnail,
-            child: GestureDetector(
-              onTap: video.controller.play,
-              child: Container(
-                color: Colors.transparent,
-                child: metadata.style.thumbnail,
-              ),
-            ),
-          ),
           RewindAndForwardLayout(
             rewind: GestureDetector(onDoubleTap: _rewind),
             forward: GestureDetector(onDoubleTap: _forward),
@@ -354,6 +344,16 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
               visible: _showAMomentRewindIcons[1],
               child: Center(
                 child: metadata.style.forwardAndRewindStyle.forward,
+              ),
+            ),
+          ),
+          CustomOpacityTransition(
+            visible: video.isShowingThumbnail,
+            child: GestureDetector(
+              onTap: video.controller.play,
+              child: Container(
+                color: Colors.transparent,
+                child: metadata.style.thumbnail,
               ),
             ),
           ),

@@ -19,8 +19,9 @@ class MainMenu extends StatelessWidget {
     final items = style.items;
 
     return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        runAlignment: WrapAlignment.center,
         children: [
           _MainMenuItem(
             index: 0,
@@ -32,16 +33,19 @@ class MainMenu extends StatelessWidget {
             index: 1,
             icon: style.speed,
             title: Text(metadata.language.speed),
-            subtitle:
-                Text(speed == 1.0 ? metadata.language.normalSpeed : "x$speed"),
+            subtitle: Text(
+              speed == 1.0 ? metadata.language.normalSpeed : "x$speed",
+            ),
           ),
-          _MainMenuItem(
-            index: 2,
-            icon: style.caption,
-            title: Text(metadata.language.caption),
-            subtitle:
-                Text(video.activeCaption ?? metadata.language.captionNone),
-          ),
+          if (video.subtitle != null)
+            _MainMenuItem(
+              index: 2,
+              icon: style.caption,
+              title: Text(metadata.language.caption),
+              subtitle: Text(
+                video.activeCaption ?? metadata.language.captionNone,
+              ),
+            ),
           if (items != null)
             for (int i = 0; i < items.length; i++) ...[
               items[i].themed == null

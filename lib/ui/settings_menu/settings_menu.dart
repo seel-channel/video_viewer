@@ -10,7 +10,7 @@ import 'package:video_viewer/ui/settings_menu/widgets/main_menu.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class SettingsMenu extends StatelessWidget {
-  const SettingsMenu({Key key}) : super(key: key);
+  SettingsMenu({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class SettingsMenu extends StatelessWidget {
           child: Container(color: Colors.transparent),
         ),
       ),
-      CustomOpacityTransition(visible: main, child: MainMenu()),
+      CustomOpacityTransition(visible: main, child: MainMenu()), //MAIN MENU
       CustomOpacityTransition(
         visible: secondary[0],
         child: QualityMenu(),

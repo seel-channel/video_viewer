@@ -20,11 +20,10 @@ class _FullScreenPageState extends State<FullScreenPage> {
   @override
   void initState() {
     Misc.onLayoutRendered(() {
-      _resetSystem();
       final metadata = _query.videoMetadata(context, listen: false);
       _systemResetTimer = Misc.periodic(3000, _resetSystem);
       _fixedLandscape = metadata.onFullscreenFixLandscape;
-      setState(() {});
+      setState(_resetSystem);
     });
     super.initState();
   }
@@ -38,14 +37,11 @@ class _FullScreenPageState extends State<FullScreenPage> {
 
   void _resetSystem() {
     Misc.setSystemOverlay([]);
-    Misc.setSystemOrientation(
-      _fixedLandscape
-          ? [
-              ...SystemOrientation.landscapeLeft,
-              ...SystemOrientation.landscapeRight
-            ]
-          : SystemOrientation.values,
-    );
+    if (_fixedLandscape)
+      Misc.setSystemOrientation([
+        ...SystemOrientation.landscapeLeft,
+        ...SystemOrientation.landscapeRight
+      ]);
   }
 
   @override

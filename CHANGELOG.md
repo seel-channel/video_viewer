@@ -1,3 +1,8 @@
+## [1.0.9+1]
+
+- InkWell effects added.
+- Improved FullScreen UX.
+
 ## [1.0.9]
 
 - VideoViewerController added.

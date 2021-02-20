@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:video_viewer/video_viewer.dart';
 import 'package:path_provider/path_provider.dart';
 
-void main() => runApp(SerieExample());
+void main() => runApp(App());
 
 class App extends StatelessWidget {
   @override
@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(child: HLSVideoExample()),
+      body: Center(child: PortraitVideoExample()),
     );
   }
 }
@@ -120,8 +120,8 @@ class _SerieExampleState extends State<SerieExample> {
               source: database.entries.first.value,
               controller: controller,
               language: VideoViewerLanguage.es,
-              onFullscreenFixLandscape: true,
               style: VideoViewerStyle(
+                thumbnail: Image.network(thumbnails.entries.first.value),
                 header: Builder(
                   builder: (innerContext) {
                     return Container(
@@ -249,61 +249,23 @@ class SerieEpisode extends InheritedWidget {
   bool updateShouldNotify(SerieEpisode old) => episode != old.episode;
 }
 
-class NetworkVideoExample extends StatelessWidget {
-  const NetworkVideoExample({Key key}) : super(key: key);
+class PortraitVideoExample extends StatelessWidget {
+  const PortraitVideoExample({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final Map<String, String> src = {
-      "1080p":
-          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-      "720p":
-          "https://file-examples-com.github.io/uploads/2017/04/file_example_MP4_480_1_5MG.mp4",
+      "1":
+          "https://assets.mixkit.co/videos/preview/mixkit-mysterious-pale-looking-fashion-woman-at-winter-39878-large.mp4",
+      "2":
+          "https://assets.mixkit.co/videos/preview/mixkit-winter-fashion-cold-looking-woman-concept-video-39874-large.mp4",
     };
 
     return VideoViewer(
-      onFullscreenFixLandscape: true,
       language: VideoViewerLanguage.es,
       source: VideoSource.getNetworkVideoSources(src),
       style: VideoViewerStyle(
-        thumbnail: Image.network(
-            "https://rockcontent.com/es/wp-content/uploads/2019/02/thumbnail.png"),
-        header: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("MY AMAZING VIDEO",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white)),
-              Text("YES!", style: TextStyle(color: Colors.white)),
-            ],
-          ),
-        ),
-        settingsStyle: SettingsMenuStyle(
-          paddingBetween: 10,
-          items: [
-            SettingsMenuItem(
-              mainMenu: Text("OTHERS",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white)),
-              secondaryMenu: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text("CHANGE ROTATION",
-                      style: TextStyle(color: Colors.white)),
-                  Text("SCREENSHOT", style: TextStyle(color: Colors.white)),
-                ],
-              ),
-            ),
-          ],
-        ),
+        settingsStyle: SettingsMenuStyle(paddingBetween: 10),
       ),
     );
   }

@@ -57,6 +57,7 @@ class VideoViewerController extends ChangeNotifier {
   VideoPlayerController get controller => _controller;
   SubtitleData get activeCaptionData => _activeSubtitleData;
   List<SubtitleData> get subtitles => _subtitle.subtitles;
+  VideoViewerSubtitle get subtitle => _subtitle;
   String get activeCaption => _activeSubtitle;
   String get activeSource => _activeSource;
 

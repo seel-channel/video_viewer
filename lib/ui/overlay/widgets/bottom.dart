@@ -31,6 +31,8 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
     final barStyle = style.progressBarStyle;
     final padding = barStyle.paddingBeetwen;
 
+    final halfPadding = Margin.all(padding / 2);
+
     String position = "00:00", remaing = "-00:00";
 
     if (controller.value.initialized) {
@@ -74,35 +76,30 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
               ),
             ),
             SizedBox(width: padding),
-            Center(
-              child: SplashCircularIcon(
-                onTap: () {
-                  setState(() => _showRemaingText = !_showRemaingText);
-                  video.cancelCloseOverlay();
-                },
-                padding: Margin.zero,
-                child: Text(
-                  _showRemaingText ? position : remaing,
-                  style: style.textStyle,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.topRight,
-              child: SplashCircularIcon(
-                onTap: video.openSettingsMenu,
-                padding: Margin.all(padding),
-                child: style.settingsStyle.settings,
+            SplashCircularIcon(
+              padding: halfPadding,
+              onTap: () {
+                setState(() => _showRemaingText = !_showRemaingText);
+                video.cancelCloseOverlay();
+              },
+              child: Text(
+                _showRemaingText ? position : remaing,
+                style: style.textStyle,
               ),
             ),
             SplashCircularIcon(
+              padding: halfPadding,
+              onTap: video.openSettingsMenu,
+              child: style.settingsStyle.settings,
+            ),
+            SplashCircularIcon(
+              padding: halfPadding + Margin.right(padding / 2),
               onTap: () async {
                 if (!isFullscreen)
                   await video.openFullScreen(context);
                 else
                   await video.closeFullScreen(context);
               },
-              padding: Margin.all(padding),
               child:
                   isFullscreen ? barStyle.fullScreenExit : barStyle.fullScreen,
             ),

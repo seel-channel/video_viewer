@@ -155,12 +155,36 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 ## **EXAMPLES**
 
-### Serie Example with 2 episodes
+### **Serie Example** with 2 episodes
+
+![](./assets/readme/SerieExample.gif)
+
 SerieExample works to change an episode directly from VideoViewer without leaving VideoViewer.
 It has different sources because some videos have different qualities.
 
+**Note:** The episodes selector is fully customizable.
+
 ```dart
 void main() => runApp(SerieExample());
+
+class SerieEpisode extends InheritedWidget {
+  const SerieEpisode({
+    Key key,
+    @required this.episode,
+    @required Widget child,
+  })  : assert(episode != null),
+        assert(child != null),
+        super(key: key, child: child);
+
+  final String episode;
+
+  static SerieEpisode of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SerieEpisode>();
+  }
+
+  @override
+  bool updateShouldNotify(SerieEpisode old) => episode != old.episode;
+}
 
 class SerieExample extends StatefulWidget {
   SerieExample({Key key}) : super(key: key);
@@ -320,25 +344,6 @@ class _SerieExampleState extends State<SerieExample> {
     );
   }
 }
-
-class SerieEpisode extends InheritedWidget {
-  const SerieEpisode({
-    Key key,
-    @required this.episode,
-    @required Widget child,
-  })  : assert(episode != null),
-        assert(child != null),
-        super(key: key, child: child);
-
-  final String episode;
-
-  static SerieEpisode of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<SerieEpisode>();
-  }
-
-  @override
-  bool updateShouldNotify(SerieEpisode old) => episode != old.episode;
-}
 ```
 
 <br><br>
@@ -386,61 +391,27 @@ class _UsingVideoControllerExampleState extends State<UsingVideoControllerExampl
 
 <br><br>
 
-### Network Videos
+### Portrait Videos Example
 
 ```dart
-class NetworkVideoExample extends StatelessWidget {
-  const NetworkVideoExample({Key key}) : super(key: key);
+class PortraitVideoExample extends StatelessWidget {
+  const PortraitVideoExample({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final Map<String, String> src = {
-      "1080p":
-          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-      "720p":
-          "https://file-examples-com.github.io/uploads/2017/04/file_example_MP4_480_1_5MG.mp4",
+      "1":
+          "https://assets.mixkit.co/videos/preview/mixkit-mysterious-pale-looking-fashion-woman-at-winter-39878-large.mp4",
+      "2":
+          "https://assets.mixkit.co/videos/preview/mixkit-winter-fashion-cold-looking-woman-concept-video-39874-large.mp4",
     };
 
     return VideoViewer(
-      onFullscreenFixLandscape: false,
       language: VideoViewerLanguage.es,
       source: VideoSource.getNetworkVideoSources(src),
       style: VideoViewerStyle(
-        thumbnail: Image.network(
-            "https://rockcontent.com/es/wp-content/uploads/2019/02/thumbnail.png"),
-        header: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("MY AMAZING VIDEO",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white)),
-              Text("YES!", style: TextStyle(color: Colors.white)),
-            ],
-          ),
-        ),
+        settingsStyle: SettingsMenuStyle(paddingBetween: 10),
       ),
-      settingsMenuItems: [
-        SettingsMenuItem(
-          mainMenu: Text("OTHERS",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white)),
-          secondaryMenu: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("CHANGE ROTATION", style: TextStyle(color: Colors.white)),
-              Text("SCREENSHOT", style: TextStyle(color: Colors.white)),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
