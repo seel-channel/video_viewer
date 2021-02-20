@@ -15,16 +15,6 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   final _query = VideoQuery();
   final animationMS = ValueNotifier<int>(1000);
 
-  void play() {
-    _query.video(context).controller?.play();
-    animationMS.value = 1000;
-  }
-
-  void pause() {
-    _query.video(context).controller?.pause();
-    animationMS.value = 0;
-  }
-
   @override
   Widget build(BuildContext context) {
     final video = _query.video(context, listen: true);
@@ -126,11 +116,18 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
     );
   }
 
+  void play() {
+    _query.video(context).controller?.play();
+    animationMS.value = 1000;
+  }
+
+  void pause() {
+    _query.video(context).controller?.pause();
+    animationMS.value = 0;
+  }
+
   void _startDragging() {
-    setState(() {
-      _query.video(context).isDraggingProgressBar = true;
-      animationMS.value = 0;
-    });
+    _query.video(context).isDraggingProgressBar = true;
   }
 
   void _endDragging() {

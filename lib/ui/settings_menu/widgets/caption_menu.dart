@@ -24,9 +24,9 @@ class CaptionMenu extends StatelessWidget {
       children: [
         CustomInkWell(
           onTap: () {
-            query
-                .video(context)
-                .changeSubtitle(subtitle: null, subtitleName: none);
+            final video = query.video(context);
+            video.changeSubtitle(subtitle: null, subtitleName: none);
+            video.closeAllSecondarySettingsMenus();
           },
           child: CustomText(
             text: none,
