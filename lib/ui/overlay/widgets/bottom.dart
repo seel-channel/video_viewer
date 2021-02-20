@@ -19,7 +19,6 @@ class OverlayBottomButtons extends StatefulWidget {
 class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
   final VideoQuery _query = VideoQuery();
   bool _showRemaingText = false;
-  bool _isDraggingBar = false;
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +45,9 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
       alignment: Alignment.bottomLeft,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(child: SizedBox()),
-        _TextPositionProgress(
-          text: position,
-          isDragging: _isDraggingBar,
+        CustomOpacityTransition(
+          visible: video.isDraggingProgressBar,
+          child: _TextPositionProgress(text: position),
         ),
         GradientBackground(
           child: Row(children: [
@@ -56,25 +55,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
               type: PlayAndPauseType.bottom,
               padding: Margin.all(padding),
             ),
-            Expanded(
-              child: AnimatedBuilder(
-                animation: controller,
-                builder: (_, __) {
-                  return VideoProgressBar(
-                    controller,
-                    style: barStyle,
-                    padding: Margin.vertical(padding),
-                    isBuffering: video.isBuffering,
-                    changePosition: (double scale, double width) {
-                      if (mounted) {
-                        setState(() => _isDraggingBar = scale != null);
-                        video.cancelCloseOverlay();
-                      }
-                    },
-                  );
-                },
-              ),
-            ),
+            Expanded(child: VideoProgressBar()),
             SizedBox(width: padding),
             SplashCircularIcon(
               padding: halfPadding,
@@ -113,31 +94,27 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
 class _TextPositionProgress extends StatelessWidget {
   const _TextPositionProgress({
     Key key,
-    this.isDragging,
-    this.text,
+    @required this.text,
   }) : super(key: key);
 
   final String text;
-  final bool isDragging;
 
   @override
   Widget build(BuildContext context) {
-    final style = VideoQuery().videoStyle(context);
+    final query = VideoQuery();
+    final style = query.videoStyle(context);
     double width = 60;
     double margin = 20;
 
-    return CustomOpacityTransition(
-      visible: isDragging,
-      child: Container(
-        width: width,
-        child: Text(text, style: style.textStyle),
-        margin: Margin.left(margin < 0 ? 0 : margin),
-        padding: Margin.all(5),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: style.progressBarStyle.backgroundColor,
-          borderRadius: style.progressBarStyle.borderRadius,
-        ),
+    return Container(
+      width: width,
+      child: Text(text, style: style.textStyle),
+      margin: Margin.left(margin < 0 ? 0 : margin),
+      padding: Margin.all(5),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: style.progressBarStyle.backgroundColor,
+        borderRadius: style.progressBarStyle.borderRadius,
       ),
     );
   }

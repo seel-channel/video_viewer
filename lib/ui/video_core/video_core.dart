@@ -233,7 +233,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(builder: (_, Orientation orientation) {
-      final size = GetMedia(context).size;
       final video = _query.video(context, listen: true);
       final metadata = _query.videoMetadata(context);
 
@@ -283,19 +282,23 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
             rewind: GestureDetector(onDoubleTap: _rewind),
             forward: GestureDetector(onDoubleTap: _forward),
           ),
-          Center(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _onTapPlayAndPause,
-              child: Container(
-                width: size.width * 0.2,
-                height: size.height * 0.2,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  shape: BoxShape.circle,
+          LayoutBuilder(
+            builder: (_, box) {
+              return Center(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _onTapPlayAndPause,
+                  child: Container(
+                    width: box.maxWidth * 0.2,
+                    height: box.maxHeight * 0.2,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
           CustomOpacityTransition(
             visible: video.isBuffering,

@@ -49,10 +49,12 @@ class VideoViewerController extends ChangeNotifier {
       _isGoingToCloseBufferingWidget = false,
       _isShowingThumbnail = true,
       _isShowingSettingsMenu = false,
-      _isShowingMainSettingsMenu = false;
+      _isShowingMainSettingsMenu = false,
+      _isDraggingProgressBar = false;
 
   Timer _closeOverlayButtons, _timerPosition;
   List<bool> isShowingSecondarySettingsMenus = [];
+  int _maxBuffering = 0;
 
   VideoPlayerController get controller => _controller;
   SubtitleData get activeCaptionData => _activeSubtitleData;
@@ -60,6 +62,7 @@ class VideoViewerController extends ChangeNotifier {
   VideoViewerSubtitle get subtitle => _subtitle;
   String get activeCaption => _activeSubtitle;
   String get activeSource => _activeSource;
+  int get maxBuffering => _maxBuffering;
 
   bool get isShowingMainSettingsMenu => _isShowingMainSettingsMenu;
   bool get isShowingOverlay => _isShowingOverlay;
@@ -87,6 +90,12 @@ class VideoViewerController extends ChangeNotifier {
   bool get isShowingThumbnail => _isShowingThumbnail;
   set isShowingThumbnail(bool value) {
     _isShowingThumbnail = value;
+    notifyListeners();
+  }
+
+  bool get isDraggingProgressBar => _isDraggingProgressBar;
+  set isDraggingProgressBar(bool value) {
+    _isDraggingProgressBar = value;
     notifyListeners();
   }
 
@@ -175,6 +184,15 @@ class VideoViewerController extends ChangeNotifier {
     if (isPlaying && isShowingThumbnail) {
       _isShowingThumbnail = false;
       notifyListeners();
+    }
+
+    _maxBuffering = 0;
+    for (DurationRange range in controller.value.buffered) {
+      final int end = range.end.inMilliseconds;
+      if (end > maxBuffering) {
+        _maxBuffering = end;
+        notifyListeners();
+      }
     }
 
     if (_isShowingOverlay) {
