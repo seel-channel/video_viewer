@@ -54,7 +54,7 @@ class VideoViewerController extends ChangeNotifier {
 
   Timer _closeOverlayButtons, _timerPosition;
   List<bool> isShowingSecondarySettingsMenus = [];
-  int _maxBuffering = 0;
+  Duration _maxBuffering = Duration.zero;
 
   VideoPlayerController get controller => _controller;
   SubtitleData get activeCaptionData => _activeSubtitleData;
@@ -62,7 +62,7 @@ class VideoViewerController extends ChangeNotifier {
   VideoViewerSubtitle get subtitle => _subtitle;
   String get activeCaption => _activeSubtitle;
   String get activeSource => _activeSource;
-  int get maxBuffering => _maxBuffering;
+  Duration get maxBuffering => _maxBuffering;
 
   bool get isShowingMainSettingsMenu => _isShowingMainSettingsMenu;
   bool get isShowingOverlay => _isShowingOverlay;
@@ -189,9 +189,9 @@ class VideoViewerController extends ChangeNotifier {
       notifyListeners();
     }
 
-    _maxBuffering = 0;
+    _maxBuffering = Duration.zero;
     for (DurationRange range in controller.value.buffered) {
-      final int end = range.end.inMilliseconds;
+      final Duration end = range.end;
       if (end > maxBuffering) {
         _maxBuffering = end;
         notifyListeners();

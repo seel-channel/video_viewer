@@ -26,16 +26,15 @@ class VideoQuery extends VideoQueryRepository {
   }
 
   @override
-  String secondsFormatter(int seconds) {
-    final Duration duration = Duration(seconds: seconds);
+  String durationFormatter(Duration duration) {
     final int hours = duration.inHours;
     final String formatter = [
       if (hours != 0) hours,
       duration.inMinutes,
-      seconds
+      duration.inSeconds
     ]
         .map((seg) => seg.abs().remainder(60).toString().padLeft(2, '0'))
         .join(':');
-    return seconds < 0 ? "-$formatter" : formatter;
+    return duration.inSeconds < 0 ? "-$formatter" : formatter;
   }
 }

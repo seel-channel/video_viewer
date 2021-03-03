@@ -31,14 +31,8 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
 
     final halfPadding = Margin.all(padding / 2);
 
-    String position = "00:00", remaing = "-00:00";
-
-    if (controller.value.initialized) {
-      final value = controller.value;
-      final seconds = value.position.inSeconds;
-      position = _query.secondsFormatter(seconds);
-      remaing = _query.secondsFormatter(seconds - value.duration.inSeconds);
-    }
+    final value = controller.value;
+    final position = value.position;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -59,7 +53,9 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
                 video.cancelCloseOverlay();
               },
               child: Text(
-                _showRemaingText ? position : remaing,
+                _showRemaingText
+                    ? _query.durationFormatter(position)
+                    : _query.durationFormatter(position - value.duration),
                 style: style.textStyle,
               ),
             ),

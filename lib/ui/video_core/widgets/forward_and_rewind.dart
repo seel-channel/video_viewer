@@ -75,7 +75,7 @@ class VideoCoreForwardAndRewindTextAlert extends StatelessWidget {
           borderRadius: forwardStyle.borderRadius,
         ),
         child: Text(
-          query.secondsFormatter(amount),
+          query.durationFormatter(Duration(seconds: amount)),
           style: style.textStyle,
         ),
       ),
