@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(child: PortraitVideoExample()),
+      body: Center(child: WebVTTSubtitleVideoExample()),
     );
   }
 }
@@ -54,7 +54,7 @@ class _UsingVideoControllerExampleState
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
           subtitle: {
             "English": VideoViewerSubtitle.network(
-              "https://pastebin.com/raw/h9cP6N5N",
+              "https://felipemurguia.com/assets/txt/WEBVTT_English.txt",
               type: SubtitleType.webvtt,
             ),
           },
@@ -320,11 +320,11 @@ class WebVTTSubtitleVideoExample extends StatelessWidget {
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
           subtitle: {
             "English": VideoViewerSubtitle.network(
-              "https://pastebin.com/raw/h9cP6N5N",
+              "https://felipemurguia.com/assets/txt/WEBVTT_English.txt",
               type: SubtitleType.webvtt,
             ),
             "Spanish": VideoViewerSubtitle.network(
-              "https://pastebin.com/raw/wrz69aay",
+              "https://felipemurguia.com/assets/txt/WEBVTT_Spanish.txt",
               type: SubtitleType.webvtt,
             ),
           },

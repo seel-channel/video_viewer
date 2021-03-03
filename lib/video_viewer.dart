@@ -98,6 +98,7 @@ class VideoViewerState extends State<VideoViewer> {
     _controller = widget.controller;
     _controller.source = widget.source;
     _controller.looping = widget.looping;
+    _controller.source = widget.source;
     _metadata = VideoViewerMetadata(
       style: widget.style,
       language: widget.language,

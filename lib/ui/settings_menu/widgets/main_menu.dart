@@ -37,15 +37,14 @@ class MainMenu extends StatelessWidget {
               speed == 1.0 ? metadata.language.normalSpeed : "x$speed",
             ),
           ),
-          if (video.subtitle != null)
-            _MainMenuItem(
-              index: 2,
-              icon: style.caption,
-              title: Text(metadata.language.caption),
-              subtitle: Text(
-                video.activeCaption ?? metadata.language.captionNone,
-              ),
+          _MainMenuItem(
+            index: 2,
+            icon: style.caption,
+            title: Text(metadata.language.caption),
+            subtitle: Text(
+              video.activeCaption ?? metadata.language.captionNone,
             ),
+          ),
           if (items != null)
             for (int i = 0; i < items.length; i++) ...[
               items[i].themed == null

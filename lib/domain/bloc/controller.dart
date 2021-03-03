@@ -136,12 +136,10 @@ class VideoViewerController extends ChangeNotifier {
     if (source.subtitle != null) {
       final subtitle = source.subtitle[source.intialSubtitle ?? ""];
       if (subtitle != null) {
-        subtitle.initialize().then((_) {
-          changeSubtitle(
-            subtitle: subtitle,
-            subtitleName: source.intialSubtitle,
-          );
-        });
+        changeSubtitle(
+          subtitle: subtitle,
+          subtitleName: source.intialSubtitle,
+        );
       }
     }
 
@@ -168,8 +166,8 @@ class VideoViewerController extends ChangeNotifier {
     @required VideoViewerSubtitle subtitle,
     @required String subtitleName,
   }) async {
-    await subtitle?.initialize();
     _subtitle = subtitle;
+    await _subtitle.initialize();
     _activeSubtitle = subtitleName;
     _activeSubtitleData = null;
     notifyListeners();
@@ -335,7 +333,6 @@ class VideoViewerController extends ChangeNotifier {
       });
     } else {
       _isFullScreen = true;
-      notifyListeners();
       await context.to(
         MultiProvider(
           providers: [
@@ -349,6 +346,7 @@ class VideoViewerController extends ChangeNotifier {
           child: FullScreenPage(),
         ),
       );
+      notifyListeners();
     }
   }
 
@@ -358,8 +356,8 @@ class VideoViewerController extends ChangeNotifier {
     if (kIsWeb)
       html.document.exitFullscreen();
     else if (_isFullScreen) {
-      context.goBack();
       _isFullScreen = false;
+      context.goBack();
       await Misc.setSystemOrientation(SystemOrientation.portraitUp);
       await Misc.setSystemOverlay(SystemOverlay.values);
       Misc.delayed(3200, () {
