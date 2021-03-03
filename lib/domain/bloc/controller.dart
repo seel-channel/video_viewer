@@ -337,7 +337,7 @@ class VideoViewerController extends ChangeNotifier {
       });
     } else {
       _isFullScreen = true;
-      await context.to(
+      await context.toTransparentPage(
         MultiProvider(
           providers: [
             ChangeNotifierProvider.value(
@@ -349,6 +349,7 @@ class VideoViewerController extends ChangeNotifier {
           ],
           child: FullScreenPage(),
         ),
+        duration: VideoQuery().videoMetadata(context).style.transitions,
       );
       notifyListeners();
     }
@@ -362,11 +363,8 @@ class VideoViewerController extends ChangeNotifier {
     else if (_isFullScreen) {
       _isFullScreen = false;
       context.goBack();
-      await Misc.setSystemOrientation(SystemOrientation.portraitUp);
+      await Misc.setSystemOrientation(SystemOrientation.values);
       await Misc.setSystemOverlay(SystemOverlay.values);
-      Misc.delayed(3200, () {
-        Misc.setSystemOrientation(SystemOrientation.values);
-      });
       notifyListeners();
     }
   }

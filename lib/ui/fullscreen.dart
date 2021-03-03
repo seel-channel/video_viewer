@@ -19,13 +19,14 @@ class _FullScreenPageState extends State<FullScreenPage> {
 
   @override
   void initState() {
+    super.initState();
     Misc.onLayoutRendered(() {
-      final metadata = _query.videoMetadata(context, listen: false);
+      final metadata = _query.videoMetadata(context);
       _systemResetTimer = Misc.periodic(3000, _resetSystem);
       _fixedLandscape = metadata.onFullscreenFixLandscape;
-      setState(_resetSystem);
+      Future.delayed(metadata.style.transitions, _resetSystem);
+      setState(() {});
     });
-    super.initState();
   }
 
   @override
@@ -53,7 +54,9 @@ class _FullScreenPageState extends State<FullScreenPage> {
           await _query.video(context).closeFullScreen(context);
           return false;
         },
-        child: Center(child: VideoViewerCore()),
+        child: Center(
+          child: VideoViewerCore(),
+        ),
       ),
     );
   }

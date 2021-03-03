@@ -29,7 +29,7 @@ class VideoViewerStyle {
     Widget loading,
     Widget buffering,
     TextStyle textStyle,
-    this.transitions = 400,
+    this.transitions = const Duration(milliseconds: 400),
   })  : this.loading = loading ??
             Center(
               child: CircularProgressIndicator(strokeWidth: 1.6),
@@ -102,7 +102,7 @@ class VideoViewerStyle {
 
   /// It is a quantity in milliseconds. It is the time it takes to take place
   /// all transitions of the VideoViewer ui,
-  final int transitions;
+  final Duration transitions;
 
   /// It is the design of the text that will be used in all the texts of the VideoViwer
   ///
