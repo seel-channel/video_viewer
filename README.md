@@ -371,7 +371,7 @@ class _UsingVideoControllerExampleState extends State<UsingVideoControllerExampl
               "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
           subtitle: {
             "English": VideoViewerSubtitle.network(
-              "https://pastebin.com/raw/h9cP6N5N",
+              "https://felipemurguia.com/assets/txt/WEBVTT_English.txt",
               type: SubtitleType.webvtt,
             ),
           },
@@ -473,15 +473,15 @@ class WebVTTSubtitleVideoExample extends StatelessWidget {
       source: {
         "WebVTT Caption": VideoSource(
           video: VideoPlayerController.network(
-              "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
+            //This video has a problem when end
+            "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4",
+          ),
           subtitle: {
             "English": VideoViewerSubtitle.network(
-              "https://pastebin.com/raw/h9cP6N5N",
-              type: SubtitleType.webvtt,
+              "https://felipemurguia.com/assets/txt/WEBVTT_English.txt",
             ),
             "Spanish": VideoViewerSubtitle.network(
-              "https://pastebin.com/raw/wrz69aay",
-              type: SubtitleType.webvtt,
+              "https://felipemurguia.com/assets/txt/WEBVTT_Spanish.txt",
             ),
           },
         )

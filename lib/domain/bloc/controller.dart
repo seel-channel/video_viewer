@@ -172,10 +172,8 @@ class VideoViewerController extends ChangeNotifier {
   }) async {
     _activeSubtitle = subtitleName;
     _activeSubtitleData = null;
-    if (subtitle != null) {
-      _subtitle = subtitle;
-      await _subtitle.initialize();
-    }
+    _subtitle = subtitle;
+    if (subtitle != null) await _subtitle.initialize();
     notifyListeners();
   }
 

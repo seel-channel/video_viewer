@@ -6,7 +6,7 @@ import 'package:video_viewer/ui/settings_menu/widgets/secondary_menu.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/caption_menu.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/quality_menu.dart';
 import 'package:video_viewer/ui/settings_menu/widgets/speed_menu.dart';
-import 'package:video_viewer/ui/settings_menu/widgets/main_menu.dart';
+import 'package:video_viewer/ui/settings_menu/main_menu.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class SettingsMenu extends StatelessWidget {

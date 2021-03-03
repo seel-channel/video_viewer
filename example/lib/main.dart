@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(child: HLSVideoExample()),
+      body: Center(child: WebVTTSubtitleVideoExample()),
     );
   }
 }
@@ -323,16 +323,17 @@ class WebVTTSubtitleVideoExample extends StatelessWidget {
     return VideoViewer(
       source: {
         "WebVTT Caption": VideoSource(
+          intialSubtitle: "Spanish",
           video: VideoPlayerController.network(
-              "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
+            //This video has a problem when end
+            "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4",
+          ),
           subtitle: {
             "English": VideoViewerSubtitle.network(
               "https://felipemurguia.com/assets/txt/WEBVTT_English.txt",
-              type: SubtitleType.webvtt,
             ),
             "Spanish": VideoViewerSubtitle.network(
               "https://felipemurguia.com/assets/txt/WEBVTT_Spanish.txt",
-              type: SubtitleType.webvtt,
             ),
           },
         )
