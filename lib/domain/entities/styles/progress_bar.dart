@@ -10,7 +10,7 @@ class ProgressBarStyle {
     Color backgroundColor,
     this.barHeight = 5,
     this.paddingBeetwen = 12,
-    BorderRadiusGeometry borderRadius,
+    BorderRadius borderRadius,
     Widget fullScreen,
     Widget fullScreenExit,
   })  : this.barDotColor = barDotColor ?? Colors.white,
@@ -106,5 +106,5 @@ class ProgressBarStyle {
   ///  EdgeRadius.all(5);
   ///  "EdgeRadius is on Helpers pubdev library"
   ///```
-  final BorderRadiusGeometry borderRadius;
+  final BorderRadius borderRadius;
 }

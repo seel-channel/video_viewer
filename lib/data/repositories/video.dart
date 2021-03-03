@@ -10,7 +10,7 @@ class VideoQuery extends VideoQueryRepository {
   @override
   VideoViewerMetadata videoMetadata(
     BuildContext context, {
-    bool listen = true,
+    bool listen = false,
   }) {
     return Provider.of<VideoViewerMetadata>(context, listen: listen);
   }
@@ -21,7 +21,7 @@ class VideoQuery extends VideoQueryRepository {
   }
 
   @override
-  VideoViewerStyle videoStyle(BuildContext context, {bool listen = true}) {
+  VideoViewerStyle videoStyle(BuildContext context, {bool listen = false}) {
     return Provider.of<VideoViewerMetadata>(context, listen: listen).style;
   }
 

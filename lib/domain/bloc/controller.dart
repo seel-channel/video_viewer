@@ -144,8 +144,12 @@ class VideoViewerController extends ChangeNotifier {
     }
 
     _activeSource = name;
-    final double speed = _controller.value.playbackSpeed;
-    final Duration position = _controller.value.position;
+    double speed = 1.0;
+    Duration position = Duration.zero;
+    if (_controller != null) {
+      speed = _controller.value.playbackSpeed;
+      position = _controller.value.position;
+    }
 
     await source.video.initialize();
     _controller = source.video;

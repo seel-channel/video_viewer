@@ -5,9 +5,8 @@ import 'package:video_viewer/data/repositories/video.dart';
 
 import 'package:video_viewer/ui/overlay/widgets/progress_bar.dart';
 import 'package:video_viewer/ui/overlay/widgets/background.dart';
-import 'package:video_viewer/ui/widgets/helpers.dart';
 import 'package:video_viewer/ui/widgets/play_and_pause.dart';
-import 'package:video_viewer/ui/widgets/transitions.dart';
+import 'package:video_viewer/ui/widgets/helpers.dart';
 
 class OverlayBottomButtons extends StatefulWidget {
   OverlayBottomButtons({Key key}) : super(key: key);
@@ -41,14 +40,10 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
       remaing = _query.secondsFormatter(seconds - value.duration.inSeconds);
     }
 
-    return Align(
-      alignment: Alignment.bottomLeft,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Expanded(child: SizedBox()),
-        CustomOpacityTransition(
-          visible: video.isDraggingProgressBar,
-          child: _TextPositionProgress(text: position),
-        ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         GradientBackground(
           child: Row(children: [
             PlayAndPause(
@@ -86,36 +81,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
             ),
           ]),
         ),
-      ]),
-    );
-  }
-}
-
-class _TextPositionProgress extends StatelessWidget {
-  const _TextPositionProgress({
-    Key key,
-    @required this.text,
-  }) : super(key: key);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final query = VideoQuery();
-    final style = query.videoStyle(context);
-    double width = 60;
-    double margin = 20;
-
-    return Container(
-      width: width,
-      child: Text(text, style: style.textStyle),
-      margin: Margin.left(margin < 0 ? 0 : margin),
-      padding: Margin.all(5),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: style.progressBarStyle.backgroundColor,
-        borderRadius: style.progressBarStyle.borderRadius,
-      ),
+      ],
     );
   }
 }

@@ -1,8 +1,11 @@
+import 'dart:ui' as ui;
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:video_viewer/data/repositories/video.dart';
+import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
+import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class VideoProgressBar extends StatefulWidget {
   VideoProgressBar({Key key}) : super(key: key);
@@ -37,7 +40,8 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   @override
   Widget build(BuildContext context) {
     final video = _query.video(context, listen: true);
-    final style = _query.videoStyle(context).progressBarStyle;
+    final videoStyle = _query.videoStyle(context);
+    final style = videoStyle.progressBarStyle;
 
     final controller = video.controller;
     final position = controller.value.position.inMilliseconds;
@@ -47,7 +51,8 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
       value: animationMS,
       child: LayoutBuilder(
         builder: (_, constraints) {
-          double width = constraints.maxWidth;
+          final double width = constraints.maxWidth;
+          final double progressWidth = (position / duration) * width;
           return _detectTap(
             width: width,
             child: Padding(
@@ -62,10 +67,21 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
                               width: (video.maxBuffering / duration) * width,
                               color: style.barBufferedColor),
                           _ProgressBar(
-                              width: (position / duration) * width,
+                              width: progressWidth,
                               color: style.barActiveColor),
                           _dotIsDragging(width),
                           _dotIdentifier(width),
+                          CustomOpacityTransition(
+                            visible: video.isDraggingProgressBar,
+                            child: CustomPaint(
+                              painter: TextPositionPainter(
+                                position: position,
+                                width: progressWidth,
+                                style: videoStyle.textStyle,
+                                barStyle: style,
+                              ),
+                            ),
+                          ),
                         ])
                   : _ProgressBar(
                       width: width,
@@ -135,6 +151,79 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
       },
     );
   }
+}
+
+class TextPositionPainter extends CustomPainter {
+  TextPositionPainter({this.width, this.position, this.style, this.barStyle});
+
+  final double width;
+  final int position;
+  final TextStyle style;
+  final ProgressBarStyle barStyle;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final text = VideoQuery()
+        .secondsFormatter(Duration(milliseconds: position).inSeconds);
+    final textStyle = ui.TextStyle(
+      color: style.color,
+      fontSize: style.fontSize + 1,
+      fontFamily: style.fontFamily,
+      fontWeight: style.fontWeight,
+      fontStyle: style.fontStyle,
+      fontFamilyFallback: style.fontFamilyFallback,
+      fontFeatures: style.fontFeatures,
+      foreground: style.foreground,
+      background: style.background,
+      letterSpacing: style.letterSpacing,
+      wordSpacing: style.wordSpacing,
+      height: style.height,
+      locale: style.locale,
+      textBaseline: style.textBaseline,
+      decorationColor: style.decorationColor,
+      decoration: style.decoration,
+      decorationStyle: style.decorationStyle,
+      decorationThickness: style.decorationThickness,
+      shadows: style.shadows,
+    );
+
+    final paragraphStyle = ui.ParagraphStyle(textDirection: TextDirection.ltr);
+    final paragraphBuilder = ui.ParagraphBuilder(paragraphStyle)
+      ..pushStyle(textStyle)
+      ..addText(text);
+
+    final paragraph = paragraphBuilder.build();
+    paragraph.layout(ui.ParagraphConstraints(width: 100));
+
+    final height = barStyle.barHeight;
+    final padding = barStyle.paddingBeetwen;
+    final minWidth = paragraph.minIntrinsicWidth;
+    final doubleHeight = height * 2;
+    final offset = Offset(
+      width - (minWidth / 2),
+      -(padding * 2) - doubleHeight,
+    );
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          offset.dx - doubleHeight,
+          offset.dy - height,
+          minWidth + height * 4,
+          paragraph.height + doubleHeight,
+        ),
+        barStyle.borderRadius.topLeft,
+      ),
+      Paint()..color = barStyle.backgroundColor,
+    );
+    canvas.drawParagraph(paragraph, offset);
+  }
+
+  @override
+  bool shouldRepaint(TextPositionPainter oldDelegate) => false;
+
+  @override
+  bool shouldRebuildSemantics(TextPositionPainter oldDelegate) => false;
 }
 
 class _Dot extends StatelessWidget {
