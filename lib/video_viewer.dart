@@ -126,12 +126,14 @@ class VideoViewerState extends State<VideoViewer> {
     await _controller.changeSource(source: source, name: activedSource);
 
     if (source.subtitle != null) {
-      final subtitle = source.subtitle.entries.toList().first;
-      await subtitle.value?.initialize();
-      _controller.changeSubtitle(
-        subtitle: subtitle.value,
-        subtitleName: subtitle.key,
-      );
+      final subtitle = source.subtitle[source.intialSubtitle];
+      if (subtitle != null) {
+        await subtitle?.initialize();
+        _controller.changeSubtitle(
+          subtitle: subtitle,
+          subtitleName: source.intialSubtitle,
+        );
+      }
     }
 
     if (widget.autoPlay) source.video.play();

@@ -10,18 +10,17 @@ class VideoSource {
   VideoSource({
     @required this.video,
     this.subtitle,
+    this.intialSubtitle = "",
   });
 
-  ///VideoPlayerController
-  ///
+  ///VideoPlayerController is from [video_player package.](https://pub.dev/packages/video_player)
   ///```dart
-  ///   VideoPlayerController.network("https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
+  ///VideoPlayerController.network("https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
   ///```
   final VideoPlayerController video;
 
-  ///Multisupport subtitles
-  ///
   ///```dart
+  /////MULTI-SUBTITLES SUPPORT
   ///  {
   ///    "English": VideoViewerSubtitle.network(
   ///      "https://pastebin.com/raw/h9cP6N5N",
@@ -34,6 +33,28 @@ class VideoSource {
   ///  },
   ///```
   final Map<String, VideoViewerSubtitle> subtitle;
+
+  ///If [intialSubtitle] doesn't exist in [subtitle], then it won't select any
+  ///subtitles and won't display anything until the user selects a subtitle.
+  ///
+  ///```dart
+  /////EXAMPLE
+  ///VideoSource(
+  ///  intialSubtitle: "Spanish"
+  ///  video: VideoPlayerController.network(...),
+  ///  subtitle: {
+  ///    "English": VideoViewerSubtitle.network(
+  ///      "https://pastebin.com/raw/h9cP6N5N",
+  ///      type: SubtitleType.webvtt,
+  ///    ),
+  ///    "Spanish": VideoViewerSubtitle.network(
+  ///      "https://pastebin.com/raw/wrz69aay",
+  ///      type: SubtitleType.webvtt,
+  ///    ),
+  ///  },
+  ///)
+  ///```
+  final String intialSubtitle;
 
   /// It is a function that returns a map from VideoPlayerController.network, the input
   /// data must be of type URL.
