@@ -101,8 +101,7 @@ class _MainMenuItem extends StatelessWidget {
             child: subtitle,
             style: textStyle.merge(TextStyle(
               fontWeight: FontWeight.normal,
-              fontSize: textStyle.fontSize -
-                  metadata.style.inLandscapeEnlargeTheTextBy,
+              fontSize: textStyle.fontSize - 2,
             )),
           )
         ],

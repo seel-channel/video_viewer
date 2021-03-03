@@ -10,17 +10,7 @@ class VideoViewerMetadata extends ChangeNotifier {
     this.defaultAspectRatio = 16 / 9,
     this.onFullscreenFixLandscape = false,
     this.language = VideoViewerLanguage.en,
-  }) : this.style = style ?? VideoViewerStyle() {
-    originalStyle = this.style;
-    responsiveStyle = originalStyle.copywith(
-      textStyle: originalStyle.textStyle.merge(
-        TextStyle(
-          fontSize: originalStyle.textStyle.fontSize +
-              originalStyle.inLandscapeEnlargeTheTextBy,
-        ),
-      ),
-    );
-  }
+  }) : this.style = style ?? VideoViewerStyle();
 
   /// It is the Aspect Ratio that the widget.style.loading will take when the video
   /// is not initialized yet
@@ -51,8 +41,5 @@ class VideoViewerMetadata extends ChangeNotifier {
   final VideoViewerLanguage language;
 
   /// It is an argument where you can change the design of almost the entire VideoViewer
-  VideoViewerStyle style;
-
-  VideoViewerStyle originalStyle;
-  VideoViewerStyle responsiveStyle;
+  final VideoViewerStyle style;
 }

@@ -30,7 +30,6 @@ class VideoViewerStyle {
     Widget buffering,
     TextStyle textStyle,
     this.transitions = 400,
-    this.inLandscapeEnlargeTheTextBy = 2,
   })  : this.loading = loading ??
             Center(
               child: CircularProgressIndicator(strokeWidth: 1.6),
@@ -112,10 +111,6 @@ class VideoViewerStyle {
   ///  TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)
   ///```
   final TextStyle textStyle;
-
-  /// It is used in the responsiveness of the text, when the VideoViewer is
-  /// in `Orientation.landscape` will increase the` textStyle fontSize` by x.
-  final double inLandscapeEnlargeTheTextBy;
 
   VideoViewerStyle copywith({
     Widget thumbnail,

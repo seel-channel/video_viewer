@@ -239,11 +239,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       final isFullScreenLandscape =
           video.isFullScreen && orientation == Orientation.landscape;
 
-      metadata.style = orientation == Orientation.landscape ||
-              video.controller.value.aspectRatio < 1.0
-          ? metadata.responsiveStyle
-          : metadata.originalStyle;
-
       Widget player = _globalGesture(
         Stack(children: [
           CustomOpacityTransition(
