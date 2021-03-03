@@ -144,14 +144,14 @@ class VideoViewerController extends ChangeNotifier {
     }
 
     _activeSource = name;
+    final double speed = _controller.value.playbackSpeed;
+    final Duration position = _controller.value.position;
 
     await source.video.initialize();
     _controller = source.video;
     _controller.addListener(_videoListener);
 
     if (inheritValues) {
-      final double speed = _controller.value.playbackSpeed;
-      final Duration position = _controller.value.position;
       await _controller.setPlaybackSpeed(speed);
       await _controller.seekTo(position);
     }
