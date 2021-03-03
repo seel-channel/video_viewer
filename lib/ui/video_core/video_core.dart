@@ -3,18 +3,16 @@ import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:video_player/video_player.dart';
 
-import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/data/repositories/video.dart';
+import 'package:video_viewer/ui/video_core/widgets/buffering.dart';
+import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind.dart';
 
-import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/text_alert.dart';
-import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/layout.dart';
-import 'package:video_viewer/ui/video_core/widgets/aspect_ratio.dart';
+import 'package:video_viewer/ui/video_core/widgets/play_and_pause.dart';
+import 'package:video_viewer/ui/video_core/widgets/scale.dart';
+import 'package:video_viewer/ui/video_core/widgets/thumbnail.dart';
 import 'package:video_viewer/ui/video_core/widgets/volume_bar.dart';
 import 'package:video_viewer/ui/video_core/widgets/subtitle.dart';
-import 'package:video_viewer/ui/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 import 'package:video_viewer/ui/overlay/overlay.dart';
 
@@ -46,10 +44,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   double _onDragStartVolume = 1;
   bool _showVolumeStatus = false;
   Timer _closeVolumeStatus;
-
-  //VIDEO ZOOM
-  final ValueNotifier<double> _scale = ValueNotifier<double>(1.0);
-  double _maxScale = 1.0, _minScale = 1.0, _initialScale = 1.0;
   int _pointers = 0;
 
   @override
@@ -215,33 +209,12 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //-----//
   //SCALE//
   //-----//
-  void _onScaleStart(ScaleStartDetails details) {
-    final size = context.media.size;
-    final controller = _query.video(context).controller;
-    final aspectWidth = size.height * controller.value.aspectRatio;
-
-    _initialScale = _scale.value;
-    _maxScale = size.width / aspectWidth;
-    setState(() {});
-  }
-
-  void _onScaleUpdate(ScaleUpdateDetails details) {
-    final double newScale = _initialScale * details.scale;
-    if (newScale >= _minScale && newScale <= _maxScale) _scale.value = newScale;
-  }
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(builder: (_, Orientation orientation) {
-      final video = _query.video(context, listen: true);
-      final metadata = _query.videoMetadata(context);
-
-      final isFullScreenLandscape =
-          video.isFullScreen && orientation == Orientation.landscape;
-
-      Widget player = _globalGesture(
-        Stack(children: [
-          CustomOpacityTransition(
+    Widget player = _globalGesture(
+      Stack(children: [
+        /*CustomOpacityTransition(
             visible: !video.isShowingThumbnail,
             child: isFullScreenLandscape
                 ? ValueListenableBuilder(
@@ -273,33 +246,37 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
                   onScaleStart: isFullScreenLandscape ? _onScaleStart : null,
                   onScaleUpdate: isFullScreenLandscape ? _onScaleUpdate : null,
                   child: Container(color: Colors.transparent),
-                ),
-          RewindAndForwardLayout(
-            rewind: GestureDetector(onDoubleTap: _rewind),
-            forward: GestureDetector(onDoubleTap: _forward),
-          ),
-          LayoutBuilder(
-            builder: (_, box) {
-              return Center(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: _onTapPlayAndPause,
-                  child: Container(
-                    width: box.maxWidth * 0.2,
-                    height: box.maxHeight * 0.2,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.circle,
-                    ),
+                ),*/
+        VideoCorePlayer(onTap: _showAndHideOverlay),
+        VideoCoreForwardAndRewindLayout(
+          rewind: GestureDetector(onDoubleTap: _rewind),
+          forward: GestureDetector(onDoubleTap: _forward),
+        ),
+        LayoutBuilder(
+          builder: (_, box) {
+            return Center(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _onTapPlayAndPause,
+                child: Container(
+                  width: box.maxWidth * 0.2,
+                  height: box.maxHeight * 0.2,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.circle,
                   ),
                 ),
-              );
-            },
-          ),
-          CustomOpacityTransition(
+              ),
+            );
+          },
+        ),
+        VideoCoreBuffering(),
+        /*CustomOpacityTransition(
             visible: video.isBuffering,
-            child: metadata.style.buffering,
-          ),
+            child: style.buffering,
+          ),*/
+        VideoCorePlayAndPause(showAMoment: _showAMomentPlayAndPause),
+        /*
           AnimatedBuilder(
             animation: video.controller,
             builder: (_, __) {
@@ -312,55 +289,70 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
                 ),
               );
             },
+          ),*/
+        VideoCoreActiveSubtitleText(),
+        VideoCoreOverlay(),
+        CustomOpacityTransition(
+          visible: _showForwardStatus,
+          child: VideoCoreForwardAndRewindTextAlert(
+            amount: _forwardAndRewindAmount,
           ),
-          ActiveSubtitleText(),
-          VideoOverlay(),
-          CustomOpacityTransition(
-            visible: _showForwardStatus,
-            child: RewindAndForwardTextAlert(amount: _forwardAndRewindAmount),
-          ),
-          CustomSwipeTransition(
+        ),
+        ValueListenableBuilder(
+          valueListenable: _currentVolume,
+          builder: (_, double value, __) => VideoCoreVolumeBar(
             visible: _showVolumeStatus,
-            direction:
-                metadata.style.volumeBarStyle.alignment == Alignment.centerLeft
-                    ? SwipeDirection.fromLeft
-                    : SwipeDirection.fromRight,
+            progress: value / _maxVolume,
+          ),
+        ),
+        /*CustomSwipeTransition(
+            visible: _showVolumeStatus,
+            direction: style.volumeBarStyle.alignment == Alignment.centerLeft
+                ? SwipeDirection.fromLeft
+                : SwipeDirection.fromRight,
             child: ValueListenableBuilder(
               valueListenable: _currentVolume,
               builder: (_, double value, __) {
                 return VideoVolumeBar(progress: value / _maxVolume);
               },
             ),
-          ),
-          RewindAndForwardLayout(
+          ),*/
+        VideoCoreForwardAndRewind(
+          showRewind: _showAMomentRewindIcons[0],
+          showForward: _showAMomentRewindIcons[1],
+        ),
+        /*RewindAndForwardLayout(
             rewind: CustomOpacityTransition(
               visible: _showAMomentRewindIcons[0],
               child: Center(
-                child: metadata.style.forwardAndRewindStyle.rewind,
+                child: style.forwardAndRewindStyle.rewind,
               ),
             ),
             forward: CustomOpacityTransition(
               visible: _showAMomentRewindIcons[1],
               child: Center(
-                child: metadata.style.forwardAndRewindStyle.forward,
+                child: style.forwardAndRewindStyle.forward,
               ),
             ),
-          ),
+          ),*/
+        VideoCoreThumbnail(),
+        /*
           CustomOpacityTransition(
             visible: video.isShowingThumbnail,
             child: GestureDetector(
               onTap: video.controller.play,
               child: Container(
                 color: Colors.transparent,
-                child: metadata.style.thumbnail,
+                child: style.thumbnail,
               ),
             ),
-          ),
-        ]),
-      );
+          ),*/
+      ]),
+    );
 
-      return isFullScreenLandscape ? player : VideoAspectRadio(child: player);
-    });
+    return player;
+
+    //return isFullScreenLandscape ? player : VideoAspectRadio(child: player);
   }
 
   //--------//

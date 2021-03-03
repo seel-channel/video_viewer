@@ -281,7 +281,7 @@ class HLSVideoExample extends StatelessWidget {
           "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8"),
       builder: (_, data) {
         if (data.hasData)
-          return VideoViewer(source: data.data);
+          return VideoViewer(source: data.data, onFullscreenFixLandscape: true);
         else
           return CircularProgressIndicator();
       },

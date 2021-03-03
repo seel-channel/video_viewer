@@ -11,7 +11,7 @@ class VideoAspectRadio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = VideoQuery().video(context, listen: true).controller;
+    final controller = VideoQuery().video(context).controller;
     return AspectRatio(
       aspectRatio: controller.value.aspectRatio,
       child: child,

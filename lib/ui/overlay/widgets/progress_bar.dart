@@ -74,11 +74,11 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
                           CustomOpacityTransition(
                             visible: video.isDraggingProgressBar,
                             child: CustomPaint(
-                              painter: TextPositionPainter(
+                              painter: _TextPositionPainter(
+                                barStyle: style,
                                 position: position,
                                 width: progressWidth,
                                 style: videoStyle.textStyle,
-                                barStyle: style,
                               ),
                             ),
                           ),
@@ -153,8 +153,8 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   }
 }
 
-class TextPositionPainter extends CustomPainter {
-  TextPositionPainter({this.width, this.position, this.style, this.barStyle});
+class _TextPositionPainter extends CustomPainter {
+  _TextPositionPainter({this.width, this.position, this.style, this.barStyle});
 
   final double width;
   final int position;
@@ -220,10 +220,10 @@ class TextPositionPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(TextPositionPainter oldDelegate) => false;
+  bool shouldRepaint(_TextPositionPainter oldDelegate) => false;
 
   @override
-  bool shouldRebuildSemantics(TextPositionPainter oldDelegate) => false;
+  bool shouldRebuildSemantics(_TextPositionPainter oldDelegate) => false;
 }
 
 class _Dot extends StatelessWidget {

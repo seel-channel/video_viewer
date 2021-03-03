@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
-class ActiveSubtitleText extends StatelessWidget {
-  const ActiveSubtitleText({Key key}) : super(key: key);
+class VideoCoreActiveSubtitleText extends StatelessWidget {
+  const VideoCoreActiveSubtitleText({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

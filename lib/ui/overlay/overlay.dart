@@ -8,8 +8,8 @@ import 'package:video_viewer/ui/overlay/widgets/bottom.dart';
 import 'package:video_viewer/ui/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
-class VideoOverlay extends StatelessWidget {
-  const VideoOverlay({Key key}) : super(key: key);
+class VideoCoreOverlay extends StatelessWidget {
+  const VideoCoreOverlay({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
