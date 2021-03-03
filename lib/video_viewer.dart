@@ -95,6 +95,9 @@ class VideoViewerState extends State<VideoViewer> {
 
   @override
   void initState() {
+    _controller = widget.controller;
+    _controller.source = widget.source;
+    _controller.looping = widget.looping;
     _metadata = VideoViewerMetadata(
       style: widget.style,
       language: widget.language,
@@ -117,26 +120,12 @@ class VideoViewerState extends State<VideoViewer> {
     final activedSource = widget.source.keys.toList().first;
     final source = widget.source.values.toList().first;
 
-    await source.video?.initialize();
+    await _controller.changeSource(
+      source: source,
+      name: activedSource,
+      autoPlay: widget.autoPlay,
+    );
 
-    _controller = widget.controller;
-    _controller.source = widget.source;
-    _controller.looping = widget.looping;
-
-    await _controller.changeSource(source: source, name: activedSource);
-
-    if (source.subtitle != null) {
-      final subtitle = source.subtitle[source.intialSubtitle ?? ""];
-      if (subtitle != null) {
-        await subtitle?.initialize();
-        _controller.changeSubtitle(
-          subtitle: subtitle,
-          subtitleName: source.intialSubtitle,
-        );
-      }
-    }
-
-    if (widget.autoPlay) source.video.play();
     _controller.isShowingThumbnail = widget.style.thumbnail != null;
     setState(() => _initialized = true);
   }
@@ -147,7 +136,7 @@ class VideoViewerState extends State<VideoViewer> {
         ? MultiProvider(
             providers: [
               ChangeNotifierProvider.value(value: _controller),
-              ChangeNotifierProvider.value(value: _metadata),
+              Provider.value(value: _metadata),
             ],
             builder: (_, __) => VideoViewerCore(),
           )

@@ -133,32 +133,33 @@ class VideoViewerController extends ChangeNotifier {
     bool inheritValues = true,
     bool autoPlay = true,
   }) async {
-    if (_controller == null) {
-      _controller = source.video;
-      _activeSource = name;
-      _controller.addListener(_videoListener);
-    } else {
-      await source.video.initialize();
-      if (source.subtitle != null) {
-        final VideoViewerSubtitle subtitle =
-            source.subtitle.values.toList().first;
-        await subtitle?.initialize();
-        _subtitle = subtitle;
+    if (source.subtitle != null) {
+      final subtitle = source.subtitle[source.intialSubtitle ?? ""];
+      if (subtitle != null) {
+        subtitle.initialize().then((_) {
+          changeSubtitle(
+            subtitle: subtitle,
+            subtitleName: source.intialSubtitle,
+          );
+        });
       }
-
-      _controller = source.video;
-      _activeSource = name;
-      _controller.addListener(_videoListener);
-
-      if (inheritValues) {
-        final double speed = _controller.value.playbackSpeed;
-        final Duration position = _controller.value.position;
-        await _controller.setPlaybackSpeed(speed);
-        await _controller.seekTo(position);
-      }
-      await _controller.setLooping(looping);
-      if (autoPlay) await _controller.play();
     }
+
+    await source.video.initialize();
+
+    _controller = source.video;
+    _activeSource = name;
+    _controller.addListener(_videoListener);
+
+    if (inheritValues) {
+      final double speed = _controller.value.playbackSpeed;
+      final Duration position = _controller.value.position;
+      await _controller.setPlaybackSpeed(speed);
+      await _controller.seekTo(position);
+    }
+
+    await _controller.setLooping(looping);
+    if (autoPlay) await _controller.play();
     notifyListeners();
   }
 
@@ -335,20 +336,17 @@ class VideoViewerController extends ChangeNotifier {
     } else {
       _isFullScreen = true;
       notifyListeners();
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MultiProvider(
-            providers: [
-              ChangeNotifierProvider.value(
-                value: VideoQuery().video(context, listen: false),
-              ),
-              ChangeNotifierProvider.value(
-                value: VideoQuery().videoMetadata(context, listen: false),
-              ),
-            ],
-            child: FullScreenPage(),
-          ),
+      await context.to(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(
+              value: VideoQuery().video(context, listen: false),
+            ),
+            Provider.value(
+              value: VideoQuery().videoMetadata(context, listen: false),
+            ),
+          ],
+          child: FullScreenPage(),
         ),
       );
     }
@@ -360,14 +358,14 @@ class VideoViewerController extends ChangeNotifier {
     if (kIsWeb)
       html.document.exitFullscreen();
     else if (_isFullScreen) {
+      context.goBack();
       _isFullScreen = false;
-      notifyListeners();
       await Misc.setSystemOrientation(SystemOrientation.portraitUp);
       await Misc.setSystemOverlay(SystemOverlay.values);
       Misc.delayed(3200, () {
         Misc.setSystemOrientation(SystemOrientation.values);
       });
-      Navigator.pop(context);
+      notifyListeners();
     }
   }
 }

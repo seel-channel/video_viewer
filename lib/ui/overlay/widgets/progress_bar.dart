@@ -15,107 +15,6 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   final _query = VideoQuery();
   final animationMS = ValueNotifier<int>(1000);
 
-  @override
-  Widget build(BuildContext context) {
-    final video = _query.video(context, listen: true);
-    final style = _query.videoStyle(context).progressBarStyle;
-
-    final controller = video.controller;
-    final position = controller.value.position.inMilliseconds;
-    final duration = controller.value.duration.inMilliseconds;
-
-    return ListenableProvider.value(
-      value: animationMS,
-      child: LayoutBuilder(
-        builder: (_, constraints) {
-          double width = constraints.maxWidth;
-          return _detectTap(
-            width: width,
-            child: Container(
-              width: width,
-              color: Colors.transparent,
-              padding: Margin.vertical(style.paddingBeetwen),
-              alignment: Alignment.centerLeft,
-              child: controller.value.initialized
-                  ? Stack(
-                      alignment: AlignmentDirectional.centerStart,
-                      children: [
-                          _ProgressBar(
-                              width: width, color: style.barBackgroundColor),
-                          _ProgressBar(
-                              width: (video.maxBuffering / duration) * width,
-                              color: style.barBufferedColor),
-                          _ProgressBar(
-                              width: (position / duration) * width,
-                              color: style.barActiveColor),
-                          _dotisDragging(width),
-                          _dotIdentifier(width),
-                        ])
-                  : _ProgressBar(
-                      width: width,
-                      color: style.barBackgroundColor,
-                    ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _dotIdentifier(double maxWidth) => _dot(maxWidth);
-  Widget _dotisDragging(double maxWidth) {
-    final video = _query.video(context, listen: true);
-    final style = _query.videoStyle(context).progressBarStyle;
-
-    final controller = video.controller;
-    final position = controller.value.position.inMilliseconds;
-    final duration = controller.value.duration.inMilliseconds;
-
-    final double widthPos = (position / duration) * maxWidth;
-    final double widthDot = style.barHeight * 2;
-    return BooleanTween(
-      animate: video.isDraggingProgressBar &&
-          (widthPos > widthDot) &&
-          (widthPos < maxWidth - widthDot),
-      tween: Tween<double>(begin: 0, end: 0.4),
-      builder: (_, value, __) => _dot(maxWidth, value, 2),
-    );
-  }
-
-  Widget _dot(double maxWidth, [double opacity = 1, int multiplicator = 1]) {
-    final query = VideoQuery();
-    final style = query.videoStyle(context).progressBarStyle;
-    final controller = query.video(context, listen: true).controller;
-
-    final height = style.barHeight;
-
-    final double widthPos = (controller.value.position.inMilliseconds /
-            controller.value.duration.inMilliseconds) *
-        maxWidth;
-    final double widthDot = height * 2;
-    final double width =
-        widthPos < height ? widthDot : widthPos + height * multiplicator;
-
-    return ValueListenableBuilder(
-      valueListenable: animationMS,
-      builder: (_, int value, __) {
-        return AnimatedContainer(
-          width: width,
-          duration: Duration(milliseconds: value),
-          alignment: Alignment.centerRight,
-          child: Container(
-            height: height * 2 * multiplicator,
-            width: height * 2 * multiplicator,
-            decoration: BoxDecoration(
-              color: style.barDotColor.withOpacity(opacity),
-              shape: BoxShape.circle,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   void play() {
     _query.video(context).controller?.play();
     animationMS.value = 1000;
@@ -133,6 +32,75 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
   void _endDragging() {
     _query.video(context).isDraggingProgressBar = false;
     Misc.delayed(50, () => play());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final video = _query.video(context, listen: true);
+    final style = _query.videoStyle(context).progressBarStyle;
+
+    final controller = video.controller;
+    final position = controller.value.position.inMilliseconds;
+    final duration = controller.value.duration.inMilliseconds;
+
+    return ListenableProvider.value(
+      value: animationMS,
+      child: LayoutBuilder(
+        builder: (_, constraints) {
+          double width = constraints.maxWidth;
+          return _detectTap(
+            width: width,
+            child: Padding(
+              padding: Margin.vertical(style.paddingBeetwen),
+              child: controller.value.initialized
+                  ? Stack(
+                      alignment: AlignmentDirectional.centerStart,
+                      children: [
+                          _ProgressBar(
+                              width: width, color: style.barBackgroundColor),
+                          _ProgressBar(
+                              width: (video.maxBuffering / duration) * width,
+                              color: style.barBufferedColor),
+                          _ProgressBar(
+                              width: (position / duration) * width,
+                              color: style.barActiveColor),
+                          _dotIsDragging(width),
+                          _dotIdentifier(width),
+                        ])
+                  : _ProgressBar(
+                      width: width,
+                      color: style.barBackgroundColor,
+                    ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _dotIdentifier(double maxWidth) => _Dot(maxWidth: maxWidth);
+  Widget _dotIsDragging(double maxWidth) {
+    final video = _query.video(context, listen: true);
+    final style = _query.videoStyle(context).progressBarStyle;
+
+    final controller = video.controller;
+    final position = controller.value.position.inMilliseconds;
+    final duration = controller.value.duration.inMilliseconds;
+
+    final double widthPos = (position / duration) * maxWidth;
+    final double widthDot = style.barHeight * 2;
+
+    return BooleanTween(
+      animate: video.isDraggingProgressBar &&
+          (widthPos > widthDot) &&
+          (widthPos < maxWidth - widthDot),
+      tween: Tween<double>(begin: 0, end: 0.4),
+      builder: (_, double value, __) => _Dot(
+        maxWidth: maxWidth,
+        opacity: value,
+        multiplicator: 2,
+      ),
+    );
   }
 
   Widget _detectTap({Widget child, double width}) {
@@ -164,6 +132,54 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
       onTapUp: (TapUpDetails details) {
         seekToRelativePosition(details.localPosition);
         _endDragging();
+      },
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  const _Dot({
+    Key key,
+    this.maxWidth,
+    this.opacity = 1,
+    this.multiplicator = 1,
+  }) : super(key: key);
+
+  final double maxWidth, opacity;
+  final int multiplicator;
+
+  @override
+  Widget build(BuildContext context) {
+    final query = VideoQuery();
+    final animation = Provider.of<ValueNotifier<int>>(context);
+    final style = query.videoStyle(context).progressBarStyle;
+    final controller = query.video(context, listen: true).controller;
+
+    final height = style.barHeight;
+
+    final double widthPos = (controller.value.position.inMilliseconds /
+            controller.value.duration.inMilliseconds) *
+        maxWidth;
+    final double widthDot = height * 2;
+    final double width =
+        widthPos < height ? widthDot : widthPos + height * multiplicator;
+
+    return ValueListenableBuilder(
+      valueListenable: animation,
+      builder: (_, int value, __) {
+        return AnimatedContainer(
+          width: width,
+          duration: Duration(milliseconds: value),
+          alignment: Alignment.centerRight,
+          child: Container(
+            height: height * 2 * multiplicator,
+            width: height * 2 * multiplicator,
+            decoration: BoxDecoration(
+              color: style.barDotColor.withOpacity(opacity),
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
       },
     );
   }

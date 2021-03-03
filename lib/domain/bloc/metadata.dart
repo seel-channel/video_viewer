@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:video_viewer/domain/entities/language.dart';
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 
-class VideoViewerMetadata extends ChangeNotifier {
+class VideoViewerMetadata {
   VideoViewerMetadata({
-    VideoViewerStyle style,
-    this.rewindAmount = 10,
-    this.forwardAmount = 10,
-    this.defaultAspectRatio = 16 / 9,
-    this.onFullscreenFixLandscape = false,
-    this.language = VideoViewerLanguage.en,
-  }) : this.style = style ?? VideoViewerStyle();
+    @required this.style,
+    @required this.rewindAmount,
+    @required this.forwardAmount,
+    @required this.defaultAspectRatio,
+    @required this.onFullscreenFixLandscape,
+    @required this.language,
+  });
 
   /// It is the Aspect Ratio that the widget.style.loading will take when the video
   /// is not initialized yet
