@@ -1,11 +1,10 @@
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
+import 'package:video_viewer/ui/video_core/widgets/orientation.dart';
 import 'package:video_viewer/ui/video_core/widgets/aspect_ratio.dart';
 import 'package:video_viewer/data/repositories/video.dart';
-import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class VideoCorePlayer extends StatefulWidget {
   VideoCorePlayer({Key key, @required this.onTap}) : super(key: key);
@@ -38,48 +37,40 @@ class _VideoCorePlayerState extends State<VideoCorePlayer> {
 
   @override
   Widget build(BuildContext context) {
-    final video = _query.video(context, listen: true);
-    return OrientationBuilder(
-      builder: (_, Orientation orientation) {
-        final isFullScreenLandscape =
-            video.isFullScreen && orientation == Orientation.landscape;
-
+    return VideoCoreOrientation(
+      builder: (isFullScreenLandscape) {
         return Stack(children: [
-          CustomOpacityTransition(
-            visible: !video.isShowingThumbnail,
-            child: isFullScreenLandscape
-                ? ValueListenableBuilder(
-                    valueListenable: _scale,
-                    builder: (_, double value, __) {
-                      return Transform.scale(
-                        scale: value,
-                        child: Center(
-                          child: VideoAspectRadio(
-                              child: VideoPlayer(video.controller)),
-                        ),
-                      );
-                    },
-                  )
-                : VideoPlayer(video.controller),
-          ),
-          kIsWeb
-              ? MouseRegion(
-                  onHover: (_) {
-                    if (!video.isShowingOverlay) widget.onTap(true);
+          isFullScreenLandscape
+              ? ValueListenableBuilder(
+                  valueListenable: _scale,
+                  builder: (_, double value, __) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Center(
+                        child: VideoCoreAspectRadio(child: _Player()),
+                      ),
+                    );
                   },
-                  child: GestureDetector(
-                    onTap: widget.onTap,
-                    child: Container(color: Colors.transparent),
-                  ),
                 )
-              : GestureDetector(
-                  onTap: widget.onTap,
-                  onScaleStart: isFullScreenLandscape ? _onScaleStart : null,
-                  onScaleUpdate: isFullScreenLandscape ? _onScaleUpdate : null,
-                  child: Container(color: Colors.transparent),
-                ),
+              : _Player(),
+          GestureDetector(
+            onTap: widget.onTap,
+            onScaleStart: isFullScreenLandscape ? _onScaleStart : null,
+            onScaleUpdate: isFullScreenLandscape ? _onScaleUpdate : null,
+            child: Container(color: Colors.transparent),
+          ),
         ]);
       },
     );
+  }
+}
+
+class _Player extends StatelessWidget {
+  const _Player({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final video = VideoQuery().video(context);
+    return VideoPlayer(video.controller);
   }
 }

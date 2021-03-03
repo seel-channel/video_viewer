@@ -281,7 +281,14 @@ class HLSVideoExample extends StatelessWidget {
           "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8"),
       builder: (_, data) {
         if (data.hasData)
-          return VideoViewer(source: data.data, onFullscreenFixLandscape: true);
+          return VideoViewer(
+            source: data.data,
+            onFullscreenFixLandscape: true,
+            style: VideoViewerStyle(
+              thumbnail: Image.network(
+                  "https://play-lh.googleusercontent.com/aA2iky4PH0REWCcPs9Qym2X7e9koaa1RtY-nKkXQsDVU6Ph25_9GkvVuyhS72bwKhN1P"),
+            ),
+          );
         else
           return CircularProgressIndicator();
       },
