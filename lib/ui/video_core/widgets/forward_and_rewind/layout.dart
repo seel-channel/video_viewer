@@ -15,7 +15,7 @@ class RewindAndForwardLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(children: [
       Expanded(child: rewind),
-      SizedBox(width: GetMedia(context).width / 2),
+      SizedBox(width: context.media.width / 2),
       Expanded(child: forward),
     ]);
   }

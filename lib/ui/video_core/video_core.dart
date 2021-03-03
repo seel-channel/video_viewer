@@ -216,7 +216,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //SCALE//
   //-----//
   void _onScaleStart(ScaleStartDetails details) {
-    final size = GetMedia(context).size;
+    final size = context.media.size;
     final controller = _query.video(context).controller;
     final aspectWidth = size.height * controller.value.aspectRatio;
 

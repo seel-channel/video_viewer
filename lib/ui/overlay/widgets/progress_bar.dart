@@ -78,7 +78,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
           (widthPos > widthDot) &&
           (widthPos < maxWidth - widthDot),
       tween: Tween<double>(begin: 0, end: 0.4),
-      builder: (value) => _dot(maxWidth, value, 2),
+      builder: (_, value, __) => _dot(maxWidth, value, 2),
     );
   }
 
