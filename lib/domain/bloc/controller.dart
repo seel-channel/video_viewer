@@ -143,10 +143,10 @@ class VideoViewerController extends ChangeNotifier {
       }
     }
 
-    await source.video.initialize();
-
-    _controller = source.video;
     _activeSource = name;
+
+    await source.video.initialize();
+    _controller = source.video;
     _controller.addListener(_videoListener);
 
     if (inheritValues) {
@@ -166,10 +166,12 @@ class VideoViewerController extends ChangeNotifier {
     @required VideoViewerSubtitle subtitle,
     @required String subtitleName,
   }) async {
-    _subtitle = subtitle;
-    await _subtitle.initialize();
     _activeSubtitle = subtitleName;
     _activeSubtitleData = null;
+    if (subtitle != null) {
+      _subtitle = subtitle;
+      await _subtitle.initialize();
+    }
     notifyListeners();
   }
 
