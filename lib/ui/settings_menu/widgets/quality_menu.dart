@@ -19,11 +19,12 @@ class QualityMenu extends StatelessWidget {
         for (MapEntry<String, VideoSource> entry in video.source.entries)
           CustomInkWell(
             onTap: () async {
-              if (entry.key != activeSource)
-                await query
-                    .video(context)
-                    .changeSource(source: entry.value, name: entry.key);
-              query.video(context).closeAllSecondarySettingsMenus();
+              final video = query.video(context);
+              video.closeAllSecondarySettingsMenus();
+              video.closeSettingsMenu();
+              if (entry.key != activeSource) {
+                await video.changeSource(source: entry.value, name: entry.key);
+              }
             },
             child: CustomText(
               text: entry.key,
