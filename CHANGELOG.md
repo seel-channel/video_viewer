@@ -1,3 +1,13 @@
+## [1.1.0]
+
+- ProgressBarTextPosition follow the finger.
+- Changed example's WEBVTT Files URL
+- SettingsMenu bugs fixed.
+- Improved:
+    - Performance
+    - Fullscreen UX
+
+
 ## [1.0.9+1]
 
 - InkWell effects added.

@@ -337,19 +337,17 @@ class VideoViewerController extends ChangeNotifier {
       });
     } else {
       _isFullScreen = true;
+      final query = VideoQuery();
+      final metadata = query.videoMetadata(context);
       await context.toTransparentPage(
         MultiProvider(
           providers: [
-            ChangeNotifierProvider.value(
-              value: VideoQuery().video(context, listen: false),
-            ),
-            Provider.value(
-              value: VideoQuery().videoMetadata(context, listen: false),
-            ),
+            ChangeNotifierProvider.value(value: query.video(context)),
+            Provider.value(value: metadata),
           ],
           child: FullScreenPage(),
         ),
-        duration: VideoQuery().videoMetadata(context).style.transitions,
+        duration: metadata.style.transitions,
       );
       notifyListeners();
     }
@@ -363,8 +361,8 @@ class VideoViewerController extends ChangeNotifier {
     else if (_isFullScreen) {
       _isFullScreen = false;
       context.goBack();
-      await Misc.setSystemOrientation(SystemOrientation.values);
       await Misc.setSystemOverlay(SystemOverlay.values);
+      await Misc.setSystemOrientation(SystemOrientation.values);
       notifyListeners();
     }
   }
