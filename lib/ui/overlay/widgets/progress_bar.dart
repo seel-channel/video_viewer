@@ -33,38 +33,32 @@ class VideoProgressBar extends StatelessWidget {
             width: width,
             child: Padding(
               padding: Margin.vertical(style.paddingBeetwen),
-              child: controller.value.initialized
-                  ? Stack(
-                      alignment: AlignmentDirectional.centerStart,
-                      children: [
-                          _ProgressBar(
-                              width: width, color: style.barBackgroundColor),
-                          _ProgressBar(
-                              width: (video.maxBuffering.inMilliseconds /
-                                      duration.inMilliseconds) *
-                                  width,
-                              color: style.barBufferedColor),
-                          _ProgressBar(
-                              width: progressWidth,
-                              color: style.barActiveColor),
-                          _DotIsDragging(maxWidth: width),
-                          _Dot(maxWidth: width),
-                          CustomOpacityTransition(
-                            visible: video.isDraggingProgressBar,
-                            child: CustomPaint(
-                              painter: _TextPositionPainter(
-                                barStyle: style,
-                                position: controller.value.position,
-                                width: progressWidth,
-                                style: videoStyle.textStyle,
-                              ),
-                            ),
-                          ),
-                        ])
-                  : _ProgressBar(
-                      width: width,
-                      color: style.barBackgroundColor,
+              child: Stack(
+                alignment: AlignmentDirectional.centerStart,
+                children: [
+                  _ProgressBar(width: width, color: style.barBackgroundColor),
+                  _ProgressBar(
+                      width: (video.maxBuffering.inMilliseconds /
+                              duration.inMilliseconds) *
+                          width,
+                      color: style.barBufferedColor),
+                  _ProgressBar(
+                      width: progressWidth, color: style.barActiveColor),
+                  _DotIsDragging(maxWidth: width),
+                  _Dot(maxWidth: width),
+                  CustomOpacityTransition(
+                    visible: video.isDraggingProgressBar,
+                    child: CustomPaint(
+                      painter: _TextPositionPainter(
+                        barStyle: style,
+                        position: controller.value.position,
+                        width: progressWidth,
+                        style: videoStyle.textStyle,
+                      ),
                     ),
+                  ),
+                ],
+              ),
             ),
           );
         },

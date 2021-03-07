@@ -11,11 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  dio: ^3.0.10
-  helpers: ^1.0.7
-  provider: ^4.3.3
-  video_player: ^1.0.1
-  universal_html: ^1.2.4
+  http: ^0.13.0
+  html: ^0.15.0
+  helpers: ^1.1.0
+  provider: ^5.0.0
+  video_player: ^2.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,5 @@
-import 'package:dio/dio.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 enum SubtitleType { webvtt, srt }
 enum _SubtitleIntializeType { network, string }
@@ -38,9 +39,9 @@ class VideoViewerSubtitle {
   Future<void> initialize() async {
     switch (_intializedType) {
       case _SubtitleIntializeType.network:
-        final response = await Dio().get<String>(_url);
+        final response = await http.get(Uri.parse(_url));
         if (response.statusCode == 200) {
-          content = response.data;
+          content = utf8.decode(response.bodyBytes);
           _getSubtitlesData();
         }
         break;

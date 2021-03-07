@@ -1,4 +1,5 @@
-import 'package:dio/dio.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_viewer/video_viewer.dart';
@@ -123,8 +124,8 @@ class VideoSource {
     List<String> audioList = [];
     String content;
 
-    final response = await Dio().get<String>(m3u8);
-    if (response.statusCode == 200) content = response.data;
+    final response = await http.get(Uri.parse(m3u8));
+    if (response.statusCode == 200) content = utf8.decode(response.bodyBytes);
 
     List<RegExpMatch> matches = regExp.allMatches(content).toList();
     List<RegExpMatch> audioMatches = regExpAudio.allMatches(content).toList();
