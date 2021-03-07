@@ -3,15 +3,15 @@ import 'package:video_viewer/data/repositories/video.dart';
 
 class VideoCoreAspectRadio extends StatelessWidget {
   const VideoCoreAspectRadio({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
   }) : super(key: key);
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final controller = VideoQuery().video(context).controller;
+    final controller = VideoQuery().video(context).controller!;
     return AspectRatio(
       aspectRatio: controller.value.aspectRatio,
       child: child,

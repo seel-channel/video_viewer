@@ -5,9 +5,9 @@ import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class VideoCoreVolumeBar extends StatelessWidget {
   const VideoCoreVolumeBar({
-    Key key,
-    @required this.visible,
-    @required this.progress,
+    Key? key,
+    required this.visible,
+    required this.progress,
   }) : super(key: key);
 
   final bool visible;
@@ -34,9 +34,9 @@ class VideoCoreVolumeBar extends StatelessWidget {
 }
 
 class _VolumeBar extends StatelessWidget {
-  const _VolumeBar({Key key, this.progress}) : super(key: key);
+  const _VolumeBar({Key? key, this.progress}) : super(key: key);
 
-  final double progress;
+  final double? progress;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,7 @@ class _VolumeBar extends StatelessWidget {
       child: Padding(
         padding: style.margin,
         child: ClipRRect(
-          borderRadius: style.borderRadius,
+          borderRadius: style.borderRadius as BorderRadius?,
           child: Container(
             height: style.height,
             width: style.width,
@@ -56,7 +56,7 @@ class _VolumeBar extends StatelessWidget {
               children: [
                 Container(color: style.backgroundColor),
                 Container(
-                  height: progress * style.height,
+                  height: progress! * style.height,
                   decoration: BoxDecoration(
                     color: style.color,
                     borderRadius: style.borderRadius,

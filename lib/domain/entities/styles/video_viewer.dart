@@ -18,17 +18,17 @@ class VideoViewerStyle {
   /// It is the main class of VideoViewer styles, in this class you can almost
   /// all styles and elements of the VideoViewer
   VideoViewerStyle({
-    ProgressBarStyle progressBarStyle,
-    PlayAndPauseWidgetStyle playAndPauseStyle,
-    SettingsMenuStyle settingsStyle,
-    ForwardAndRewindStyle forwardAndRewindStyle,
-    VolumeBarStyle volumeBarStyle,
-    SubtitleStyle subtitleStyle,
+    ProgressBarStyle? progressBarStyle,
+    PlayAndPauseWidgetStyle? playAndPauseStyle,
+    SettingsMenuStyle? settingsStyle,
+    ForwardAndRewindStyle? forwardAndRewindStyle,
+    VolumeBarStyle? volumeBarStyle,
+    SubtitleStyle? subtitleStyle,
     this.header,
     this.thumbnail,
-    Widget loading,
-    Widget buffering,
-    TextStyle textStyle,
+    Widget? loading,
+    Widget? buffering,
+    TextStyle? textStyle,
     this.transitions = const Duration(milliseconds: 400),
   })  : this.loading = loading ??
             Center(
@@ -76,10 +76,10 @@ class VideoViewerStyle {
 
   /// It is a thumbnail that appears when the video is loaded for the first time, once
   /// given play or pressing on it will disappear.
-  final Widget thumbnail;
+  final Widget? thumbnail;
 
   /// It is the widget header shows on the top when you tap the video viewer and it shows the progress bar
-  final Widget header;
+  final Widget? header;
 
   /// It is the NotNull-Widget that appears when the video is loading.
   ///
@@ -113,16 +113,16 @@ class VideoViewerStyle {
   final TextStyle textStyle;
 
   VideoViewerStyle copywith({
-    Widget thumbnail,
-    Widget header,
-    Widget loading,
-    Widget buffering,
-    TextStyle textStyle,
-    VolumeBarStyle volumeBarStyle,
-    ProgressBarStyle progressBarStyle,
-    SettingsMenuStyle settingsStyle,
-    PlayAndPauseWidgetStyle playAndPauseStyle,
-    ForwardAndRewindStyle forwardAndRewindStyle,
+    Widget? thumbnail,
+    Widget? header,
+    Widget? loading,
+    Widget? buffering,
+    TextStyle? textStyle,
+    VolumeBarStyle? volumeBarStyle,
+    ProgressBarStyle? progressBarStyle,
+    SettingsMenuStyle? settingsStyle,
+    PlayAndPauseWidgetStyle? playAndPauseStyle,
+    ForwardAndRewindStyle? forwardAndRewindStyle,
   }) {
     return VideoViewerStyle(
       header: header ?? this.header,

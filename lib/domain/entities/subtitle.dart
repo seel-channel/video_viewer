@@ -19,8 +19,8 @@ class SubtitleData {
 class VideoViewerSubtitle {
   _SubtitleIntializeType _intializedType;
   final SubtitleType type;
-  String content;
-  String _url;
+  late String content;
+  late String _url;
 
   List<SubtitleData> _subtitles = [];
 
@@ -54,7 +54,7 @@ class VideoViewerSubtitle {
   List<SubtitleData> get subtitles => _subtitles;
 
   void _getSubtitlesData() {
-    RegExp regExp;
+    late RegExp regExp;
 
     switch (type) {
       case SubtitleType.webvtt:
@@ -77,20 +77,20 @@ class VideoViewerSubtitle {
 
     matches.forEach((regExpMatch) {
       final Duration start = Duration(
-        hours: int.parse(regExpMatch.group(2)),
-        minutes: int.parse(regExpMatch.group(3)),
-        seconds: int.parse(regExpMatch.group(4)),
-        milliseconds: int.parse(regExpMatch.group(5)),
+        hours: int.parse(regExpMatch.group(2)!),
+        minutes: int.parse(regExpMatch.group(3)!),
+        seconds: int.parse(regExpMatch.group(4)!),
+        milliseconds: int.parse(regExpMatch.group(5)!),
       );
 
       final Duration end = Duration(
-        hours: int.parse(regExpMatch.group(7)),
-        minutes: int.parse(regExpMatch.group(8)),
-        seconds: int.parse(regExpMatch.group(9)),
-        milliseconds: int.parse(regExpMatch.group(10)),
+        hours: int.parse(regExpMatch.group(7)!),
+        minutes: int.parse(regExpMatch.group(8)!),
+        seconds: int.parse(regExpMatch.group(9)!),
+        milliseconds: int.parse(regExpMatch.group(10)!),
       );
 
-      final String text = _removeAllHtmlTags(regExpMatch.group(11));
+      final String text = _removeAllHtmlTags(regExpMatch.group(11)!);
 
       subtitles.add(SubtitleData(
         start: start,
@@ -106,9 +106,9 @@ class VideoViewerSubtitle {
 
     exp.allMatches(htmlText).toList().forEach((RegExpMatch regExpMathc) {
       if (regExpMathc.group(0) == '<br>') {
-        newHtmlText = newHtmlText.replaceAll(regExpMathc.group(0), '\n');
+        newHtmlText = newHtmlText.replaceAll(regExpMathc.group(0)!, '\n');
       } else {
-        newHtmlText = newHtmlText.replaceAll(regExpMathc.group(0), '');
+        newHtmlText = newHtmlText.replaceAll(regExpMathc.group(0)!, '');
       }
     });
     return newHtmlText;

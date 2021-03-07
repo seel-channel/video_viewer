@@ -5,9 +5,9 @@ import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class VideoCoreForwardAndRewind extends StatelessWidget {
   const VideoCoreForwardAndRewind({
-    Key key,
-    @required this.showRewind,
-    @required this.showForward,
+    Key? key,
+    required this.showRewind,
+    required this.showForward,
   }) : super(key: key);
 
   final bool showRewind, showForward;
@@ -34,9 +34,9 @@ class VideoCoreForwardAndRewind extends StatelessWidget {
 
 class VideoCoreForwardAndRewindLayout extends StatelessWidget {
   const VideoCoreForwardAndRewindLayout({
-    Key key,
-    @required this.rewind,
-    @required this.forward,
+    Key? key,
+    required this.rewind,
+    required this.forward,
   }) : super(key: key);
 
   final Widget rewind;
@@ -54,11 +54,11 @@ class VideoCoreForwardAndRewindLayout extends StatelessWidget {
 
 class VideoCoreForwardAndRewindTextAlert extends StatelessWidget {
   const VideoCoreForwardAndRewindTextAlert({
-    Key key,
+    Key? key,
     this.amount,
   }) : super(key: key);
 
-  final int amount;
+  final int? amount;
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +75,7 @@ class VideoCoreForwardAndRewindTextAlert extends StatelessWidget {
           borderRadius: forwardStyle.borderRadius,
         ),
         child: Text(
-          query.durationFormatter(Duration(seconds: amount)),
+          query.durationFormatter(Duration(seconds: amount!)),
           style: style.textStyle,
         ),
       ),

@@ -9,7 +9,7 @@ import 'package:video_viewer/ui/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/widgets/helpers.dart';
 
 class OverlayBottomButtons extends StatefulWidget {
-  OverlayBottomButtons({Key key}) : super(key: key);
+  OverlayBottomButtons({Key? key}) : super(key: key);
 
   @override
   _OverlayBottomButtonsState createState() => _OverlayBottomButtonsState();
@@ -25,7 +25,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
     final video = _query.video(context, listen: true);
 
     final isFullscreen = video.isFullScreen;
-    final controller = video.controller;
+    final controller = video.controller!;
     final barStyle = style.progressBarStyle;
     final padding = barStyle.paddingBeetwen;
 

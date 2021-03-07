@@ -19,10 +19,10 @@ export 'package:video_viewer/domain/bloc/controller.dart';
 
 class VideoViewer extends StatefulWidget {
   VideoViewer({
-    Key key,
-    @required this.source,
-    VideoViewerStyle style,
-    VideoViewerController controller,
+    Key? key,
+    required this.source,
+    VideoViewerStyle? style,
+    VideoViewerController? controller,
     this.looping = false,
     this.autoPlay = false,
     this.rewindAmount = 10,
@@ -89,16 +89,16 @@ class VideoViewer extends StatefulWidget {
 }
 
 class VideoViewerState extends State<VideoViewer> {
-  VideoViewerController _controller;
-  VideoViewerMetadata _metadata;
+  VideoViewerController? _controller;
+  VideoViewerMetadata? _metadata;
   bool _initialized = false;
 
   @override
   void initState() {
     _controller = widget.controller;
-    _controller.source = widget.source;
-    _controller.looping = widget.looping;
-    _controller.source = widget.source;
+    _controller!.source = widget.source;
+    _controller!.looping = widget.looping;
+    _controller!.source = widget.source;
     _metadata = VideoViewerMetadata(
       style: widget.style,
       language: widget.language,
@@ -114,20 +114,20 @@ class VideoViewerState extends State<VideoViewer> {
   @override
   void dispose() {
     super.dispose();
-    _controller.dispose();
+    _controller!.dispose();
   }
 
   void _initVideoViewer() async {
     final activedSource = widget.source.keys.toList().first;
     final source = widget.source.values.toList().first;
 
-    await _controller.changeSource(
+    await _controller!.changeSource(
       source: source,
       name: activedSource,
       autoPlay: widget.autoPlay,
     );
 
-    _controller.isShowingThumbnail = widget.style.thumbnail != null;
+    _controller!.isShowingThumbnail = widget.style.thumbnail != null;
     setState(() => _initialized = true);
   }
 

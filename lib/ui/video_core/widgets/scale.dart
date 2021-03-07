@@ -7,9 +7,9 @@ import 'package:video_viewer/ui/video_core/widgets/aspect_ratio.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
 class VideoCorePlayer extends StatefulWidget {
-  VideoCorePlayer({Key key, @required this.onTap}) : super(key: key);
+  VideoCorePlayer({Key? key, required this.onTap}) : super(key: key);
 
-  final void Function([bool]) onTap;
+  final void Function([bool?]) onTap;
 
   @override
   _VideoCorePlayerState createState() => _VideoCorePlayerState();
@@ -22,7 +22,7 @@ class _VideoCorePlayerState extends State<VideoCorePlayer> {
 
   void _onScaleStart(ScaleStartDetails details) {
     final size = context.media.size;
-    final controller = _query.video(context).controller;
+    final controller = _query.video(context).controller!;
     final aspectWidth = size.height * controller.value.aspectRatio;
 
     _initialScale = _scale.value;
@@ -66,11 +66,11 @@ class _VideoCorePlayerState extends State<VideoCorePlayer> {
 }
 
 class _Player extends StatelessWidget {
-  const _Player({Key key}) : super(key: key);
+  const _Player({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final video = VideoQuery().video(context);
-    return VideoPlayer(video.controller);
+    return VideoPlayer(video.controller!);
   }
 }

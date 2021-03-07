@@ -8,7 +8,7 @@ import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class VideoProgressBar extends StatelessWidget {
-  const VideoProgressBar({Key key}) : super(key: key);
+  const VideoProgressBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class VideoProgressBar extends StatelessWidget {
           final videoStyle = _query.videoStyle(context);
 
           final style = videoStyle.progressBarStyle;
-          final controller = video.controller;
+          final controller = video.controller!;
 
           final Duration position = controller.value.position;
           final Duration duration = controller.value.duration;
@@ -68,7 +68,7 @@ class VideoProgressBar extends StatelessWidget {
 }
 
 class _DotIsDragging extends StatelessWidget {
-  const _DotIsDragging({Key key, @required this.maxWidth}) : super(key: key);
+  const _DotIsDragging({Key? key, required this.maxWidth}) : super(key: key);
 
   final double maxWidth;
 
@@ -78,7 +78,7 @@ class _DotIsDragging extends StatelessWidget {
     final video = _query.video(context, listen: true);
     final style = _query.videoStyle(context).progressBarStyle;
 
-    final controller = video.controller;
+    final controller = video.controller!;
     final position = controller.value.position.inMilliseconds;
     final duration = controller.value.duration.inMilliseconds;
 
@@ -101,13 +101,13 @@ class _DotIsDragging extends StatelessWidget {
 
 class _ProgressBarGesture extends StatefulWidget {
   const _ProgressBarGesture({
-    Key key,
+    Key? key,
     this.child,
     this.width,
   }) : super(key: key);
 
-  final Widget child;
-  final double width;
+  final Widget? child;
+  final double? width;
   @override
   __ProgressBarGestureState createState() => __ProgressBarGestureState();
 }
@@ -116,8 +116,8 @@ class __ProgressBarGestureState extends State<_ProgressBarGesture> {
   final _query = VideoQuery();
 
   void _seekToRelativePosition(Offset local, [bool showText = false]) async {
-    final controller = _query.video(context).controller;
-    final double localPos = local.dx / widget.width;
+    final controller = _query.video(context).controller!;
+    final double localPos = local.dx / widget.width!;
     final Duration position = controller.value.duration * localPos;
     await controller.seekTo(position);
   }
@@ -171,9 +171,9 @@ class __ProgressBarGestureState extends State<_ProgressBarGesture> {
 
 class _ProgressBar extends StatelessWidget {
   const _ProgressBar({
-    Key key,
-    @required this.width,
-    @required this.color,
+    Key? key,
+    required this.width,
+    required this.color,
   }) : super(key: key);
 
   final double width;
@@ -199,13 +199,13 @@ class _ProgressBar extends StatelessWidget {
 
 class _Dot extends StatelessWidget {
   const _Dot({
-    Key key,
+    Key? key,
     this.maxWidth,
     this.opacity = 1,
     this.multiplicator = 1,
   }) : super(key: key);
 
-  final double maxWidth, opacity;
+  final double? maxWidth, opacity;
   final int multiplicator;
 
   @override
@@ -213,13 +213,13 @@ class _Dot extends StatelessWidget {
     final query = VideoQuery();
     final animation = Provider.of<ValueNotifier<int>>(context);
     final style = query.videoStyle(context).progressBarStyle;
-    final controller = query.video(context, listen: true).controller;
+    final controller = query.video(context, listen: true).controller!;
 
     final height = style.barHeight;
 
     final double widthPos = (controller.value.position.inMilliseconds /
             controller.value.duration.inMilliseconds) *
-        maxWidth;
+        maxWidth!;
     final double widthDot = height * 2;
     final double width =
         widthPos < height ? widthDot : widthPos + height * multiplicator;
@@ -235,7 +235,7 @@ class _Dot extends StatelessWidget {
             height: height * 2 * multiplicator,
             width: height * 2 * multiplicator,
             decoration: BoxDecoration(
-              color: style.barDotColor.withOpacity(opacity),
+              color: style.barDotColor.withOpacity(opacity!),
               shape: BoxShape.circle,
             ),
           ),
@@ -248,34 +248,34 @@ class _Dot extends StatelessWidget {
 class _TextPositionPainter extends CustomPainter {
   _TextPositionPainter({this.width, this.position, this.style, this.barStyle});
 
-  final double width;
-  final Duration position;
-  final TextStyle style;
-  final ProgressBarStyle barStyle;
+  final double? width;
+  final Duration? position;
+  final TextStyle? style;
+  final ProgressBarStyle? barStyle;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final text = VideoQuery().durationFormatter(position);
+    final text = VideoQuery().durationFormatter(position!);
     final textStyle = ui.TextStyle(
-      color: style.color,
-      fontSize: style.fontSize + 1,
-      fontFamily: style.fontFamily,
-      fontWeight: style.fontWeight,
-      fontStyle: style.fontStyle,
-      fontFamilyFallback: style.fontFamilyFallback,
-      fontFeatures: style.fontFeatures,
-      foreground: style.foreground,
-      background: style.background,
-      letterSpacing: style.letterSpacing,
-      wordSpacing: style.wordSpacing,
-      height: style.height,
-      locale: style.locale,
-      textBaseline: style.textBaseline,
-      decorationColor: style.decorationColor,
-      decoration: style.decoration,
-      decorationStyle: style.decorationStyle,
-      decorationThickness: style.decorationThickness,
-      shadows: style.shadows,
+      color: style!.color,
+      fontSize: style!.fontSize! + 1,
+      fontFamily: style!.fontFamily,
+      fontWeight: style!.fontWeight,
+      fontStyle: style!.fontStyle,
+      fontFamilyFallback: style!.fontFamilyFallback,
+      fontFeatures: style!.fontFeatures,
+      foreground: style!.foreground,
+      background: style!.background,
+      letterSpacing: style!.letterSpacing,
+      wordSpacing: style!.wordSpacing,
+      height: style!.height,
+      locale: style!.locale,
+      textBaseline: style!.textBaseline,
+      decorationColor: style!.decorationColor,
+      decoration: style!.decoration,
+      decorationStyle: style!.decorationStyle,
+      decorationThickness: style!.decorationThickness,
+      shadows: style!.shadows,
     );
 
     final paragraphStyle = ui.ParagraphStyle(textDirection: TextDirection.ltr);
@@ -286,12 +286,12 @@ class _TextPositionPainter extends CustomPainter {
     final paragraph = paragraphBuilder.build();
     paragraph.layout(ui.ParagraphConstraints(width: 100));
 
-    final height = barStyle.barHeight;
-    final padding = barStyle.paddingBeetwen;
+    final height = barStyle!.barHeight;
+    final padding = barStyle!.paddingBeetwen;
     final minWidth = paragraph.minIntrinsicWidth;
     final doubleHeight = height * 2;
     final offset = Offset(
-      width - (minWidth / 2),
+      width! - (minWidth / 2),
       -(padding * 2) - doubleHeight,
     );
 
@@ -303,9 +303,9 @@ class _TextPositionPainter extends CustomPainter {
           minWidth + height * 4,
           paragraph.height + doubleHeight,
         ),
-        barStyle.borderRadius.topLeft,
+        barStyle!.borderRadius.topLeft,
       ),
-      Paint()..color = barStyle.backgroundColor,
+      Paint()..color = barStyle!.backgroundColor,
     );
     canvas.drawParagraph(paragraph, offset);
   }

@@ -9,7 +9,7 @@ import 'package:video_viewer/ui/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class VideoCoreOverlay extends StatelessWidget {
-  const VideoCoreOverlay({Key key}) : super(key: key);
+  const VideoCoreOverlay({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class VideoCoreOverlay extends StatelessWidget {
 
     final header = style.header;
     final visible = video.isShowingOverlay;
-    final controller = video.controller;
+    final controller = video.controller!;
 
     return CustomOpacityTransition(
       visible: !video.isShowingThumbnail,

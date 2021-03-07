@@ -5,12 +5,12 @@ enum Direction { bottom, top }
 
 class GradientBackground extends StatelessWidget {
   const GradientBackground({
-    Key key,
+    Key? key,
     this.child,
     this.direction = Direction.bottom,
   }) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
   final Direction direction;
 
   @override

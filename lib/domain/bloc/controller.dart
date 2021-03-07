@@ -34,14 +34,14 @@ class VideoViewerController extends ChangeNotifier {
   ///    "1080p": VideoSource(video: VideoPlayerController.network("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")),
   ///}
   ///```
-  Map<String, VideoSource> _source;
+  Map<String, VideoSource>? _source;
 
-  bool looping;
-  String _activeSource;
-  String _activeSubtitle;
-  VideoViewerSubtitle _subtitle;
-  VideoPlayerController _controller;
-  SubtitleData _activeSubtitleData;
+  late bool looping;
+  String? _activeSource;
+  String? _activeSubtitle;
+  VideoViewerSubtitle? _subtitle;
+  VideoPlayerController? _controller;
+  SubtitleData? _activeSubtitleData;
 
   int _lastVideoPosition = 0;
   bool _isBuffering = false,
@@ -53,22 +53,22 @@ class VideoViewerController extends ChangeNotifier {
       _isShowingMainSettingsMenu = false,
       _isDraggingProgressBar = false;
 
-  Timer _closeOverlayButtons, _timerPosition;
+  Timer? _closeOverlayButtons, _timerPosition;
   List<bool> isShowingSecondarySettingsMenus = [];
   Duration _maxBuffering = Duration.zero;
 
-  VideoPlayerController get controller => _controller;
-  SubtitleData get activeCaptionData => _activeSubtitleData;
-  List<SubtitleData> get subtitles => _subtitle.subtitles;
-  VideoViewerSubtitle get subtitle => _subtitle;
-  String get activeCaption => _activeSubtitle;
-  String get activeSource => _activeSource;
+  VideoPlayerController? get controller => _controller;
+  SubtitleData? get activeCaptionData => _activeSubtitleData;
+  List<SubtitleData> get subtitles => _subtitle!.subtitles;
+  VideoViewerSubtitle? get subtitle => _subtitle;
+  String? get activeCaption => _activeSubtitle;
+  String? get activeSource => _activeSource;
   Duration get maxBuffering => _maxBuffering;
 
   bool get isShowingMainSettingsMenu => _isShowingMainSettingsMenu;
   bool get isShowingOverlay => _isShowingOverlay;
   bool get isFullScreen => _isFullScreen;
-  bool get isPlaying => _controller.value.isPlaying;
+  bool get isPlaying => _controller!.value.isPlaying;
 
   bool get isBuffering => _isBuffering;
   set isBuffering(bool value) {
@@ -100,8 +100,8 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Map<String, VideoSource> get source => _source;
-  set source(Map<String, VideoSource> value) {
+  Map<String, VideoSource>? get source => _source;
+  set source(Map<String, VideoSource>? value) {
     _source = value;
     notifyListeners();
   }
@@ -111,7 +111,7 @@ class VideoViewerController extends ChangeNotifier {
     _timerPosition?.cancel();
     _closeOverlayButtons?.cancel();
     await _controller?.pause();
-    await _controller.dispose();
+    await _controller!.dispose();
     super.dispose();
   }
 
@@ -129,13 +129,13 @@ class VideoViewerController extends ChangeNotifier {
   ///   _controller.seekTo(lastController.value.position);
   /// ```
   Future<void> changeSource({
-    @required VideoSource source,
-    @required String name,
+    required VideoSource source,
+    required String name,
     bool inheritValues = true,
     bool autoPlay = true,
   }) async {
     if (source.subtitle != null) {
-      final subtitle = source.subtitle[source.intialSubtitle ?? ""];
+      final subtitle = source.subtitle![source.intialSubtitle];
       if (subtitle != null) {
         changeSubtitle(
           subtitle: subtitle,
@@ -148,33 +148,33 @@ class VideoViewerController extends ChangeNotifier {
     double speed = 1.0;
     Duration position = Duration.zero;
     if (_controller != null) {
-      speed = _controller.value.playbackSpeed;
-      position = _controller.value.position;
+      speed = _controller!.value.playbackSpeed;
+      position = _controller!.value.position;
     }
 
     await source.video.initialize();
     _controller = source.video;
-    _controller.addListener(_videoListener);
+    _controller!.addListener(_videoListener);
 
     if (inheritValues) {
-      await _controller.setPlaybackSpeed(speed);
-      await _controller.seekTo(position);
+      await _controller!.setPlaybackSpeed(speed);
+      await _controller!.seekTo(position);
     }
 
-    await _controller.setLooping(looping);
-    if (autoPlay) await _controller.play();
+    await _controller!.setLooping(looping);
+    if (autoPlay) await _controller!.play();
     notifyListeners();
   }
 
   ///DON'T TOUCH >:]
   Future<void> changeSubtitle({
-    @required VideoViewerSubtitle subtitle,
-    @required String subtitleName,
+    required VideoViewerSubtitle? subtitle,
+    required String subtitleName,
   }) async {
     _activeSubtitle = subtitleName;
     _activeSubtitleData = null;
     _subtitle = subtitle;
-    if (subtitle != null) await _subtitle.initialize();
+    if (subtitle != null) await _subtitle!.initialize();
     notifyListeners();
   }
 
@@ -182,7 +182,7 @@ class VideoViewerController extends ChangeNotifier {
   //LISTENERS//
   //---------//
   void _videoListener() {
-    final value = _controller.value;
+    final value = _controller!.value;
     final position = value.position;
 
     if (isPlaying && isShowingThumbnail) {
@@ -191,7 +191,7 @@ class VideoViewerController extends ChangeNotifier {
     }
 
     _maxBuffering = Duration.zero;
-    for (DurationRange range in controller.value.buffered) {
+    for (DurationRange range in controller!.value.buffered) {
       final Duration end = range.end;
       if (end > maxBuffering) {
         _maxBuffering = end;
@@ -202,7 +202,7 @@ class VideoViewerController extends ChangeNotifier {
     if (_isShowingOverlay) {
       if (isPlaying) {
         if (position >= value.duration && looping) {
-          _controller.seekTo(Duration.zero);
+          _controller!.seekTo(Duration.zero);
         } else {
           if (_timerPosition == null) _createBufferTimer();
           if (_closeOverlayButtons == null) _startCloseOverlay();
@@ -212,8 +212,8 @@ class VideoViewerController extends ChangeNotifier {
 
     if (_subtitle != null) {
       if (_activeSubtitleData != null) {
-        if (!(position > _activeSubtitleData.start &&
-            position < _activeSubtitleData.end)) _findSubtitle();
+        if (!(position > _activeSubtitleData!.start &&
+            position < _activeSubtitleData!.end)) _findSubtitle();
       } else {
         _findSubtitle();
       }
@@ -221,7 +221,7 @@ class VideoViewerController extends ChangeNotifier {
   }
 
   void _findSubtitle() {
-    final position = _controller.value.position;
+    final position = _controller!.value.position;
     for (SubtitleData subtitle in subtitles) {
       if (position > subtitle.start &&
           position < subtitle.end &&
@@ -259,7 +259,7 @@ class VideoViewerController extends ChangeNotifier {
 
   void _createBufferTimer() {
     _timerPosition = Misc.periodic(1000, () {
-      int position = _controller.value.position.inMilliseconds;
+      int position = _controller!.value.position.inMilliseconds;
       if (isPlaying)
         _isBuffering = _lastVideoPosition != position ? false : true;
       else
@@ -274,20 +274,20 @@ class VideoViewerController extends ChangeNotifier {
   //OVERLAY//
   //-------//
   Future<void> onTapPlayAndPause() async {
-    final value = _controller.value;
+    final value = _controller!.value;
     if (isPlaying) {
-      await _controller.pause();
+      await _controller!.pause();
       if (!_isShowingOverlay) _isShowingOverlay = false;
     } else {
       if (value.position >= value.duration)
-        await _controller.seekTo(Duration.zero);
+        await _controller!.seekTo(Duration.zero);
       _lastVideoPosition = _lastVideoPosition - 1;
-      await _controller.play();
+      await _controller!.play();
     }
     notifyListeners();
   }
 
-  void showAndHideOverlay([bool show]) {
+  void showAndHideOverlay([bool? show]) {
     _isShowingOverlay = show ?? !_isShowingOverlay;
     if (_isShowingOverlay) _isGoingToCloseBufferingWidget = false;
     notifyListeners();
@@ -332,8 +332,8 @@ class VideoViewerController extends ChangeNotifier {
   ///because this function do **Navigator.push(context, MaterialPageRoute(...))**
   Future<void> openFullScreen(BuildContext context) async {
     if (kIsWeb) {
-      html.document.documentElement.requestFullscreen();
-      html.document.documentElement.onFullscreenChange.listen((_) {
+      html.document.documentElement!.requestFullscreen();
+      html.document.documentElement!.onFullscreenChange.listen((_) {
         _isFullScreen = html.document.fullscreenElement != null;
       });
     } else {

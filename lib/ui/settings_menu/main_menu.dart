@@ -6,7 +6,7 @@ import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/ui/widgets/helpers.dart';
 
 class MainMenu extends StatelessWidget {
-  const MainMenu({Key key}) : super(key: key);
+  const MainMenu({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class MainMenu extends StatelessWidget {
     final video = query.video(context, listen: true);
     final metadata = query.videoMetadata(context, listen: true);
 
-    final speed = video.controller.value.playbackSpeed;
+    final speed = video.controller!.value.playbackSpeed;
     final style = metadata.style.settingsStyle;
     final items = style.items;
 
@@ -27,7 +27,7 @@ class MainMenu extends StatelessWidget {
             index: 0,
             icon: style.settings,
             title: Text(metadata.language.quality),
-            subtitle: Text(video.activeSource),
+            subtitle: Text(video.activeSource!),
           ),
           _MainMenuItem(
             index: 1,
@@ -37,7 +37,7 @@ class MainMenu extends StatelessWidget {
               speed == 1.0 ? metadata.language.normalSpeed : "x$speed",
             ),
           ),
-          if (video.source[video.activeSource].subtitle != null)
+          if (video.source![video.activeSource!]!.subtitle != null)
             _MainMenuItem(
               index: 2,
               icon: style.caption,
@@ -58,9 +58,9 @@ class MainMenu extends StatelessWidget {
                     )
                   : _MainMenuItem(
                       index: i + kDefaultMenus,
-                      icon: items[i].themed.icon,
-                      title: items[i].themed.title,
-                      subtitle: items[i].themed.subtitle,
+                      icon: items[i].themed!.icon,
+                      title: items[i].themed!.title,
+                      subtitle: items[i].themed!.subtitle,
                     ),
             ],
         ],
@@ -71,11 +71,11 @@ class MainMenu extends StatelessWidget {
 
 class _MainMenuItem extends StatelessWidget {
   const _MainMenuItem({
-    Key key,
-    @required this.index,
-    @required this.icon,
-    @required this.title,
-    @required this.subtitle,
+    Key? key,
+    required this.index,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
   }) : super(key: key);
 
   final Widget title, subtitle, icon;
@@ -101,7 +101,7 @@ class _MainMenuItem extends StatelessWidget {
             child: subtitle,
             style: textStyle.merge(TextStyle(
               fontWeight: FontWeight.normal,
-              fontSize: textStyle.fontSize - 2,
+              fontSize: textStyle.fontSize! - 2,
             )),
           )
         ],

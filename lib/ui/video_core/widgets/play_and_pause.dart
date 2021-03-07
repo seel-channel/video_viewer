@@ -5,8 +5,8 @@ import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class VideoCorePlayAndPause extends StatelessWidget {
   const VideoCorePlayAndPause({
-    Key key,
-    @required this.showAMoment,
+    Key? key,
+    required this.showAMoment,
   }) : super(key: key);
 
   final bool showAMoment;
@@ -14,8 +14,8 @@ class VideoCorePlayAndPause extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final video = VideoQuery().video(context);
-    final position = video.controller.value.position;
-    final duration = video.controller.value.duration;
+    final position = video.controller!.value.position;
+    final duration = video.controller!.value.duration;
 
     return Center(
       child: CustomOpacityTransition(

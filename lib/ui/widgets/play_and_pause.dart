@@ -6,13 +6,13 @@ enum PlayAndPauseType { center, bottom }
 
 class PlayAndPause extends StatelessWidget {
   const PlayAndPause({
-    Key key,
-    @required this.type,
+    Key? key,
+    required this.type,
     this.padding,
   }) : super(key: key);
 
   final PlayAndPauseType type;
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {

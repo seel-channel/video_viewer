@@ -7,7 +7,7 @@ class SubtitleStyle {
   final EdgeInsetsGeometry padding;
 
   SubtitleStyle({
-    TextStyle style,
+    TextStyle? style,
     this.alignment = Alignment.bottomCenter,
     this.textAlign = TextAlign.center,
     this.padding = const EdgeInsets.all(20.0),

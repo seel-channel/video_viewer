@@ -4,7 +4,7 @@ import 'package:video_viewer/ui/settings_menu/widgets/secondary_menu.dart';
 import 'package:video_viewer/ui/widgets/helpers.dart';
 
 class SpeedMenu extends StatelessWidget {
-  const SpeedMenu({Key key}) : super(key: key);
+  const SpeedMenu({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +12,7 @@ class SpeedMenu extends StatelessWidget {
     final video = query.video(context, listen: true);
     final metadata = query.videoMetadata(context, listen: true);
 
-    final speed = video.controller.value.playbackSpeed;
+    final speed = video.controller!.value.playbackSpeed;
 
     return SecondaryMenu(
       children: [
@@ -20,7 +20,7 @@ class SpeedMenu extends StatelessWidget {
           CustomInkWell(
             onTap: () {
               final video = query.video(context);
-              video.controller.setPlaybackSpeed(i);
+              video.controller!.setPlaybackSpeed(i);
               video.closeAllSecondarySettingsMenus();
             },
             child: CustomText(

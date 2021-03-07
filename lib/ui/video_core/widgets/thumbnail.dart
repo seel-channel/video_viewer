@@ -3,7 +3,7 @@ import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class VideoCoreThumbnail extends StatelessWidget {
-  const VideoCoreThumbnail({Key key}) : super(key: key);
+  const VideoCoreThumbnail({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class VideoCoreThumbnail extends StatelessWidget {
     return CustomOpacityTransition(
       visible: video.isShowingThumbnail,
       child: GestureDetector(
-        onTap: video.controller.play,
+        onTap: video.controller!.play,
         child: Container(
           color: Colors.transparent,
           child: style.thumbnail,

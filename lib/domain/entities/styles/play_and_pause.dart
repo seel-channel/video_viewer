@@ -5,9 +5,9 @@ class PlayAndPauseWidgetStyle {
   /// of the circle that appears behind. Note: The play and pause icons are
   /// the same ones that appear in the progress bar
   PlayAndPauseWidgetStyle({
-    Widget play,
-    Widget pause,
-    Color background,
+    Widget? play,
+    Widget? pause,
+    Color? background,
     this.circleBorder,
     this.circleRadius = 40,
   })  : this.background = background ?? Color(0xFF295acc).withOpacity(0.8),
@@ -44,7 +44,7 @@ class PlayAndPauseWidgetStyle {
   final double circleRadius;
 
   /// It is the style of the border that the container will have
-  final BoxBorder circleBorder;
+  final BoxBorder? circleBorder;
 
   Widget _base(Widget child, Color background) {
     return Container(

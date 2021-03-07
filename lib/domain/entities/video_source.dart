@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_viewer/video_viewer.dart';
 
@@ -8,7 +7,7 @@ export 'package:video_player/video_player.dart';
 
 class VideoSource {
   VideoSource({
-    @required this.video,
+    required this.video,
     this.subtitle,
     this.intialSubtitle = "",
   });
@@ -32,7 +31,7 @@ class VideoSource {
   ///    ),
   ///  },
   ///```
-  final Map<String, VideoViewerSubtitle> subtitle;
+  final Map<String, VideoViewerSubtitle>? subtitle;
 
   ///If [intialSubtitle] doesn't exist in [subtitle], then it won't select any
   ///subtitles and won't display anything until the user selects a subtitle.
@@ -79,7 +78,7 @@ class VideoSource {
     Map<String, VideoSource> videoSource = {};
     for (String key in sources.keys)
       videoSource[key] = VideoSource(
-        video: VideoPlayerController.network(sources[key]),
+        video: VideoPlayerController.network(sources[key]!),
       );
     return videoSource;
   }
@@ -122,7 +121,7 @@ class VideoSource {
 
     Map<String, String> sources = {};
     List<String> audioList = [];
-    String content;
+    late String content;
 
     final response = await http.get(Uri.parse(m3u8));
     if (response.statusCode == 200) content = utf8.decode(response.bodyBytes);
@@ -131,25 +130,25 @@ class VideoSource {
     List<RegExpMatch> audioMatches = regExpAudio.allMatches(content).toList();
 
     matches.forEach((RegExpMatch regExpMatch) {
-      final RegExpMatch match = netRegx2.firstMatch(m3u8);
+      final RegExpMatch? match = netRegx2.firstMatch(m3u8);
       final String sourceURL = (regExpMatch.group(3)).toString();
       final String quality = (regExpMatch.group(1)).toString();
       final bool isNetwork = netRegx.hasMatch(sourceURL);
       String url = sourceURL;
 
       if (!isNetwork) {
-        final String dataURL = match.group(0);
+        final String? dataURL = match!.group(0);
         url = "$dataURL$sourceURL";
       }
 
       audioMatches.forEach((RegExpMatch regExpMatch2) {
-        final RegExpMatch match = netRegx2.firstMatch(m3u8);
+        final RegExpMatch? match = netRegx2.firstMatch(m3u8);
         final String audioURL = (regExpMatch2.group(1)).toString();
         final bool isNetwork = netRegx.hasMatch(audioURL);
         String audio = audioURL;
 
         if (!isNetwork) {
-          final String audioDataURL = match.group(0);
+          final String? audioDataURL = match!.group(0);
           audio = "$audioDataURL$audioURL";
         }
         audioList.add(audio);

@@ -6,7 +6,7 @@ import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/ui/video_core/video_core.dart';
 
 class FullScreenPage extends StatefulWidget {
-  FullScreenPage({Key key}) : super(key: key);
+  FullScreenPage({Key? key}) : super(key: key);
 
   @override
   _FullScreenPageState createState() => _FullScreenPageState();
@@ -15,7 +15,7 @@ class FullScreenPage extends StatefulWidget {
 class _FullScreenPageState extends State<FullScreenPage> {
   final VideoQuery _query = VideoQuery();
   bool _fixedLandscape = false;
-  Timer _systemResetTimer;
+  Timer? _systemResetTimer;
 
   @override
   void initState() {

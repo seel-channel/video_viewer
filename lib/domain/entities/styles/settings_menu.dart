@@ -5,11 +5,11 @@ class SettingsMenuStyle {
   /// These are the styles of the settings sales, here you will change the icons and
   /// the language of the texts
   SettingsMenuStyle({
-    Widget settings,
-    Widget speed,
-    Widget caption,
-    Widget selected,
-    Widget chevron,
+    Widget? settings,
+    Widget? speed,
+    Widget? caption,
+    Widget? selected,
+    Widget? chevron,
     this.paddingBetween = 24,
     this.items,
   })  : this.settings = settings ??
@@ -75,5 +75,5 @@ class SettingsMenuStyle {
   final double paddingBetween;
 
   ///ADD CUSTOM SECTIONS TO SETTINGS MENU
-  final List<SettingsMenuItem> items;
+  final List<SettingsMenuItem>? items;
 }

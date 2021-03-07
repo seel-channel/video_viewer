@@ -19,7 +19,7 @@ import 'package:video_viewer/ui/widgets/transitions.dart';
 import 'package:video_viewer/ui/overlay/overlay.dart';
 
 class VideoViewerCore extends StatefulWidget {
-  VideoViewerCore({Key key}) : super(key: key);
+  VideoViewerCore({Key? key}) : super(key: key);
 
   @override
   _VideoViewerCoreState createState() => _VideoViewerCoreState();
@@ -28,7 +28,7 @@ class VideoViewerCore extends StatefulWidget {
 class _VideoViewerCoreState extends State<VideoViewerCore> {
   final VideoQuery _query = VideoQuery();
   bool _showAMomentPlayAndPause = false;
-  Timer _hidePlayAndPause;
+  Timer? _hidePlayAndPause;
 
   //REWIND AND FORWARD
   int _defaultRewindAmount = 10;
@@ -45,7 +45,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   Offset _verticalDragStartOffset = Offset.zero;
   double _onDragStartVolume = 1;
   bool _showVolumeStatus = false;
-  Timer _closeVolumeStatus;
+  Timer? _closeVolumeStatus;
   int _pointers = 0;
 
   @override
@@ -85,7 +85,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     }
   }
 
-  void _showAndHideOverlay([bool show]) {
+  void _showAndHideOverlay([bool? show]) {
     _query.video(context).showAndHideOverlay(show);
     if (!_focusRawKeyboard.hasFocus)
       FocusScope.of(context).requestFocus(_focusRawKeyboard);
@@ -98,7 +98,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   void _forward() => _showRewindAndForward(1, _defaultForwardAmount);
 
   void _controllerSeekTo(int amount) async {
-    final controller = _query.video(context).controller;
+    final controller = _query.video(context).controller!;
     final seconds = controller.value.position.inSeconds;
     await controller.seekTo(Duration(seconds: seconds + amount));
     await controller.play();
@@ -133,10 +133,10 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     if (!video.isShowingSettingsMenu && _pointers == 1) {
       double diff = _horizontalDragStartOffset.dx - details.globalPosition.dx;
       double multiplicator = (diff.abs() / 50);
-      int seconds = video.controller.value.position.inSeconds;
+      int seconds = video.controller!.value.position.inSeconds;
       int amount = -((diff / 10).round() * multiplicator).round();
       setState(() {
-        if (seconds + amount < video.controller.value.duration.inSeconds &&
+        if (seconds + amount < video.controller!.value.duration.inSeconds &&
             seconds + amount > 0) _forwardAndRewindAmount = amount;
       });
     }
@@ -159,7 +159,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       final fractional = _maxVolume * 0.05;
       if (volume >= _maxVolume - fractional) volume = _maxVolume;
       if (volume <= fractional) volume = 0.0;
-      await video.controller.setVolume(volume);
+      await video.controller!.setVolume(volume);
       _currentVolume.value = volume;
     }
   }
@@ -170,7 +170,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       setState(() {
         _closeVolumeStatus?.cancel();
         _showVolumeStatus = true;
-        _onDragStartVolume = video.controller.value.volume;
+        _onDragStartVolume = video.controller!.value.volume;
         _currentVolume.value = _onDragStartVolume;
         _verticalDragStartOffset = details.globalPosition;
       });

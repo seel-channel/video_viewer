@@ -4,15 +4,15 @@ import 'package:video_viewer/data/repositories/video.dart';
 
 class SplashCircularIcon extends StatelessWidget {
   const SplashCircularIcon({
-    Key key,
-    @required this.child,
-    @required this.onTap,
+    Key? key,
+    required this.child,
+    required this.onTap,
     this.padding = EdgeInsets.zero,
   }) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
   final void Function() onTap;
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +35,9 @@ class SplashCircularIcon extends StatelessWidget {
 
 class CustomText extends StatelessWidget {
   const CustomText({
-    Key key,
-    @required this.text,
-    @required this.selected,
+    Key? key,
+    required this.text,
+    required this.selected,
   }) : super(key: key);
 
   final String text;
@@ -69,9 +69,9 @@ class CustomText extends StatelessWidget {
 
 class CustomInkWell extends StatelessWidget {
   const CustomInkWell({
-    Key key,
-    @required this.child,
-    @required this.onTap,
+    Key? key,
+    required this.child,
+    required this.onTap,
   }) : super(key: key);
 
   final Widget child;

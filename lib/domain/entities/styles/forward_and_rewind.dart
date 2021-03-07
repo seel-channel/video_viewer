@@ -5,11 +5,11 @@ class ForwardAndRewindStyle {
   /// With this argument change the icons that appear when double-tapping,
   /// also the style of the container that indicates when the video will be rewind or forward.
   ForwardAndRewindStyle({
-    Widget rewind,
-    Widget forward,
-    Color backgroundColor,
-    EdgeInsetsGeometry padding,
-    BorderRadiusGeometry borderRadius,
+    Widget? rewind,
+    Widget? forward,
+    Color? backgroundColor,
+    EdgeInsetsGeometry? padding,
+    BorderRadiusGeometry? borderRadius,
   })  : this.padding = padding ?? Margin.all(5),
         this.backgroundColor =
             backgroundColor ?? Colors.black.withOpacity(0.28),

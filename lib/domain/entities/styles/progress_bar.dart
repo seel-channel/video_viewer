@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 class ProgressBarStyle {
   /// It is the style that will have all the icons and elements of the progress bar
   ProgressBarStyle({
-    Color barDotColor,
-    Color barActiveColor,
-    Color barBufferedColor,
-    Color barBackgroundColor,
-    Color backgroundColor,
+    Color? barDotColor,
+    Color? barActiveColor,
+    Color? barBufferedColor,
+    Color? barBackgroundColor,
+    Color? backgroundColor,
     this.barHeight = 5,
     this.paddingBeetwen = 12,
-    BorderRadius borderRadius,
-    Widget fullScreen,
-    Widget fullScreenExit,
+    BorderRadius? borderRadius,
+    Widget? fullScreen,
+    Widget? fullScreenExit,
   })  : this.barDotColor = barDotColor ?? Colors.white,
         this.barActiveColor = barActiveColor ?? Color(0xFF295acc),
         this.barBufferedColor =

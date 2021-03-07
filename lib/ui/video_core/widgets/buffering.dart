@@ -3,7 +3,7 @@ import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class VideoCoreBuffering extends StatelessWidget {
-  const VideoCoreBuffering({Key key}) : super(key: key);
+  const VideoCoreBuffering({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
