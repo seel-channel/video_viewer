@@ -110,65 +110,70 @@ class _SerieExampleState extends State<SerieExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: VideoViewer(
-        source: database.entries.first.value,
-        controller: controller,
-        language: VideoViewerLanguage.es,
-        style: VideoViewerStyle(
-          header: Builder(
-            builder: (innerContext) {
-              return Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Game of Thrones: $episode",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+      body: Column(
+        children: [
+          Text("hola"),
+          VideoViewer(
+            source: database.entries.first.value,
+            controller: controller,
+            language: VideoViewerLanguage.es,
+            style: VideoViewerStyle(
+              header: Builder(
+                builder: (innerContext) {
+                  return Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Game of Thrones: $episode",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              settingsStyle: SettingsMenuStyle(
+                paddingBetween: 10,
+                items: [
+                  SettingsMenuItem(
+                    themed: SettingsMenuItemThemed(
+                      title: "Episodes",
+                      subtitle: episode,
+                      icon: Icon(
+                        Icons.view_module_outlined,
                         color: Colors.white,
                       ),
                     ),
-                  ],
-                ),
-              );
-            },
-          ),
-          settingsStyle: SettingsMenuStyle(
-            paddingBetween: 10,
-            items: [
-              SettingsMenuItem(
-                themed: SettingsMenuItemThemed(
-                  title: "Episodes",
-                  subtitle: episode,
-                  icon: Icon(
-                    Icons.view_module_outlined,
-                    color: Colors.white,
-                  ),
-                ),
-                secondaryMenuWidth: 200,
-                secondaryMenu: Padding(
-                  padding: EdgeInsets.only(top: 5),
-                  child: Center(
-                    child: Container(
-                      child: Wrap(
-                        spacing: 20,
-                        runSpacing: 10,
-                        children: [
-                          for (var entry in database.entries)
-                            episodeImage(entry)
-                        ],
+                    secondaryMenuWidth: 200,
+                    secondaryMenu: Padding(
+                      padding: EdgeInsets.only(top: 5),
+                      child: Center(
+                        child: Container(
+                          child: Wrap(
+                            spacing: 20,
+                            runSpacing: 10,
+                            children: [
+                              for (var entry in database.entries)
+                                episodeImage(entry)
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
