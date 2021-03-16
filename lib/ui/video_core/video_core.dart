@@ -212,7 +212,12 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   Widget build(BuildContext context) {
     Widget player = _globalGesture(
       Stack(children: [
-        VideoCorePlayer(onTap: _showAndHideOverlay),
+        VideoCorePlayer(),
+        GestureDetector(
+          onTap: _showAndHideOverlay,
+          behavior: HitTestBehavior.opaque,
+          child: Container(height: double.infinity, width: double.infinity),
+        ),
         VideoCoreForwardAndRewindLayout(
           rewind: GestureDetector(onDoubleTap: _rewind),
           forward: GestureDetector(onDoubleTap: _forward),
@@ -236,8 +241,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           },
         ),
         VideoCoreBuffering(),
-        VideoCorePlayAndPause(showAMoment: _showAMomentPlayAndPause),
         VideoCoreActiveSubtitleText(),
+        VideoCorePlayAndPause(showAMoment: _showAMomentPlayAndPause),
         VideoCoreOverlay(),
         CustomOpacityTransition(
           visible: _showForwardStatus,

@@ -7,9 +7,7 @@ import 'package:video_viewer/ui/video_core/widgets/aspect_ratio.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
 class VideoCorePlayer extends StatefulWidget {
-  VideoCorePlayer({Key? key, required this.onTap}) : super(key: key);
-
-  final void Function([bool?]) onTap;
+  VideoCorePlayer({Key? key}) : super(key: key);
 
   @override
   _VideoCorePlayerState createState() => _VideoCorePlayerState();
@@ -54,7 +52,6 @@ class _VideoCorePlayerState extends State<VideoCorePlayer> {
                 )
               : _Player(),
           GestureDetector(
-            onTap: widget.onTap,
             onScaleStart: isFullScreenLandscape ? _onScaleStart : null,
             onScaleUpdate: isFullScreenLandscape ? _onScaleUpdate : null,
             child: Container(color: Colors.transparent),
