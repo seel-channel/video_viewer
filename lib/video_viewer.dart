@@ -89,45 +89,36 @@ class VideoViewer extends StatefulWidget {
 }
 
 class VideoViewerState extends State<VideoViewer> {
-  VideoViewerController? _controller;
-  VideoViewerMetadata? _metadata;
+  late VideoViewerController _controller;
   bool _initialized = false;
 
   @override
   void initState() {
     _controller = widget.controller;
-    _controller!.source = widget.source;
-    _controller!.looping = widget.looping;
-    _controller!.source = widget.source;
-    _metadata = VideoViewerMetadata(
-      style: widget.style,
-      language: widget.language,
-      rewindAmount: widget.rewindAmount,
-      forwardAmount: widget.forwardAmount,
-      defaultAspectRatio: widget.defaultAspectRatio,
-      onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
-    );
+    _controller.source = widget.source;
+    _controller.looping = widget.looping;
+    _controller.source = widget.source;
     _initVideoViewer();
     super.initState();
   }
 
   @override
   void dispose() {
+    _controller.dispose();
     super.dispose();
-    _controller!.dispose();
   }
 
   void _initVideoViewer() async {
     final activedSource = widget.source.keys.toList().first;
     final source = widget.source.values.toList().first;
 
-    await _controller!.changeSource(
+    await _controller.changeSource(
       source: source,
       name: activedSource,
       autoPlay: widget.autoPlay,
     );
 
-    _controller!.isShowingThumbnail = widget.style.thumbnail != null;
+    _controller.isShowingThumbnail = widget.style.thumbnail != null;
     setState(() => _initialized = true);
   }
 
@@ -137,7 +128,16 @@ class VideoViewerState extends State<VideoViewer> {
         ? MultiProvider(
             providers: [
               ChangeNotifierProvider.value(value: _controller),
-              Provider.value(value: _metadata),
+              Provider.value(
+                value: VideoViewerMetadata(
+                  style: widget.style,
+                  language: widget.language,
+                  rewindAmount: widget.rewindAmount,
+                  forwardAmount: widget.forwardAmount,
+                  defaultAspectRatio: widget.defaultAspectRatio,
+                  onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
+                ),
+              ),
             ],
             builder: (_, __) => VideoViewerCore(),
           )
