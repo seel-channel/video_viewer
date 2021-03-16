@@ -12,10 +12,10 @@ dependencies:
     sdk: flutter
 
   http: ^0.13.0
-  html: ^0.15.0
   helpers: ^1.1.0
   provider: ^5.0.0
-  video_player: ^2.0.0
+  video_player: ^2.0.2
+  universal_html: ^2.0.2
 
 dev_dependencies:
   flutter_test:
