@@ -21,8 +21,13 @@ class VideoViewerController extends ChangeNotifier {
   /// To reclaim the resources used by the player call [dispose].
   ///
   /// After [dispose] all further calls are ignored.
-  VideoViewerController()
-      : this.isShowingSecondarySettingsMenus = List.filled(12, false);
+  VideoViewerController() {
+    this.isShowingSecondarySettingsMenus = List.filled(12, false);
+    if (kIsWeb)
+      html.document.activeElement!.onFullscreenChange.listen((_) {
+        _isFullScreen = html.document.fullscreenElement != null;
+      });
+  }
 
   /// Receive a list of all the resources to be played.
   ///
@@ -331,10 +336,7 @@ class VideoViewerController extends ChangeNotifier {
   ///because this function do **Navigator.push(context, MaterialPageRoute(...))**
   Future<void> openFullScreen(BuildContext context) async {
     if (kIsWeb) {
-      html.document.documentElement!.requestFullscreen();
-      html.document.documentElement!.onFullscreenChange.listen((_) {
-        _isFullScreen = html.document.fullscreenElement != null;
-      });
+      html.document.activeElement!.requestFullscreen();
     } else {
       _isFullScreen = true;
       final query = VideoQuery();
