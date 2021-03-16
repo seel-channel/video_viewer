@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:video_viewer/data/repositories/video.dart';
@@ -74,7 +75,7 @@ class VideoCoreForwardAndRewindTextAlert extends StatelessWidget {
           color: forwardStyle.backgroundColor,
           borderRadius: forwardStyle.borderRadius,
         ),
-        child: Text(
+        child: AutoSizeText(
           query.durationFormatter(Duration(seconds: amount!)),
           style: style.textStyle,
         ),

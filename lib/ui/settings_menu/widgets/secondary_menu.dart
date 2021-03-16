@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/ui/widgets/helpers.dart';
 
@@ -32,7 +33,7 @@ class SecondaryMenu extends StatelessWidget {
               child: Row(children: [
                 style.chevron,
                 Expanded(
-                  child: Text(
+                  child: AutoSizeText(
                     metadata.language.settings,
                     style: metadata.style.textStyle,
                   ),

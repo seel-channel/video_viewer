@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 
@@ -52,7 +53,7 @@ class _OverlayBottomButtonsState extends State<OverlayBottomButtons> {
                 setState(() => _showRemaingText = !_showRemaingText);
                 video.cancelCloseOverlay();
               },
-              child: Text(
+              child: AutoSizeText(
                 _showRemaingText
                     ? _query.durationFormatter(position)
                     : _query.durationFormatter(position - value.duration),

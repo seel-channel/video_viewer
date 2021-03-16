@@ -8,6 +8,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.5.0"
+  auto_size_text:
+    dependency: "direct main"
+    description:
+      name: auto_size_text
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0-nullsafety.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -43,7 +50,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.15.0"
-<<<<<<< HEAD
   crypto:
     dependency: transitive
     description:
@@ -51,8 +57,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.0"
-=======
->>>>>>> dev
   csslib:
     dependency: transitive
     description:
@@ -219,7 +223,7 @@ packages:
       name: universal_html
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.2"
+    version: "2.0.4"
   universal_io:
     dependency: transitive
     description:
@@ -256,10 +260,5 @@ packages:
     source: hosted
     version: "2.0.0"
 sdks:
-<<<<<<< HEAD
   dart: ">=2.12.0 <3.0.0"
   flutter: ">=1.20.0"
-=======
-  dart: ">=2.12.0-0.0 <3.0.0"
-  flutter: ">=1.17.0"
->>>>>>> dev

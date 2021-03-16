@@ -16,6 +16,7 @@ dependencies:
   provider: ^5.0.0
   video_player: ^2.0.2
   universal_html: ^2.0.2
+  auto_size_text: ^3.0.0-nullsafety.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 import 'package:video_viewer/domain/entities/settings_menu_item.dart';
 import 'package:video_viewer/data/repositories/video.dart';
@@ -26,25 +27,21 @@ class MainMenu extends StatelessWidget {
           _MainMenuItem(
             index: 0,
             icon: style.settings,
-            title: Text(metadata.language.quality),
-            subtitle: Text(video.activeSource!),
+            title: metadata.language.quality,
+            subtitle: video.activeSource!,
           ),
           _MainMenuItem(
             index: 1,
             icon: style.speed,
-            title: Text(metadata.language.speed),
-            subtitle: Text(
-              speed == 1.0 ? metadata.language.normalSpeed : "x$speed",
-            ),
+            title: metadata.language.speed,
+            subtitle: speed == 1.0 ? metadata.language.normalSpeed : "x$speed",
           ),
           if (video.source![video.activeSource!]!.subtitle != null)
             _MainMenuItem(
               index: 2,
               icon: style.caption,
-              title: Text(metadata.language.caption),
-              subtitle: Text(
-                video.activeCaption ?? metadata.language.captionNone,
-              ),
+              title: metadata.language.caption,
+              subtitle: video.activeCaption ?? metadata.language.captionNone,
             ),
           if (items != null)
             for (int i = 0; i < items.length; i++) ...[
@@ -78,7 +75,8 @@ class _MainMenuItem extends StatelessWidget {
     required this.subtitle,
   }) : super(key: key);
 
-  final Widget title, subtitle, icon;
+  final Widget icon;
+  final String title, subtitle;
   final int index;
 
   @override
@@ -96,9 +94,9 @@ class _MainMenuItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           icon,
-          DefaultTextStyle(child: title, style: textStyle),
-          DefaultTextStyle(
-            child: subtitle,
+          AutoSizeText(title, style: textStyle),
+          AutoSizeText(
+            subtitle,
             style: textStyle.merge(TextStyle(
               fontWeight: FontWeight.normal,
               fontSize: textStyle.fontSize! - 2,

@@ -33,5 +33,6 @@ class SettingsMenuItemThemed {
     required this.subtitle,
   });
 
-  final Widget icon, title, subtitle;
+  final Widget icon;
+  final String title, subtitle;
 }
