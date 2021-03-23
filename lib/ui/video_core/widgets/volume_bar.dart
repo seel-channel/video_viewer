@@ -47,20 +47,17 @@ class _VolumeBar extends StatelessWidget {
       child: Padding(
         padding: style.margin,
         child: ClipRRect(
-          borderRadius: style.borderRadius as BorderRadius?,
+          borderRadius: style.bar.borderRadius,
           child: Container(
-            height: style.height,
-            width: style.width,
+            height: style.bar.height,
+            width: style.bar.width,
             child: Stack(
               alignment: AlignmentDirectional.bottomCenter,
               children: [
-                Container(color: style.backgroundColor),
+                Container(color: style.bar.background),
                 Container(
-                  height: progress! * style.height,
-                  decoration: BoxDecoration(
-                    color: style.color,
-                    borderRadius: style.borderRadius,
-                  ),
+                  height: progress! * style.bar.height,
+                  color: style.bar.color,
                 ),
               ],
             ),

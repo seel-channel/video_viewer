@@ -31,16 +31,16 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   Timer? _hidePlayAndPause;
 
   //REWIND AND FORWARD
+  final ValueNotifier<int> _forwardAndRewindAmount = ValueNotifier<int>(1);
   int _defaultRewindAmount = 10;
   int _defaultForwardAmount = 10;
-  int _forwardAndRewindAmount = 0;
   bool _showForwardStatus = false;
   Offset _horizontalDragStartOffset = Offset.zero;
   List<bool> _showAMomentRewindIcons = [false, false];
 
   //VOLUME
-  final FocusNode _focusRawKeyboard = FocusNode();
   final ValueNotifier<double> _currentVolume = ValueNotifier<double>(1.0);
+  final FocusNode _focusRawKeyboard = FocusNode();
   final double _maxVolume = 1.0;
   Offset _verticalDragStartOffset = Offset.zero;
   double _onDragStartVolume = 1;
@@ -61,10 +61,12 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   @override
   void dispose() {
-    super.dispose();
+    _forwardAndRewindAmount.dispose();
+    _currentVolume.dispose();
     _focusRawKeyboard.dispose();
     _hidePlayAndPause?.cancel();
     _closeVolumeStatus?.cancel();
+    super.dispose();
   }
 
   //--------------//
@@ -107,7 +109,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   void _showRewindAndForward(int index, int amount) async {
     _videoSeekTo(amount);
     setState(() {
-      _forwardAndRewindAmount = amount;
+      _forwardAndRewindAmount.value = amount;
       _showForwardStatus = true;
       _showAMomentRewindIcons[index] = true;
     });
@@ -135,10 +137,9 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       double multiplicator = (diff.abs() / 50);
       int seconds = video.video!.value.position.inSeconds;
       int amount = -((diff / 10).round() * multiplicator).round();
-      setState(() {
-        if (seconds + amount < video.video!.value.duration.inSeconds &&
-            seconds + amount > 0) _forwardAndRewindAmount = amount;
-      });
+
+      if (seconds + amount < video.video!.value.duration.inSeconds &&
+          seconds + amount > 0) _forwardAndRewindAmount.value = amount;
     }
   }
 
@@ -146,7 +147,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     final video = _query.video(context);
     if (!video.isShowingSettingsMenu && _showForwardStatus) {
       setState(() => _showForwardStatus = false);
-      _videoSeekTo(_forwardAndRewindAmount);
+      _videoSeekTo(_forwardAndRewindAmount.value);
     }
   }
 
@@ -223,22 +224,20 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           forward: GestureDetector(onDoubleTap: _forward),
         ),
         LayoutBuilder(
-          builder: (_, box) {
-            return Center(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: _onTapPlayAndPause,
-                child: Container(
-                  width: box.maxWidth * 0.2,
-                  height: box.maxHeight * 0.2,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    shape: BoxShape.circle,
-                  ),
+          builder: (_, box) => Center(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _onTapPlayAndPause,
+              child: Container(
+                width: box.maxWidth * 0.2,
+                height: box.maxHeight * 0.2,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  shape: BoxShape.circle,
                 ),
               ),
-            );
-          },
+            ),
+          ),
         ),
         VideoCoreBuffering(),
         VideoCoreActiveSubtitleText(),
@@ -246,8 +245,11 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         VideoCoreOverlay(),
         CustomOpacityTransition(
           visible: _showForwardStatus,
-          child: VideoCoreForwardAndRewindTextAlert(
-            amount: _forwardAndRewindAmount,
+          child: ValueListenableBuilder(
+            valueListenable: _forwardAndRewindAmount,
+            builder: (_, int seconds, __) => VideoCoreForwardAndRewindAlert(
+              seconds: seconds,
+            ),
           ),
         ),
         ValueListenableBuilder(

@@ -29,6 +29,8 @@ class VideoProgressBar extends StatelessWidget {
           final double progressWidth =
               (position.inMilliseconds / duration.inMilliseconds) * width;
 
+          final bar = style.bar;
+
           return _ProgressBarGesture(
             width: width,
             child: Padding(
@@ -36,14 +38,14 @@ class VideoProgressBar extends StatelessWidget {
               child: Stack(
                 alignment: AlignmentDirectional.centerStart,
                 children: [
-                  _ProgressBar(width: width, color: style.barBackgroundColor),
+                  _ProgressBar(width: width, color: bar.background),
                   _ProgressBar(
-                      width: (controller.maxBuffering.inMilliseconds /
-                              duration.inMilliseconds) *
-                          width,
-                      color: style.barBufferedColor),
-                  _ProgressBar(
-                      width: progressWidth, color: style.barActiveColor),
+                    width: (controller.maxBuffering.inMilliseconds /
+                            duration.inMilliseconds) *
+                        width,
+                    color: bar.buffered,
+                  ),
+                  _ProgressBar(width: progressWidth, color: bar.color),
                   _DotIsDragging(maxWidth: width),
                   _Dot(maxWidth: width),
                   CustomOpacityTransition(
@@ -83,7 +85,7 @@ class _DotIsDragging extends StatelessWidget {
     final duration = video.value.duration.inMilliseconds;
 
     final double widthPos = (position / duration) * maxWidth;
-    final double widthDot = style.barHeight * 2;
+    final double widthDot = style.bar.height * 2;
 
     return BooleanTween(
       animate: controller.isDraggingProgressBar &&
@@ -186,12 +188,12 @@ class _ProgressBar extends StatelessWidget {
 
     return AnimatedContainer(
       width: width,
-      height: style.barHeight,
+      height: style.bar.height,
       duration: Duration(milliseconds: animation.value),
       alignment: Alignment.centerRight,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: style.borderRadius,
+        borderRadius: style.bar.borderRadius,
       ),
     );
   }
@@ -215,7 +217,7 @@ class _Dot extends StatelessWidget {
     final style = query.videoStyle(context).progressBarStyle;
     final video = query.video(context, listen: true).video!;
 
-    final height = style.barHeight;
+    final height = style.bar.height;
 
     final double widthPos = (video.value.position.inMilliseconds /
             video.value.duration.inMilliseconds) *
@@ -235,7 +237,7 @@ class _Dot extends StatelessWidget {
             height: height * 2 * multiplicator,
             width: height * 2 * multiplicator,
             decoration: BoxDecoration(
-              color: style.barDotColor.withOpacity(opacity!),
+              color: style.bar.dot.withOpacity(opacity!),
               shape: BoxShape.circle,
             ),
           ),
@@ -286,7 +288,7 @@ class _TextPositionPainter extends CustomPainter {
     final paragraph = paragraphBuilder.build();
     paragraph.layout(ui.ParagraphConstraints(width: 100));
 
-    final height = barStyle!.barHeight;
+    final height = barStyle!.bar.height;
     final padding = barStyle!.paddingBeetwen;
     final minWidth = paragraph.minIntrinsicWidth;
     final doubleHeight = height * 2;
@@ -303,7 +305,7 @@ class _TextPositionPainter extends CustomPainter {
           minWidth + height * 4,
           paragraph.height + doubleHeight,
         ),
-        barStyle!.borderRadius.topLeft,
+        barStyle!.bar.borderRadius.topLeft,
       ),
       Paint()..color = barStyle!.backgroundColor,
     );
