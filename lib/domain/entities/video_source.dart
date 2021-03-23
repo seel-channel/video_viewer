@@ -5,6 +5,11 @@ import 'package:video_viewer/video_viewer.dart';
 
 export 'package:video_player/video_player.dart';
 
+class VideoSize {
+  VideoSize(this.width, this.height);
+  final int width, height;
+}
+
 class VideoSource {
   VideoSource({
     required this.video,
@@ -73,7 +78,7 @@ class VideoSource {
   ///    "1080p": VideoSource(video: VideoPlayerController.network("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")),
   ///}
   /// ```
-  static Map<String, VideoSource> getNetworkVideoSources(
+  static Map<String, VideoSource> fromNetworkVideoSources(
       Map<String, String> sources) {
     Map<String, VideoSource> videoSource = {};
     for (String key in sources.keys)
@@ -88,31 +93,18 @@ class VideoSource {
   ///
   ///EXAMPLE:
   ///```dart
-  ///Future<Map<String, VideoPlayerController>> videoFrom3u8() async {
-  ///   final String url = "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8";
-  ///   final Directory directory = await getApplicationDocumentsDirectory();
-  ///   final Map<String, String> files = await getm3u8VideoFileData(url);
-  ///   Map<String, VideoPlayerController> sources = {
-  ///      "Auto": VideoPlayerController.network(url)
-  ///   };
-  ///
-  ///   for (String quality in files.keys) {
-  ///      final File file = File('${directory.path}/hls$quality.m3u8');
-  ///      await file.writeAsString(files[quality]);
-  ///      sources["${quality.split("x").last}p"] = VideoPlayerController.file(file);
-  ///   }
-  ///
-  ///   return sources;
-  ///}
+  ///VideoSource.fromM3u8VideoUrl(
+  ///   "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8",
+  ///   formatter: (size) => "${size.height}p",
+  ///)
   /// ```
-  static Future<Map<String, String>> getm3u8VideoFileData(String m3u8) async {
+  static Future<Map<String, VideoSource>> fromM3u8PlaylistUrl(
+    String m3u8, {
+    String Function(VideoSize video)? formatter,
+    bool descending = true,
+  }) async {
     final RegExp netRegx = RegExp(r'^(http|https):\/\/([\w.]+\/?)\S*');
     final RegExp netRegx2 = RegExp(r'(.*)\r?\/');
-    final RegExp regExpAudio = RegExp(
-      r"""^#EXT-X-MEDIA:TYPE=AUDIO(?:.*,URI="(.*m3u8)")""",
-      caseSensitive: false,
-      multiLine: true,
-    );
     final RegExp regExp = RegExp(
       r"#EXT-X-STREAM-INF:(?:.*,RESOLUTION=(\d+x\d+))?,?(.*)\r?\n(.*)",
       caseSensitive: false,
@@ -120,14 +112,12 @@ class VideoSource {
     );
 
     Map<String, String> sources = {};
-    List<String> audioList = [];
     late String content;
 
     final response = await http.get(Uri.parse(m3u8));
     if (response.statusCode == 200) content = utf8.decode(response.bodyBytes);
 
     List<RegExpMatch> matches = regExp.allMatches(content).toList();
-    List<RegExpMatch> audioMatches = regExpAudio.allMatches(content).toList();
 
     matches.forEach((RegExpMatch regExpMatch) {
       final RegExpMatch? match = netRegx2.firstMatch(m3u8);
@@ -141,32 +131,33 @@ class VideoSource {
         url = "$dataURL$sourceURL";
       }
 
-      audioMatches.forEach((RegExpMatch regExpMatch2) {
-        final RegExpMatch? match = netRegx2.firstMatch(m3u8);
-        final String audioURL = (regExpMatch2.group(1)).toString();
-        final bool isNetwork = netRegx.hasMatch(audioURL);
-        String audio = audioURL;
-
-        if (!isNetwork) {
-          final String? audioDataURL = match!.group(0);
-          audio = "$audioDataURL$audioURL";
-        }
-        audioList.add(audio);
-      });
-
-      String audio = "";
-      String file = "";
-      if (audioList.length != 0) {
-        audio =
-            """#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio-medium",NAME="audio",AUTOSELECT=YES,DEFAULT=YES,CHANNELS="2",URI="${audioList.last}"\n""";
-      }
-
-      file =
-          """#EXTM3U\n#EXT-X-INDEPENDENT-SEGMENTS\n$audio#EXT-X-STREAM-INF:CLOSED-CAPTIONS=NONE,BANDWIDTH=1469712,RESOLUTION=$quality,FRAME-RATE=30.000\n$url""";
-
-      sources[quality] = file;
+      sources[quality] = url;
     });
 
-    return sources;
+    if (formatter != null) {
+      Map<String, String> newSources = {};
+      for (var entry in sources.entries) {
+        final quality = entry.key.split("x");
+        VideoSize size;
+        if (quality.length == 2)
+          size = VideoSize(
+            int.tryParse(quality.elementAt(0)) ?? 0,
+            int.tryParse(quality.elementAt(1)) ?? 0,
+          );
+        else
+          size = VideoSize(0, 0);
+        newSources[formatter(size)] = entry.value;
+      }
+      sources = newSources;
+    }
+
+    if (descending) {
+      Map<String, String> newSources = {};
+      for (var entry in sources.entries.toList().reversed)
+        newSources[entry.key] = entry.value;
+      sources = newSources;
+    }
+
+    return VideoSource.fromNetworkVideoSources(sources);
   }
 }
