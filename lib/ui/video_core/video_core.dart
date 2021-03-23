@@ -11,7 +11,7 @@ import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind.dart';
 import 'package:video_viewer/ui/video_core/widgets/orientation.dart';
 
 import 'package:video_viewer/ui/video_core/widgets/play_and_pause.dart';
-import 'package:video_viewer/ui/video_core/widgets/scale.dart';
+import 'package:video_viewer/ui/video_core/widgets/player.dart';
 import 'package:video_viewer/ui/video_core/widgets/thumbnail.dart';
 import 'package:video_viewer/ui/video_core/widgets/volume_bar.dart';
 import 'package:video_viewer/ui/video_core/widgets/subtitle.dart';

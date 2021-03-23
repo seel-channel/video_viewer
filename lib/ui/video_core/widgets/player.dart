@@ -67,7 +67,7 @@ class _Player extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final video = VideoQuery().video(context);
+    final video = VideoQuery().video(context, listen: true);
     return VideoPlayer(video.video!);
   }
 }
