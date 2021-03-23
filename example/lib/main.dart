@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_viewer/video_viewer.dart';
-import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(App());
 
@@ -80,29 +77,49 @@ class SerieExample extends StatefulWidget {
 
 class _SerieExampleState extends State<SerieExample> {
   final VideoViewerController controller = VideoViewerController();
-  final Map<String, Map<String, VideoSource>> database = {
-    "Episode 1": VideoSource.getNetworkVideoSources({
-      "1080p":
-          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    }),
-    "Episode 2": VideoSource.getNetworkVideoSources({
-      "720p":
-          "https://file-examples-com.github.io/uploads/2017/04/file_example_MP4_480_1_5MG.mp4"
-    }),
+  final Map<String, Map<String, String>> database = {
+    "第1集": {
+      "超清":
+          "https://ks-xpc4.xpccdn.com/ff6c8b38-79a6-4040-b220-899e579a5c28.mp4",
+    },
+    "第2集": {
+      "超清":
+          "https://hls.syrme.top/hls/5ac73019-c1bc-4f5b-b295-52ff6a29a9e7/playlist.m3u8"
+    },
+    "第3集": {
+      "超清":
+          "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8"
+    },
+    "第4集": {
+      "超清":
+          "https://ks-xpc4.xpccdn.com/ff6c8b38-79a6-4040-b220-899e579a5c28.mp4"
+    },
+    "第5集": {
+      "超清":
+          "https://ks-xpc4.xpccdn.com/3368e540-b1f9-4832-8167-a2334da19b5c.mp4"
+    },
   };
 
   final Map<String, String> thumbnails = {
-    "Episode 1":
+    "第1集":
         "https://cloudfront-us-east-1.images.arcpublishing.com/semana/FUM2RCCVW5EL5LQYCDVC6VRO2U.jpg",
-    "Episode 2":
+    "第2集":
         "https://www.elcomercio.com/files/article_main/uploads/2019/03/29/5c9e3ddfc85ca.jpeg",
+    "第3集":
+        "https://cloudfront-us-east-1.images.arcpublishing.com/semana/FUM2RCCVW5EL5LQYCDVC6VRO2U.jpg",
+    "第4集":
+        "https://www.elcomercio.com/files/article_main/uploads/2019/03/29/5c9e3ddfc85ca.jpeg",
+    "第5集":
+        "https://cloudfront-us-east-1.images.arcpublishing.com/semana/FUM2RCCVW5EL5LQYCDVC6VRO2U.jpg",
   };
 
   String episode = "";
+  MapEntry<String, Map<String, String>> initial;
 
   @override
   void initState() {
-    episode = database.entries.first.key;
+    initial = database.entries.first;
+    episode = initial.key;
     super.initState();
   }
 
@@ -110,91 +127,94 @@ class _SerieExampleState extends State<SerieExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
-        children: [
-          Text("hola"),
-          VideoViewer(
-            source: database.entries.first.value,
-            controller: controller,
-            language: VideoViewerLanguage.es,
-            style: VideoViewerStyle(
-              header: Builder(
-                builder: (innerContext) {
-                  return Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Game of Thrones: $episode",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+      body: Center(
+        child: VideoViewer(
+          source: VideoSource.fromNetworkVideoSources(initial.value),
+          controller: controller,
+          language: VideoViewerLanguage.es,
+          style: VideoViewerStyle(
+            header: Builder(
+              builder: (innerContext) {
+                return Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Game of Thrones: $episode",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              settingsStyle: SettingsMenuStyle(
-                paddingBetween: 10,
-                items: [
-                  SettingsMenuItem(
-                    themed: SettingsMenuItemThemed(
-                      title: "Episodes",
-                      subtitle: episode,
-                      icon: Icon(
-                        Icons.view_module_outlined,
-                        color: Colors.white,
                       ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            settingsStyle: SettingsMenuStyle(
+              paddingBetween: 10,
+              items: [
+                SettingsMenuItem(
+                  themed: SettingsMenuItemThemed(
+                    title: "Episodes",
+                    subtitle: episode,
+                    icon: Icon(
+                      Icons.view_module_outlined,
+                      color: Colors.white,
                     ),
-                    secondaryMenuWidth: 200,
-                    secondaryMenu: Padding(
-                      padding: EdgeInsets.only(top: 5),
-                      child: Center(
-                        child: Container(
-                          child: Wrap(
-                            spacing: 20,
-                            runSpacing: 10,
-                            children: [
-                              for (var entry in database.entries)
-                                episodeImage(entry)
-                            ],
-                          ),
+                  ),
+                  secondaryMenuWidth: 300,
+                  secondaryMenu: Padding(
+                    padding: EdgeInsets.only(top: 5),
+                    child: Center(
+                      child: Container(
+                        child: Wrap(
+                          spacing: 20,
+                          runSpacing: 10,
+                          children: [
+                            for (var entry in database.entries)
+                              episodeImage(entry)
+                          ],
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget episodeImage(MapEntry<String, Map<String, VideoSource>> entry) {
+  Widget episodeImage(MapEntry<String, Map<String, String>> entry) {
     return ClipRRect(
       borderRadius: BorderRadius.all(Radius.circular(5)),
       child: Material(
         child: InkWell(
           onTap: () async {
-            final source = entry.value;
-            final video = source.entries.first;
+            final episodeName = entry.key;
+            final qualities = entry.value;
+
+            Map<String, VideoSource> sources =
+                VideoSource.fromNetworkVideoSources(qualities);
+
+            final video = sources.entries.first;
+
             await controller.changeSource(
+              inheritValues: false, //RESET SPEED TO NORMAL AND POSITION TO ZERO
               source: video.value,
               name: video.key,
-              inheritValues: false,
             );
 
             controller.closeAllSecondarySettingsMenus();
-            controller.source = source;
-            episode = entry.key;
+            controller.source = sources;
+            episode = episodeName;
             setState(() {});
           },
           child: Stack(
@@ -235,7 +255,7 @@ class PortraitVideoExample extends StatelessWidget {
 
     return VideoViewer(
       language: VideoViewerLanguage.es,
-      source: VideoSource.getNetworkVideoSources(src),
+      source: VideoSource.fromNetworkVideoSources(src),
       style: VideoViewerStyle(
         settingsStyle: SettingsMenuStyle(paddingBetween: 10),
       ),
@@ -248,42 +268,17 @@ class HLSVideoExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: createHLSFiles(
-          "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8"),
-      builder: (_, data) {
-        if (data.hasData)
-          return VideoViewer(
-            source: data.data,
-            onFullscreenFixLandscape: true,
-            style: VideoViewerStyle(
-              thumbnail: Image.network(
-                  "https://play-lh.googleusercontent.com/aA2iky4PH0REWCcPs9Qym2X7e9koaa1RtY-nKkXQsDVU6Ph25_9GkvVuyhS72bwKhN1P"),
-            ),
-          );
-        else
-          return CircularProgressIndicator();
-      },
+    return VideoViewer(
+      source: VideoSource.fromNetworkVideoSources({
+        "Auto":
+            "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8"
+      }),
+      onFullscreenFixLandscape: true,
+      style: VideoViewerStyle(
+        thumbnail: Image.network(
+            "https://play-lh.googleusercontent.com/aA2iky4PH0REWCcPs9Qym2X7e9koaa1RtY-nKkXQsDVU6Ph25_9GkvVuyhS72bwKhN1P"),
+      ),
     );
-  }
-
-  ///USE [path_provider] AND [dart.io] **(Only available on Android and iOS)**
-  Future<Map<String, VideoSource>> createHLSFiles(String url) async {
-    final Directory directory = await getApplicationDocumentsDirectory();
-    final Map<String, String> files =
-        await VideoSource.getm3u8VideoFileData(url);
-    Map<String, VideoSource> sources = {
-      "Auto": VideoSource(video: VideoPlayerController.network(url)),
-    };
-
-    for (String quality in files.keys) {
-      final File file = File('${directory.path}/hls$quality.m3u8');
-      await file.writeAsString(files[quality]);
-      sources["${quality.split("x").last}p"] =
-          VideoSource(video: VideoPlayerController.file(file));
-    }
-
-    return sources;
   }
 }
 
