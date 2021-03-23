@@ -63,7 +63,7 @@ class _UsingVideoControllerExampleState
     );
   }
 
-  VideoPlayerController getVideoPlayer() => controller.controller;
+  VideoPlayerController getVideoPlayer() => controller.video;
   String getActiveSourceName() => controller.activeSource;
   String getActiveCaption() => controller.activeCaption;
   bool isFullScreen() => controller.isFullScreen;
