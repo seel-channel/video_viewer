@@ -226,14 +226,20 @@ class VideoViewerController extends ChangeNotifier {
 
   void _findSubtitle() {
     final position = _video!.value.position;
+    bool foundOne = false;
     for (SubtitleData subtitle in subtitles) {
       if (position > subtitle.start &&
           position < subtitle.end &&
           _activeSubtitleData != subtitle) {
         _activeSubtitleData = subtitle;
+        foundOne = true;
         notifyListeners();
         break;
       }
+    }
+    if (!foundOne && _activeSubtitleData != null) {
+      _activeSubtitleData = null;
+      notifyListeners();
     }
   }
 
