@@ -174,29 +174,49 @@ class SerieExample extends StatefulWidget {
 
 class _SerieExampleState extends State<SerieExample> {
   final VideoViewerController controller = VideoViewerController();
-  final Map<String, Map<String, VideoSource>> database = {
-    "Episode 1": VideoSource.getNetworkVideoSources({
-      "1080p":
-          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    }),
-    "Episode 2": VideoSource.getNetworkVideoSources({
-      "720p":
-          "https://file-examples-com.github.io/uploads/2017/04/file_example_MP4_480_1_5MG.mp4"
-    }),
+  final Map<String, Map<String, String>> database = {
+    "第1集": {
+      "超清":
+          "https://ks-xpc4.xpccdn.com/ff6c8b38-79a6-4040-b220-899e579a5c28.mp4",
+    },
+    "第2集": {
+      "超清":
+          "https://hls.syrme.top/hls/5ac73019-c1bc-4f5b-b295-52ff6a29a9e7/playlist.m3u8"
+    },
+    "第3集": {
+      "超清":
+          "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8"
+    },
+    "第4集": {
+      "超清":
+          "https://ks-xpc4.xpccdn.com/ff6c8b38-79a6-4040-b220-899e579a5c28.mp4"
+    },
+    "第5集": {
+      "超清":
+          "https://ks-xpc4.xpccdn.com/3368e540-b1f9-4832-8167-a2334da19b5c.mp4"
+    },
   };
 
   final Map<String, String> thumbnails = {
-    "Episode 1":
+    "第1集":
         "https://cloudfront-us-east-1.images.arcpublishing.com/semana/FUM2RCCVW5EL5LQYCDVC6VRO2U.jpg",
-    "Episode 2":
+    "第2集":
         "https://www.elcomercio.com/files/article_main/uploads/2019/03/29/5c9e3ddfc85ca.jpeg",
+    "第3集":
+        "https://cloudfront-us-east-1.images.arcpublishing.com/semana/FUM2RCCVW5EL5LQYCDVC6VRO2U.jpg",
+    "第4集":
+        "https://www.elcomercio.com/files/article_main/uploads/2019/03/29/5c9e3ddfc85ca.jpeg",
+    "第5集":
+        "https://cloudfront-us-east-1.images.arcpublishing.com/semana/FUM2RCCVW5EL5LQYCDVC6VRO2U.jpg",
   };
 
   String episode = "";
+  MapEntry<String, Map<String, String>> initial;
 
   @override
   void initState() {
-    episode = database.entries.first.key;
+    initial = database.entries.first;
+    episode = initial.key;
     super.initState();
   }
 
@@ -206,11 +226,10 @@ class _SerieExampleState extends State<SerieExample> {
       backgroundColor: Colors.grey[100],
       body: Center(
         child: VideoViewer(
-          source: database.entries.first.value,
+          source: VideoSource.fromNetworkVideoSources(initial.value),
           controller: controller,
           language: VideoViewerLanguage.es,
           style: VideoViewerStyle(
-            thumbnail: Image.network(thumbnails.entries.first.value),
             header: Builder(
               builder: (innerContext) {
                 return Container(
@@ -238,11 +257,14 @@ class _SerieExampleState extends State<SerieExample> {
               items: [
                 SettingsMenuItem(
                   themed: SettingsMenuItemThemed(
-                    icon: Icon(Icons.view_module_outlined, color: Colors.white),
-                    title: Text("Episodes"),
-                    subtitle: Text(episode),
+                    title: "Episodes",
+                    subtitle: episode,
+                    icon: Icon(
+                      Icons.view_module_outlined,
+                      color: Colors.white,
+                    ),
                   ),
-                  secondaryMenuWidth: 200,
+                  secondaryMenuWidth: 300,
                   secondaryMenu: Padding(
                     padding: EdgeInsets.only(top: 5),
                     child: Center(
@@ -266,6 +288,64 @@ class _SerieExampleState extends State<SerieExample> {
       ),
     );
   }
+
+  Widget episodeImage(MapEntry<String, Map<String, String>> entry) {
+    return ClipRRect(
+      borderRadius: BorderRadius.all(Radius.circular(5)),
+      child: Material(
+        child: InkWell(
+          onTap: () async {
+            final episodeName = entry.key;
+            final qualities = entry.value;
+
+            Map<String, VideoSource> sources;
+            String url = qualities.entries.first.value;
+
+            if (url.contains("m3u8")) {
+              sources = await VideoSource.fromM3u8PlaylistUrl(
+                url,
+                formatter: (size) => "${size.height}p",
+              );
+            } else {
+              sources = VideoSource.fromNetworkVideoSources(qualities);
+            }
+
+            final video = sources.entries.first;
+
+            await controller.changeSource(
+              inheritValues: false, //RESET SPEED TO NORMAL AND POSITION TO ZERO
+              source: video.value,
+              name: video.key,
+            );
+
+            controller.closeAllSecondarySettingsMenus();
+            controller.source = sources;
+            episode = episodeName;
+            setState(() {});
+          },
+          child: Stack(
+            alignment: AlignmentDirectional.bottomCenter,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                color: Colors.white,
+                child: Image.network(thumbnails[entry.key], fit: BoxFit.cover),
+              ),
+              Text(
+                entry.key,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 ```
 
 <br><br>
@@ -311,7 +391,7 @@ class _UsingVideoControllerExampleState extends State<UsingVideoControllerExampl
 }
 ```
 
-<br><br>
+<!-- <br><br>
 
 ### Portrait Videos Example
 
@@ -337,7 +417,7 @@ class PortraitVideoExample extends StatelessWidget {
     );
   }
 }
-```
+``` -->
 
 <br><br>
 
@@ -349,34 +429,25 @@ class HLSVideoExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: createHLSFiles(
-          "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8"),
+    return FutureBuilder<Map<String, VideoSource>>(
+      future: VideoSource.fromM3u8PlaylistUrl(
+        "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8",
+        formatter: (size) => "${size.height}p",
+      ),
       builder: (_, data) {
-        if (data.hasData)
-          return VideoViewer(source: data.data);
-        else
-          return CircularProgressIndicator();
+        return data.hasData
+            ? VideoViewer(
+                source: data.data,
+                onFullscreenFixLandscape: true,
+                style: VideoViewerStyle(
+                  thumbnail: Image.network(
+                    "https://play-lh.googleusercontent.com/aA2iky4PH0REWCcPs9Qym2X7e9koaa1RtY-nKkXQsDVU6Ph25_9GkvVuyhS72bwKhN1P",
+                  ),
+                ),
+              )
+            : CircularProgressIndicator();
       },
     );
-  }
-
-  ///USE [path_provider] AND [dart.io] **(Only available on Android and iOS)**
-  Future<Map<String, VideoSource>> createHLSFiles(String url) async {
-    final Directory directory = await getApplicationDocumentsDirectory();
-    final Map<String, String> files = await VideoSource.getm3u8VideoFileData(url);
-    Map<String, VideoSource> sources = {
-      "Auto": VideoSource(video: VideoPlayerController.network(url)),
-    };
-
-    for (String quality in files.keys) {
-      final File file = File('${directory.path}/hls$quality.m3u8');
-      await file.writeAsString(files[quality]);
-      sources["${quality.split("x").last}p"] =
-          VideoSource(video: VideoPlayerController.file(file));
-    }
-
-    return sources;
   }
 }
 ```

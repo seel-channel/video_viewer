@@ -24,48 +24,9 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(child: HLSVideoExample()),
+      body: Center(child: SerieExample()),
     );
   }
-}
-
-class UsingVideoControllerExample extends StatefulWidget {
-  UsingVideoControllerExample({Key key}) : super(key: key);
-
-  @override
-  _UsingVideoControllerExampleState createState() =>
-      _UsingVideoControllerExampleState();
-}
-
-class _UsingVideoControllerExampleState
-    extends State<UsingVideoControllerExample> {
-  final VideoViewerController controller = VideoViewerController();
-
-  @override
-  Widget build(BuildContext context) {
-    return VideoViewer(
-      controller: controller,
-      source: {
-        "SubRip Text": VideoSource(
-          video: VideoPlayerController.network(
-              "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
-          subtitle: {
-            "English": VideoViewerSubtitle.network(
-              "https://felipemurguia.com/assets/txt/WEBVTT_English.txt",
-              type: SubtitleType.webvtt,
-            ),
-          },
-        )
-      },
-    );
-  }
-
-  VideoPlayerController getVideoPlayer() => controller.video;
-  String getActiveSourceName() => controller.activeSource;
-  String getActiveCaption() => controller.activeCaption;
-  bool isFullScreen() => controller.isFullScreen;
-  bool isBuffering() => controller.isBuffering;
-  bool isPlaying() => controller.isPlaying;
 }
 
 class SerieExample extends StatefulWidget {
