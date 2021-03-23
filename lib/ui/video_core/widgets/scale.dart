@@ -20,8 +20,8 @@ class _VideoCorePlayerState extends State<VideoCorePlayer> {
 
   void _onScaleStart(ScaleStartDetails details) {
     final size = context.media.size;
-    final controller = _query.video(context).controller!;
-    final aspectWidth = size.height * controller.value.aspectRatio;
+    final video = _query.video(context).video!;
+    final aspectWidth = size.height * video.value.aspectRatio;
 
     _initialScale = _scale.value;
     _maxScale = size.width / aspectWidth;
@@ -68,6 +68,6 @@ class _Player extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final video = VideoQuery().video(context);
-    return VideoPlayer(video.controller!);
+    return VideoPlayer(video.video!);
   }
 }

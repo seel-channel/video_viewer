@@ -12,10 +12,10 @@ class MainMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final query = VideoQuery();
-    final video = query.video(context, listen: true);
+    final controller = query.video(context, listen: true);
     final metadata = query.videoMetadata(context, listen: true);
 
-    final speed = video.controller!.value.playbackSpeed;
+    final speed = controller.video!.value.playbackSpeed;
     final style = metadata.style.settingsStyle;
     final items = style.items;
 
@@ -28,7 +28,7 @@ class MainMenu extends StatelessWidget {
             index: 0,
             icon: style.settings,
             title: metadata.language.quality,
-            subtitle: video.activeSource!,
+            subtitle: controller.activeSource!,
           ),
           _MainMenuItem(
             index: 1,
@@ -36,12 +36,13 @@ class MainMenu extends StatelessWidget {
             title: metadata.language.speed,
             subtitle: speed == 1.0 ? metadata.language.normalSpeed : "x$speed",
           ),
-          if (video.source![video.activeSource!]!.subtitle != null)
+          if (controller.source![controller.activeSource!]!.subtitle != null)
             _MainMenuItem(
               index: 2,
               icon: style.caption,
               title: metadata.language.caption,
-              subtitle: video.activeCaption ?? metadata.language.captionNone,
+              subtitle:
+                  controller.activeCaption ?? metadata.language.captionNone,
             ),
           if (items != null)
             for (int i = 0; i < items.length; i++) ...[

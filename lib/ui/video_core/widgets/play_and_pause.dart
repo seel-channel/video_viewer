@@ -14,8 +14,8 @@ class VideoCorePlayAndPause extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final video = VideoQuery().video(context);
-    final position = video.controller!.value.position;
-    final duration = video.controller!.value.duration;
+    final position = video.video!.value.position;
+    final duration = video.video!.value.duration;
 
     return Center(
       child: CustomOpacityTransition(

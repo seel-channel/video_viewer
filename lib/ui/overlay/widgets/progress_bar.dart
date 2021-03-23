@@ -17,14 +17,14 @@ class VideoProgressBar extends StatelessWidget {
       child: LayoutBuilder(
         builder: (_, constraints) {
           final _query = VideoQuery();
-          final video = _query.video(context, listen: true);
+          final controller = _query.video(context, listen: true);
           final videoStyle = _query.videoStyle(context);
 
           final style = videoStyle.progressBarStyle;
-          final controller = video.controller!;
+          final video = controller.video!;
 
-          final Duration position = controller.value.position;
-          final Duration duration = controller.value.duration;
+          final Duration position = video.value.position;
+          final Duration duration = video.value.duration;
           final double width = constraints.maxWidth;
           final double progressWidth =
               (position.inMilliseconds / duration.inMilliseconds) * width;
@@ -38,7 +38,7 @@ class VideoProgressBar extends StatelessWidget {
                 children: [
                   _ProgressBar(width: width, color: style.barBackgroundColor),
                   _ProgressBar(
-                      width: (video.maxBuffering.inMilliseconds /
+                      width: (controller.maxBuffering.inMilliseconds /
                               duration.inMilliseconds) *
                           width,
                       color: style.barBufferedColor),
@@ -47,11 +47,11 @@ class VideoProgressBar extends StatelessWidget {
                   _DotIsDragging(maxWidth: width),
                   _Dot(maxWidth: width),
                   CustomOpacityTransition(
-                    visible: video.isDraggingProgressBar,
+                    visible: controller.isDraggingProgressBar,
                     child: CustomPaint(
                       painter: _TextPositionPainter(
                         barStyle: style,
-                        position: controller.value.position,
+                        position: video.value.position,
                         width: progressWidth,
                         style: videoStyle.textStyle,
                       ),
@@ -75,18 +75,18 @@ class _DotIsDragging extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _query = VideoQuery();
-    final video = _query.video(context, listen: true);
+    final controller = _query.video(context, listen: true);
     final style = _query.videoStyle(context).progressBarStyle;
 
-    final controller = video.controller!;
-    final position = controller.value.position.inMilliseconds;
-    final duration = controller.value.duration.inMilliseconds;
+    final video = controller.video!;
+    final position = video.value.position.inMilliseconds;
+    final duration = video.value.duration.inMilliseconds;
 
     final double widthPos = (position / duration) * maxWidth;
     final double widthDot = style.barHeight * 2;
 
     return BooleanTween(
-      animate: video.isDraggingProgressBar &&
+      animate: controller.isDraggingProgressBar &&
           (widthPos > widthDot) &&
           (widthPos < maxWidth - widthDot),
       tween: Tween<double>(begin: 0, end: 0.4),
@@ -116,19 +116,19 @@ class __ProgressBarGestureState extends State<_ProgressBarGesture> {
   final _query = VideoQuery();
 
   void _seekToRelativePosition(Offset local, [bool showText = false]) async {
-    final controller = _query.video(context).controller!;
+    final video = _query.video(context).video!;
     final double localPos = local.dx / widget.width!;
-    final Duration position = controller.value.duration * localPos;
-    await controller.seekTo(position);
+    final Duration position = video.value.duration * localPos;
+    await video.seekTo(position);
   }
 
   void play() {
-    _query.video(context).controller?.play();
+    _query.video(context).video?.play();
     Provider.of<ValueNotifier<int>>(context, listen: false).value = 1000;
   }
 
   void pause() {
-    _query.video(context).controller?.pause();
+    _query.video(context).video?.pause();
     Provider.of<ValueNotifier<int>>(context, listen: false).value = 0;
   }
 
@@ -213,12 +213,12 @@ class _Dot extends StatelessWidget {
     final query = VideoQuery();
     final animation = Provider.of<ValueNotifier<int>>(context);
     final style = query.videoStyle(context).progressBarStyle;
-    final controller = query.video(context, listen: true).controller!;
+    final video = query.video(context, listen: true).video!;
 
     final height = style.barHeight;
 
-    final double widthPos = (controller.value.position.inMilliseconds /
-            controller.value.duration.inMilliseconds) *
+    final double widthPos = (video.value.position.inMilliseconds /
+            video.value.duration.inMilliseconds) *
         maxWidth!;
     final double widthDot = height * 2;
     final double width =

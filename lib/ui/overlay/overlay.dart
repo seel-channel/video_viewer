@@ -15,14 +15,14 @@ class VideoCoreOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final query = VideoQuery();
     final style = query.videoMetadata(context, listen: true).style;
-    final video = query.video(context, listen: true);
+    final controller = query.video(context, listen: true);
 
+    final video = controller.video!;
     final header = style.header;
-    final visible = video.isShowingOverlay;
-    final controller = video.controller!;
+    final visible = controller.isShowingOverlay;
 
     return CustomOpacityTransition(
-      visible: !video.isShowingThumbnail,
+      visible: !controller.isShowingThumbnail,
       child: Stack(children: [
         if (header != null)
           CustomSwipeTransition(
@@ -39,17 +39,17 @@ class VideoCoreOverlay extends StatelessWidget {
         CustomSwipeTransition(
           direction: SwipeDirection.fromBottom,
           visible: visible,
-          child: OverlayBottomButtons(),
+          child: OverlayBottom(),
         ),
         AnimatedBuilder(
           animation: controller,
           builder: (_, __) => CustomOpacityTransition(
-            visible: visible && !controller.value.isPlaying,
+            visible: visible && !video.value.isPlaying,
             child: Center(child: PlayAndPause(type: PlayAndPauseType.center)),
           ),
         ),
         CustomOpacityTransition(
-          visible: video.isShowingSettingsMenu,
+          visible: controller.isShowingSettingsMenu,
           child: SettingsMenu(),
         ),
       ]),

@@ -14,7 +14,7 @@ class VideoCoreThumbnail extends StatelessWidget {
     return CustomOpacityTransition(
       visible: video.isShowingThumbnail,
       child: GestureDetector(
-        onTap: video.controller!.play,
+        onTap: video.video!.play,
         child: Container(
           color: Colors.transparent,
           child: style.thumbnail,

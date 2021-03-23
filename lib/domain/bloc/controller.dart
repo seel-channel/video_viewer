@@ -44,7 +44,7 @@ class VideoViewerController extends ChangeNotifier {
   String? _activeSource;
   String? _activeSubtitle;
   VideoViewerSubtitle? _subtitle;
-  VideoPlayerController? _controller;
+  VideoPlayerController? _video;
   SubtitleData? _activeSubtitleData;
 
   int _lastVideoPosition = 0;
@@ -61,7 +61,7 @@ class VideoViewerController extends ChangeNotifier {
   List<bool> isShowingSecondarySettingsMenus = [];
   Duration _maxBuffering = Duration.zero;
 
-  VideoPlayerController? get controller => _controller;
+  VideoPlayerController? get video => _video;
   SubtitleData? get activeCaptionData => _activeSubtitleData;
   List<SubtitleData> get subtitles => _subtitle!.subtitles;
   VideoViewerSubtitle? get subtitle => _subtitle;
@@ -72,7 +72,7 @@ class VideoViewerController extends ChangeNotifier {
   bool get isShowingMainSettingsMenu => _isShowingMainSettingsMenu;
   bool get isShowingOverlay => _isShowingOverlay;
   bool get isFullScreen => _isFullScreen;
-  bool get isPlaying => _controller!.value.isPlaying;
+  bool get isPlaying => _video!.value.isPlaying;
 
   bool get isBuffering => _isBuffering;
   set isBuffering(bool value) {
@@ -114,8 +114,8 @@ class VideoViewerController extends ChangeNotifier {
   Future<void> dispose() async {
     _timerPosition?.cancel();
     _closeOverlayButtons?.cancel();
-    await _controller?.pause();
-    await _controller!.dispose();
+    await _video?.pause();
+    await _video!.dispose();
     super.dispose();
   }
 
@@ -129,8 +129,8 @@ class VideoViewerController extends ChangeNotifier {
   ///
   ///For example:
   ///```dart
-  ///   _controller.setPlaybackSpeed(lastController.value.playbackSpeed);
-  ///   _controller.seekTo(lastController.value.position);
+  ///   _video.setPlaybackSpeed(lastController.value.playbackSpeed);
+  ///   _video.seekTo(lastController.value.position);
   /// ```
   Future<void> changeSource({
     required VideoSource source,
@@ -151,22 +151,22 @@ class VideoViewerController extends ChangeNotifier {
     _activeSource = name;
     double speed = 1.0;
     Duration position = Duration.zero;
-    if (_controller != null) {
-      speed = _controller!.value.playbackSpeed;
-      position = _controller!.value.position;
+    if (_video != null) {
+      speed = _video!.value.playbackSpeed;
+      position = _video!.value.position;
     }
 
     await source.video.initialize();
-    _controller = source.video;
-    _controller!.addListener(_videoListener);
+    _video = source.video;
+    _video!.addListener(_videoListener);
 
     if (inheritValues) {
-      await _controller!.setPlaybackSpeed(speed);
-      await _controller!.seekTo(position);
+      await _video!.setPlaybackSpeed(speed);
+      await _video!.seekTo(position);
     }
 
-    await _controller!.setLooping(looping);
-    if (autoPlay) await _controller!.play();
+    await _video!.setLooping(looping);
+    if (autoPlay) await _video!.play();
     notifyListeners();
   }
 
@@ -186,7 +186,7 @@ class VideoViewerController extends ChangeNotifier {
   //LISTENERS//
   //---------//
   void _videoListener() {
-    final value = _controller!.value;
+    final value = _video!.value;
     final position = value.position;
 
     if (isPlaying && isShowingThumbnail) {
@@ -195,7 +195,7 @@ class VideoViewerController extends ChangeNotifier {
     }
 
     _maxBuffering = Duration.zero;
-    for (DurationRange range in controller!.value.buffered) {
+    for (DurationRange range in _video!.value.buffered) {
       final Duration end = range.end;
       if (end > maxBuffering) {
         _maxBuffering = end;
@@ -206,7 +206,7 @@ class VideoViewerController extends ChangeNotifier {
     if (_isShowingOverlay) {
       if (isPlaying) {
         if (position >= value.duration && looping) {
-          _controller!.seekTo(Duration.zero);
+          _video!.seekTo(Duration.zero);
         } else {
           if (_timerPosition == null) _createBufferTimer();
           if (_closeOverlayButtons == null) _startCloseOverlay();
@@ -225,7 +225,7 @@ class VideoViewerController extends ChangeNotifier {
   }
 
   void _findSubtitle() {
-    final position = _controller!.value.position;
+    final position = _video!.value.position;
     for (SubtitleData subtitle in subtitles) {
       if (position > subtitle.start &&
           position < subtitle.end &&
@@ -263,7 +263,7 @@ class VideoViewerController extends ChangeNotifier {
 
   void _createBufferTimer() {
     _timerPosition = Misc.periodic(1000, () {
-      int position = _controller!.value.position.inMilliseconds;
+      int position = _video!.value.position.inMilliseconds;
       if (isPlaying)
         _isBuffering = _lastVideoPosition != position ? false : true;
       else
@@ -278,15 +278,14 @@ class VideoViewerController extends ChangeNotifier {
   //OVERLAY//
   //-------//
   Future<void> onTapPlayAndPause() async {
-    final value = _controller!.value;
+    final value = _video!.value;
     if (isPlaying) {
-      await _controller!.pause();
+      await _video!.pause();
       if (!_isShowingOverlay) _isShowingOverlay = false;
     } else {
-      if (value.position >= value.duration)
-        await _controller!.seekTo(Duration.zero);
+      if (value.position >= value.duration) await _video!.seekTo(Duration.zero);
       _lastVideoPosition = _lastVideoPosition - 1;
-      await _controller!.play();
+      await _video!.play();
     }
     notifyListeners();
   }

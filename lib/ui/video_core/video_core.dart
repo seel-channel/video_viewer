@@ -97,15 +97,15 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   void _rewind() => _showRewindAndForward(0, -_defaultRewindAmount);
   void _forward() => _showRewindAndForward(1, _defaultForwardAmount);
 
-  void _controllerSeekTo(int amount) async {
-    final controller = _query.video(context).controller!;
-    final seconds = controller.value.position.inSeconds;
-    await controller.seekTo(Duration(seconds: seconds + amount));
-    await controller.play();
+  void _videoSeekTo(int amount) async {
+    final video = _query.video(context).video!;
+    final seconds = video.value.position.inSeconds;
+    await video.seekTo(Duration(seconds: seconds + amount));
+    await video.play();
   }
 
   void _showRewindAndForward(int index, int amount) async {
-    _controllerSeekTo(amount);
+    _videoSeekTo(amount);
     setState(() {
       _forwardAndRewindAmount = amount;
       _showForwardStatus = true;
@@ -133,10 +133,10 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     if (!video.isShowingSettingsMenu && _pointers == 1) {
       double diff = _horizontalDragStartOffset.dx - details.globalPosition.dx;
       double multiplicator = (diff.abs() / 50);
-      int seconds = video.controller!.value.position.inSeconds;
+      int seconds = video.video!.value.position.inSeconds;
       int amount = -((diff / 10).round() * multiplicator).round();
       setState(() {
-        if (seconds + amount < video.controller!.value.duration.inSeconds &&
+        if (seconds + amount < video.video!.value.duration.inSeconds &&
             seconds + amount > 0) _forwardAndRewindAmount = amount;
       });
     }
@@ -146,12 +146,12 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     final video = _query.video(context);
     if (!video.isShowingSettingsMenu && _showForwardStatus) {
       setState(() => _showForwardStatus = false);
-      _controllerSeekTo(_forwardAndRewindAmount);
+      _videoSeekTo(_forwardAndRewindAmount);
     }
   }
 
   //-----------------//
-  //CONTROLLER VOLUME//
+  //video VOLUME//
   //-----------------//
   void _setVolume(double volume) async {
     if (volume <= _maxVolume && volume >= 0) {
@@ -159,7 +159,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       final fractional = _maxVolume * 0.05;
       if (volume >= _maxVolume - fractional) volume = _maxVolume;
       if (volume <= fractional) volume = 0.0;
-      await video.controller!.setVolume(volume);
+      await video.video!.setVolume(volume);
       _currentVolume.value = volume;
     }
   }
@@ -170,7 +170,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       setState(() {
         _closeVolumeStatus?.cancel();
         _showVolumeStatus = true;
-        _onDragStartVolume = video.controller!.value.volume;
+        _onDragStartVolume = video.video!.value.volume;
         _currentVolume.value = _onDragStartVolume;
         _verticalDragStartOffset = details.globalPosition;
       });

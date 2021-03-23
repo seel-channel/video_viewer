@@ -12,7 +12,7 @@ class SpeedMenu extends StatelessWidget {
     final video = query.video(context, listen: true);
     final metadata = query.videoMetadata(context, listen: true);
 
-    final speed = video.controller!.value.playbackSpeed;
+    final speed = video.video!.value.playbackSpeed;
 
     return SecondaryMenu(
       children: [
@@ -20,7 +20,7 @@ class SpeedMenu extends StatelessWidget {
           CustomInkWell(
             onTap: () {
               final video = query.video(context);
-              video.controller!.setPlaybackSpeed(i);
+              video.video!.setPlaybackSpeed(i);
               video.closeAllSecondarySettingsMenus();
             },
             child: CustomText(
