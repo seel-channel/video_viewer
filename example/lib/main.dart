@@ -24,7 +24,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(child: SerieExample()),
+      body: Center(child: HLSVideoExample()),
     );
   }
 }
@@ -201,8 +201,17 @@ class _SerieExampleState extends State<SerieExample> {
             final episodeName = entry.key;
             final qualities = entry.value;
 
-            Map<String, VideoSource> sources =
-                VideoSource.fromNetworkVideoSources(qualities);
+            Map<String, VideoSource> sources;
+            String url = qualities.entries.first.value;
+
+            if (url.contains("m3u8")) {
+              sources = await VideoSource.fromM3u8PlaylistUrl(
+                url,
+                formatter: (size) => "${size.height}p",
+              );
+            } else {
+              sources = VideoSource.fromNetworkVideoSources(qualities);
+            }
 
             final video = sources.entries.first;
 
@@ -241,43 +250,51 @@ class _SerieExampleState extends State<SerieExample> {
   }
 }
 
-class PortraitVideoExample extends StatelessWidget {
-  const PortraitVideoExample({Key key}) : super(key: key);
+// class PortraitVideoExample extends StatelessWidget {
+//   const PortraitVideoExample({Key key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    final Map<String, String> src = {
-      "1":
-          "https://assets.mixkit.co/videos/preview/mixkit-mysterious-pale-looking-fashion-woman-at-winter-39878-large.mp4",
-      "2":
-          "https://assets.mixkit.co/videos/preview/mixkit-winter-fashion-cold-looking-woman-concept-video-39874-large.mp4",
-    };
+//   @override
+//   Widget build(BuildContext context) {
+//     final Map<String, String> src = {
+//       "1":
+//           "https://assets.mixkit.co/videos/preview/mixkit-mysterious-pale-looking-fashion-woman-at-winter-39878-large.mp4",
+//       "2":
+//           "https://assets.mixkit.co/videos/preview/mixkit-winter-fashion-cold-looking-woman-concept-video-39874-large.mp4",
+//     };
 
-    return VideoViewer(
-      language: VideoViewerLanguage.es,
-      source: VideoSource.fromNetworkVideoSources(src),
-      style: VideoViewerStyle(
-        settingsStyle: SettingsMenuStyle(paddingBetween: 10),
-      ),
-    );
-  }
-}
+//     return VideoViewer(
+//       language: VideoViewerLanguage.es,
+//       source: VideoSource.fromNetworkVideoSources(src),
+//       style: VideoViewerStyle(
+//         settingsStyle: SettingsMenuStyle(paddingBetween: 10),
+//       ),
+//     );
+//   }
+// }
 
 class HLSVideoExample extends StatelessWidget {
   const HLSVideoExample({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return VideoViewer(
-      source: VideoSource.fromNetworkVideoSources({
-        "Auto":
-            "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8"
-      }),
-      onFullscreenFixLandscape: true,
-      style: VideoViewerStyle(
-        thumbnail: Image.network(
-            "https://play-lh.googleusercontent.com/aA2iky4PH0REWCcPs9Qym2X7e9koaa1RtY-nKkXQsDVU6Ph25_9GkvVuyhS72bwKhN1P"),
+    return FutureBuilder<Map<String, VideoSource>>(
+      future: VideoSource.fromM3u8PlaylistUrl(
+        "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8",
+        formatter: (size) => "${size.height}p",
       ),
+      builder: (_, data) {
+        return data.hasData
+            ? VideoViewer(
+                source: data.data,
+                onFullscreenFixLandscape: true,
+                style: VideoViewerStyle(
+                  thumbnail: Image.network(
+                    "https://play-lh.googleusercontent.com/aA2iky4PH0REWCcPs9Qym2X7e9koaa1RtY-nKkXQsDVU6Ph25_9GkvVuyhS72bwKhN1P",
+                  ),
+                ),
+              )
+            : CircularProgressIndicator();
+      },
     );
   }
 }
