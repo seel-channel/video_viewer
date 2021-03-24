@@ -194,7 +194,7 @@ class VideoViewerController extends ChangeNotifier {
       notifyListeners();
     }
 
-    if (_isBuffering != buffering) {
+    if (_isBuffering != buffering && !_isDraggingProgressBar) {
       _isBuffering = buffering;
       notifyListeners();
     }
