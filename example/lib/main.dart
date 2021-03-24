@@ -249,6 +249,7 @@ class HLSVideoExample extends StatelessWidget {
       builder: (_, data) {
         return data.hasData
             ? VideoViewer(
+                language: VideoViewerLanguage.ar,
                 source: data.data,
                 onFullscreenFixLandscape: true,
                 style: VideoViewerStyle(
@@ -273,7 +274,6 @@ class WebVTTSubtitleVideoExample extends StatelessWidget {
         "WebVTT Caption": VideoSource(
           intialSubtitle: "Spanish",
           video: VideoPlayerController.network(
-            //This video has a problem when end
             "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4",
           ),
           subtitle: {

@@ -1,9 +1,7 @@
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 
 import 'package:video_viewer/data/repositories/video.dart';
-
 import 'package:video_viewer/ui/overlay/widgets/progress_bar.dart';
 import 'package:video_viewer/ui/overlay/widgets/background.dart';
 import 'package:video_viewer/ui/widgets/play_and_pause.dart';
@@ -62,7 +60,7 @@ class _OverlayBottomState extends State<OverlayBottom> {
                   _showRemaingText.value = !showText;
                   video.cancelCloseOverlay();
                 },
-                child: AutoSizeText(
+                child: Text(
                   showText
                       ? _query.durationFormatter(position)
                       : _query.durationFormatter(position - duration),

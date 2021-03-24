@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
 class VideoCoreForwardAndRewindBar extends StatelessWidget {
@@ -31,7 +30,7 @@ class VideoCoreForwardAndRewindBar extends StatelessWidget {
           borderRadius: forwardStyle.borderRadius,
         ),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          AutoSizeText(
+          Text(
             query.durationFormatter(Duration(seconds: seconds)),
             style: style.textStyle,
           ),

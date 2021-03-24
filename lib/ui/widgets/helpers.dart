@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
 import 'package:video_viewer/data/repositories/video.dart';
@@ -53,7 +52,7 @@ class CustomText extends StatelessWidget {
       padding: Margin.horizontal(8),
       child: Row(children: [
         Expanded(
-          child: AutoSizeText(
+          child: Text(
             text,
             style: metadata.style.textStyle.merge(
               TextStyle(

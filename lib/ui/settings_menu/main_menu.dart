@@ -1,6 +1,5 @@
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 
 import 'package:video_viewer/domain/entities/settings_menu_item.dart';
 import 'package:video_viewer/data/repositories/video.dart';
@@ -95,8 +94,8 @@ class _MainMenuItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           icon,
-          AutoSizeText(title, style: textStyle),
-          AutoSizeText(
+          Text(title, style: textStyle),
+          Text(
             subtitle,
             style: textStyle.merge(TextStyle(
               fontWeight: FontWeight.normal,

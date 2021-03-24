@@ -56,13 +56,13 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   @override
   void initState() {
-    super.initState();
     Misc.onLayoutRendered(() {
       final metadata = _query.videoMetadata(context);
       _defaultRewindAmount = metadata.rewindAmount;
       _defaultForwardAmount = metadata.forwardAmount;
       setState(() {});
     });
+    super.initState();
   }
 
   @override

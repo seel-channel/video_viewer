@@ -1,6 +1,5 @@
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
 enum RippleSide { left, right }
@@ -33,7 +32,7 @@ class ForwardAndRewindRippleSide extends StatelessWidget {
             side == RippleSide.left
                 ? style.forwardAndRewindStyle.rewind
                 : style.forwardAndRewindStyle.forward,
-            AutoSizeText(text, style: style.textStyle),
+            Text(text, style: style.textStyle),
           ],
         ),
       ),
