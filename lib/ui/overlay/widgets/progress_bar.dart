@@ -85,12 +85,12 @@ class _DotIsDragging extends StatelessWidget {
     final duration = video.value.duration.inMilliseconds;
 
     final double widthPos = (position / duration) * maxWidth;
-    final double widthDot = style.bar.height * 2;
+    final double dotWidth = style.bar.identifierWidth;
 
     return BooleanTween(
       animate: controller.isDraggingProgressBar &&
-          (widthPos > widthDot) &&
-          (widthPos < maxWidth - widthDot),
+          (widthPos > dotWidth) &&
+          (widthPos < maxWidth - dotWidth),
       tween: Tween<double>(begin: 0, end: 0.4),
       builder: (_, double value, __) => _Dot(
         maxWidth: maxWidth,
@@ -217,14 +217,14 @@ class _Dot extends StatelessWidget {
     final style = query.videoStyle(context).progressBarStyle;
     final video = query.video(context, listen: true).video!;
 
-    final height = style.bar.height;
+    final dotSize = style.bar.identifierWidth;
 
     final double widthPos = (video.value.position.inMilliseconds /
             video.value.duration.inMilliseconds) *
         maxWidth!;
-    final double widthDot = height * 2;
+    final double dotWidth = dotSize * 2;
     final double width =
-        widthPos < height ? widthDot : widthPos + height * multiplicator;
+        widthPos < dotSize ? dotWidth : widthPos + dotSize * multiplicator;
 
     return ValueListenableBuilder(
       valueListenable: animation,
@@ -234,8 +234,8 @@ class _Dot extends StatelessWidget {
           duration: Duration(milliseconds: value),
           alignment: Alignment.centerRight,
           child: Container(
-            height: height * 2 * multiplicator,
-            width: height * 2 * multiplicator,
+            height: dotWidth * multiplicator,
+            width: dotWidth * multiplicator,
             decoration: BoxDecoration(
               color: style.bar.identifier.withOpacity(opacity!),
               shape: BoxShape.circle,
