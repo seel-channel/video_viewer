@@ -242,7 +242,6 @@ class HLSVideoExample extends StatelessWidget {
     return FutureBuilder<Map<String, VideoSource>>(
       future: VideoSource.fromM3u8PlaylistUrl(
         "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8",
-        descending: false,
         formatter: (quality) =>
             quality == "Auto" ? "Auto" : "${quality.split("x").last}p",
       ),

@@ -23,14 +23,6 @@
 <br><br>
 
 ## **INSTALLATION**
-
-First, add `video_viewer` as a dependency in your **pubspec.yaml.**
-
-```yaml
-dependencies:
-  video_viewer: ^1.0.9
-```
-
 ### Android
 
 Add _android.permission.INTERNET_ and _usesCleartextTraffic_ in your **Android Manifest** file, located in `<project_root>/android/app/src/main/AndroidManifest.xml`
@@ -432,7 +424,7 @@ class HLSVideoExample extends StatelessWidget {
     return FutureBuilder<Map<String, VideoSource>>(
       future: VideoSource.fromM3u8PlaylistUrl(
         "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8",
-        formatter: (size) => "${size.height}p",
+        formatter: (quality) => quality == "Auto" ? "Automatic" : "${quality.split("x").last}p",
       ),
       builder: (_, data) {
         return data.hasData
