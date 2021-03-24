@@ -25,7 +25,7 @@ class VideoViewer extends StatefulWidget {
     VideoViewerController? controller,
     this.looping = false,
     this.autoPlay = false,
-    this.rewindAmount = 10,
+    this.rewindAmount = -10,
     this.forwardAmount = 10,
     this.defaultAspectRatio = 16 / 9,
     this.onFullscreenFixLandscape = false,
