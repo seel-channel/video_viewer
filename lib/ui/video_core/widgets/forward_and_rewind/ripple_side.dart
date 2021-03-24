@@ -26,7 +26,7 @@ class ForwardAndRewindRippleSide extends StatelessWidget {
           ? _RippleLeftPainter(ripple)
           : _RippleRightPainter(ripple),
       child: Padding(
-        padding: side == RippleSide.left ? Margin.right(20) : Margin.left(20),
+        padding: side == RippleSide.left ? Margin.right(10) : Margin.left(10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -47,17 +47,22 @@ class _RippleLeftPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    var paint = Paint()
+    final Paint paint = Paint()
       ..color = color
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 5;
+      ..style = PaintingStyle.fill;
 
     canvas.drawPath(
-        Path()
-          ..arcTo(Offset.zero & size, -1.5, 3, false)
-          ..lineTo(0.0, size.height)
-          ..lineTo(0.0, 0.0),
-        paint);
+      Path()
+        ..arcTo(
+          Offset(size.width * 0.75, 0.0) & Size(size.width / 4, size.height),
+          -1.5,
+          3,
+          false,
+        )
+        ..lineTo(0.0, size.height)
+        ..lineTo(0.0, 0.0),
+      paint,
+    );
   }
 
   @override
@@ -70,17 +75,22 @@ class _RippleRightPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    var paint = Paint()
+    final Paint paint = Paint()
       ..color = color
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 5;
-    //draw arc
+      ..style = PaintingStyle.fill;
+
     canvas.drawPath(
-        Path()
-          ..arcTo(Offset.zero & size, -1.5, -3.3, false)
-          ..lineTo(size.width, size.height)
-          ..lineTo(size.width, 0.0),
-        paint);
+      Path()
+        ..arcTo(
+          Offset.zero & Size(size.width / 4, size.height),
+          -1.5,
+          -3.3,
+          false,
+        )
+        ..lineTo(size.width, size.height)
+        ..lineTo(size.width, 0.0),
+      paint,
+    );
   }
 
   @override
