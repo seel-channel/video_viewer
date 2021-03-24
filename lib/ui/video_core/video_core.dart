@@ -159,14 +159,14 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   void _forwardDragUpdate(Offset globalPosition) {
-    final video = _query.video(context);
-    if (!video.isShowingSettingsMenu) {
-      double diff = _horizontalDragStartOffset.dx - globalPosition.dx;
-      double multiplicator = (diff.abs() / 50);
-      int seconds = video.video!.value.position.inSeconds;
-      int amount = -((diff / 10).round() * multiplicator).round();
+    final controller = _query.video(context);
+    if (!controller.isShowingSettingsMenu) {
+      final double diff = _horizontalDragStartOffset.dx - globalPosition.dx;
+      final double multiplicator = (diff.abs() / 25);
+      final int seconds = controller.video!.value.position.inSeconds;
+      final int amount = -((diff / 10).round() * multiplicator).round();
 
-      if (seconds + amount < video.video!.value.duration.inSeconds &&
+      if (seconds + amount < controller.video!.value.duration.inSeconds &&
           seconds + amount > 0) _forwardAndRewindAmount.value = amount;
     }
   }
