@@ -1,4 +1,14 @@
-## [1.1.0]
+## [1.2.0]
+
+- Subtitles bugs fixed
+- Scale video gesture fixed.
+- Sound Null Safety Migration.
+- Double Tap ripple effect added.
+- SerieExample improved (It longer need an InheritedWidget to works)
+- m3u8 (HLS) multiplataform support added (It longer need path_provider and dart:io)
+
+
+# [1.1.0]
 
 - ProgressBarTextPosition follow the finger.
 - Changed example's WEBVTT Files URL
