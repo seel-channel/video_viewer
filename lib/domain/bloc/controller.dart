@@ -51,13 +51,13 @@ class VideoViewerController extends ChangeNotifier {
   bool _isBuffering = false,
       _isShowingOverlay = false,
       _isFullScreen = false,
-      _isGoingToCloseBufferingWidget = false,
+      _isGoingToCloseOverlay = false,
       _isShowingThumbnail = true,
       _isShowingSettingsMenu = false,
       _isShowingMainSettingsMenu = false,
       _isDraggingProgressBar = false;
 
-  Timer? _closeOverlayButtons, _timerPosition;
+  Timer? _closeOverlayButtons;
   List<bool> isShowingSecondarySettingsMenus = [];
   Duration _maxBuffering = Duration.zero;
 
@@ -112,7 +112,6 @@ class VideoViewerController extends ChangeNotifier {
 
   @override
   Future<void> dispose() async {
-    _timerPosition?.cancel();
     _closeOverlayButtons?.cancel();
     await _video?.pause();
     await _video!.dispose();
@@ -188,9 +187,15 @@ class VideoViewerController extends ChangeNotifier {
   void _videoListener() {
     final value = _video!.value;
     final position = value.position;
+    final buffering = video!.value.isBuffering;
 
     if (isPlaying && isShowingThumbnail) {
       _isShowingThumbnail = false;
+      notifyListeners();
+    }
+
+    if (_isBuffering != buffering) {
+      _isBuffering = buffering;
       notifyListeners();
     }
 
@@ -208,10 +213,9 @@ class VideoViewerController extends ChangeNotifier {
         if (position >= value.duration && looping) {
           _video!.seekTo(Duration.zero);
         } else {
-          if (_timerPosition == null) _createBufferTimer();
           if (_closeOverlayButtons == null) _startCloseOverlay();
         }
-      } else if (_isGoingToCloseBufferingWidget) cancelCloseOverlay();
+      } else if (_isGoingToCloseOverlay) cancelCloseOverlay();
     }
 
     if (_subtitle != null) {
@@ -248,15 +252,15 @@ class VideoViewerController extends ChangeNotifier {
   //-----//
   ///DON'T TOUCH >:]
   void cancelCloseOverlay() {
-    _isGoingToCloseBufferingWidget = false;
+    _isGoingToCloseOverlay = false;
     _closeOverlayButtons?.cancel();
     _closeOverlayButtons = null;
     notifyListeners();
   }
 
   void _startCloseOverlay() {
-    if (!_isGoingToCloseBufferingWidget) {
-      _isGoingToCloseBufferingWidget = true;
+    if (!_isGoingToCloseOverlay) {
+      _isGoingToCloseOverlay = true;
       _closeOverlayButtons = Misc.timer(3200, () {
         if (isPlaying) {
           _isShowingOverlay = false;
@@ -265,19 +269,6 @@ class VideoViewerController extends ChangeNotifier {
       });
       notifyListeners();
     }
-  }
-
-  void _createBufferTimer() {
-    _timerPosition = Misc.periodic(1000, () {
-      int position = _video!.value.position.inMilliseconds;
-      if (isPlaying)
-        _isBuffering = _lastVideoPosition != position ? false : true;
-      else
-        _isBuffering = false;
-      _lastVideoPosition = position;
-      notifyListeners();
-    });
-    notifyListeners();
   }
 
   //-------//
@@ -298,7 +289,7 @@ class VideoViewerController extends ChangeNotifier {
 
   void showAndHideOverlay([bool? show]) {
     _isShowingOverlay = show ?? !_isShowingOverlay;
-    if (_isShowingOverlay) _isGoingToCloseBufferingWidget = false;
+    if (_isShowingOverlay) _isGoingToCloseOverlay = false;
     notifyListeners();
   }
 

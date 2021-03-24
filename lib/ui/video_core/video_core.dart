@@ -264,7 +264,10 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
             ),
           ),
         ),
-        VideoCoreBuffering(),
+        AnimatedBuilder(
+          animation: _query.video(context, listen: true),
+          builder: (_, __) => VideoCoreBuffering(),
+        ),
         VideoCoreActiveSubtitleText(),
         VideoCorePlayAndPause(showAMoment: _showAMomentPlayAndPause),
         VideoCoreOverlay(),
