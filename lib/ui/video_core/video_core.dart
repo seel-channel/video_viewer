@@ -34,8 +34,12 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //REWIND AND FORWARD
   final ValueNotifier<int> _forwardAndRewindAmount = ValueNotifier<int>(1);
   Duration _initialPosition = Duration.zero;
-  int _defaultRewindAmount = 10;
+  int _rewindDoubleTapCount = 0;
+  int _forwardDoubleTapCount = 0;
+  int _defaultRewindAmount = -10;
   int _defaultForwardAmount = 10;
+  Timer? _rewindDoubleTapTimer;
+  Timer? _forwardDoubleTapTimer;
   bool _showForwardStatus = false;
   Offset _horizontalDragStartOffset = Offset.zero;
   List<bool> _showAMomentRewindIcons = [false, false];
@@ -71,9 +75,9 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     super.dispose();
   }
 
-  //--------------//
-  //MISC FUNCTIONS//
-  //--------------//
+  //-------------//
+  //OVERLAY (TAP)//
+  //-------------//
   void _onTapPlayAndPause() async {
     final video = _query.video(context);
     await video.onTapPlayAndPause();
@@ -95,10 +99,10 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       FocusScope.of(context).requestFocus(_focusRawKeyboard);
   }
 
-  //------------------//
-  //FORWARD AND REWIND//
-  //------------------//
-  void _rewind() => _showRewindAndForward(0, -_defaultRewindAmount);
+  //-------------------------------//
+  //FORWARD AND REWIND (DOUBLE TAP)//
+  //-------------------------------//
+  void _rewind() => _showRewindAndForward(0, _defaultRewindAmount);
   void _forward() => _showRewindAndForward(1, _defaultForwardAmount);
 
   void _videoSeekTo(int amount) async {
@@ -111,16 +115,30 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   void _showRewindAndForward(int index, int amount) async {
     _videoSeekTo(amount);
     setState(() {
-      _forwardAndRewindAmount.value = amount;
+      if (index == 0) {
+        if (!_showAMomentRewindIcons[index]) _rewindDoubleTapCount = 0;
+        _rewindDoubleTapTimer?.cancel();
+        _rewindDoubleTapCount += 1;
+        _rewindDoubleTapTimer = Misc.timer(600, () {
+          _showAMomentRewindIcons[index] = false;
+          setState(() {});
+        });
+      } else {
+        if (!_showAMomentRewindIcons[index]) _forwardDoubleTapCount = 0;
+        _forwardDoubleTapTimer?.cancel();
+        _forwardDoubleTapCount += 1;
+        _forwardDoubleTapTimer = Misc.timer(600, () {
+          _showAMomentRewindIcons[index] = false;
+          setState(() {});
+        });
+      }
       _showAMomentRewindIcons[index] = true;
-    });
-    Misc.delayed(600, () {
-      setState(() {
-        _showAMomentRewindIcons[index] = false;
-      });
     });
   }
 
+  //------------------------------------//
+  //FORWARD AND REWIND (DRAG HORIZONTAL)//
+  //------------------------------------//
   void _forwardDragStart(DragStartDetails details) {
     final controller = _query.video(context);
     if (!controller.isShowingSettingsMenu && _pointers == 1)
@@ -152,9 +170,9 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     }
   }
 
-  //-----------------//
-  //video VOLUME//
-  //-----------------//
+  //----------------------------//
+  //VIDEO VOLUME (VERTICAL DRAG)//
+  //----------------------------//
   void _setVolume(double volume) async {
     if (volume <= _maxVolume && volume >= 0) {
       final video = _query.video(context);
@@ -220,6 +238,12 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           behavior: HitTestBehavior.opaque,
           child: Container(height: double.infinity, width: double.infinity),
         ),
+        VideoCoreForwardAndRewind(
+          showRewind: _showAMomentRewindIcons[0],
+          showForward: _showAMomentRewindIcons[1],
+          rewindSeconds: _defaultRewindAmount * _rewindDoubleTapCount,
+          forwardSeconds: _defaultForwardAmount * _forwardDoubleTapCount,
+        ),
         VideoCoreForwardAndRewindLayout(
           rewind: GestureDetector(onDoubleTap: _rewind),
           forward: GestureDetector(onDoubleTap: _forward),
@@ -260,12 +284,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
             visible: _showVolumeStatus,
             progress: value / _maxVolume,
           ),
-        ),
-        VideoCoreForwardAndRewind(
-          showRewind: _showAMomentRewindIcons[0],
-          showForward: _showAMomentRewindIcons[1],
-          rewindSeconds: -_defaultRewindAmount,
-          forwardSeconds: _defaultForwardAmount,
         ),
         VideoCoreThumbnail(),
       ]),
