@@ -43,7 +43,7 @@ class VideoProgressBar extends StatelessWidget {
                     width: (controller.maxBuffering.inMilliseconds /
                             duration.inMilliseconds) *
                         width,
-                    color: bar.buffered,
+                    color: bar.secondBackground,
                   ),
                   _ProgressBar(width: progressWidth, color: bar.color),
                   _DotIsDragging(maxWidth: width),
@@ -237,7 +237,7 @@ class _Dot extends StatelessWidget {
             height: height * 2 * multiplicator,
             width: height * 2 * multiplicator,
             decoration: BoxDecoration(
-              color: style.bar.dot.withOpacity(opacity!),
+              color: style.bar.identifier.withOpacity(opacity!),
               shape: BoxShape.circle,
             ),
           ),

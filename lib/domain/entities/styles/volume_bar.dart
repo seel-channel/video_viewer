@@ -27,5 +27,9 @@ class VolumeBarStyle {
   ///```
   final EdgeInsetsGeometry margin;
 
+  ///DEFAULT:
+  ///```dart
+  ///BarStyle.volume()
+  ///```
   final BarStyle bar;
 }

@@ -11,12 +11,12 @@ class ForwardAndRewindStyle {
     Widget? forward,
     Color? backgroundColor,
     EdgeInsetsGeometry? padding,
-    BorderRadiusGeometry? borderRadius,
+    BorderRadius? borderRadius,
   })  : this.bar = bar ?? BarStyle.forward(),
         this.padding = padding ?? Margin.all(20),
         this.backgroundColor =
             backgroundColor ?? Colors.black.withOpacity(0.28),
-        this.borderRadius = borderRadius ?? EdgeRadius.vertical(bottom: 5),
+        this.borderRadius = borderRadius ?? EdgeRadius.all(20),
         this.rewind = rewind ?? Icon(Icons.fast_rewind, color: Colors.white),
         this.forward = forward ?? Icon(Icons.fast_forward, color: Colors.white);
 
@@ -61,7 +61,11 @@ class ForwardAndRewindStyle {
   ///   EdgeRadius.vertical(bottom: 5);
   ///   "NOTE: EdgeRadius is on Helpers pubdev library"
   ///```
-  final BorderRadiusGeometry borderRadius;
+  final BorderRadius borderRadius;
 
+  ///DEFAULT:
+  ///```dart
+  ///BarStyle.forward()
+  ///```
   final BarStyle bar;
 }
