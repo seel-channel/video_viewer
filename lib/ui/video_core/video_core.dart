@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -31,9 +32,12 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   bool _showAMomentPlayAndPause = false;
   Timer? _hidePlayAndPause;
 
+  Offset _dragInitialDelta = Offset.zero;
+  Axis _dragDirection = Axis.vertical;
+
   //REWIND AND FORWARD
   final ValueNotifier<int> _forwardAndRewindAmount = ValueNotifier<int>(1);
-  Duration _initialPosition = Duration.zero;
+  Duration _initialForwardPosition = Duration.zero;
   int _rewindDoubleTapCount = 0;
   int _forwardDoubleTapCount = 0;
   int _defaultRewindAmount = -10;
@@ -52,7 +56,11 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   double _onDragStartVolume = 1;
   bool _showVolumeStatus = false;
   Timer? _closeVolumeStatus;
-  int _pointers = 0;
+
+  //SCALE
+  final ValueNotifier<double> _scale = ValueNotifier<double>(1.0);
+  final double _minScale = 1.0;
+  double _initialScale = 1.0, _maxScale = 1.0;
 
   @override
   void initState() {
@@ -67,11 +75,12 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   @override
   void dispose() {
-    _forwardAndRewindAmount.dispose();
+    _scale.dispose();
     _currentVolume.dispose();
     _focusRawKeyboard.dispose();
     _hidePlayAndPause?.cancel();
     _closeVolumeStatus?.cancel();
+    _forwardAndRewindAmount.dispose();
     super.dispose();
   }
 
@@ -139,20 +148,20 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //------------------------------------//
   //FORWARD AND REWIND (DRAG HORIZONTAL)//
   //------------------------------------//
-  void _forwardDragStart(DragStartDetails details) {
+  void _forwardDragStart(Offset globalPosition) {
     final controller = _query.video(context);
-    if (!controller.isShowingSettingsMenu && _pointers == 1)
+    if (!controller.isShowingSettingsMenu)
       setState(() {
-        _initialPosition = controller.video!.value.position;
-        _horizontalDragStartOffset = details.globalPosition;
+        _initialForwardPosition = controller.video!.value.position;
+        _horizontalDragStartOffset = globalPosition;
         _showForwardStatus = true;
       });
   }
 
-  void _forwardDragUpdate(DragUpdateDetails details) {
+  void _forwardDragUpdate(Offset globalPosition) {
     final video = _query.video(context);
-    if (!video.isShowingSettingsMenu && _pointers == 1) {
-      double diff = _horizontalDragStartOffset.dx - details.globalPosition.dx;
+    if (!video.isShowingSettingsMenu) {
+      double diff = _horizontalDragStartOffset.dx - globalPosition.dx;
       double multiplicator = (diff.abs() / 50);
       int seconds = video.video!.value.position.inSeconds;
       int amount = -((diff / 10).round() * multiplicator).round();
@@ -184,23 +193,23 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     }
   }
 
-  void _volumeDragStart(DragStartDetails details) {
+  void _volumeDragStart(Offset globalPosition) {
     final video = _query.video(context);
-    if (!video.isShowingSettingsMenu && _pointers == 1) {
+    if (!video.isShowingSettingsMenu) {
       setState(() {
         _closeVolumeStatus?.cancel();
         _showVolumeStatus = true;
         _onDragStartVolume = video.video!.value.volume;
         _currentVolume.value = _onDragStartVolume;
-        _verticalDragStartOffset = details.globalPosition;
+        _verticalDragStartOffset = globalPosition;
       });
     }
   }
 
-  void _volumeDragUpdate(DragUpdateDetails details) {
+  void _volumeDragUpdate(Offset globalPosition) {
     final video = _query.video(context);
-    if (!video.isShowingSettingsMenu && _pointers == 1) {
-      double diff = _verticalDragStartOffset.dy - details.globalPosition.dy;
+    if (!video.isShowingSettingsMenu) {
+      double diff = _verticalDragStartOffset.dy - globalPosition.dy;
       double volume = (diff / 125) + _onDragStartVolume;
       _setVolume(volume);
     }
@@ -230,79 +239,84 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   @override
   Widget build(BuildContext context) {
-    Widget player = _globalGesture(
-      Stack(children: [
-        VideoCorePlayer(),
-        GestureDetector(
-          onTap: _showAndHideOverlay,
-          behavior: HitTestBehavior.opaque,
-          child: Container(height: double.infinity, width: double.infinity),
+    Widget player = Stack(children: [
+      ValueListenableBuilder(
+        valueListenable: _scale,
+        builder: (_, double scale, __) => Transform.scale(
+          scale: scale,
+          child: VideoCorePlayer(),
         ),
-        VideoCoreForwardAndRewind(
-          showRewind: _showAMomentRewindIcons[0],
-          showForward: _showAMomentRewindIcons[1],
-          rewindSeconds: _defaultRewindAmount * _rewindDoubleTapCount,
-          forwardSeconds: _defaultForwardAmount * _forwardDoubleTapCount,
-        ),
-        VideoCoreForwardAndRewindLayout(
-          rewind: GestureDetector(onDoubleTap: _rewind),
-          forward: GestureDetector(onDoubleTap: _forward),
-        ),
-        LayoutBuilder(
-          builder: (_, box) => Center(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _onTapPlayAndPause,
-              child: Container(
-                width: box.maxWidth * 0.2,
-                height: box.maxHeight * 0.2,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  shape: BoxShape.circle,
-                ),
+      ),
+      GestureDetector(
+        onTap: _showAndHideOverlay,
+        behavior: HitTestBehavior.opaque,
+        child: Container(height: double.infinity, width: double.infinity),
+      ),
+      VideoCoreForwardAndRewind(
+        showRewind: _showAMomentRewindIcons[0],
+        showForward: _showAMomentRewindIcons[1],
+        rewindSeconds: _defaultRewindAmount * _rewindDoubleTapCount,
+        forwardSeconds: _defaultForwardAmount * _forwardDoubleTapCount,
+      ),
+      VideoCoreForwardAndRewindLayout(
+        rewind: GestureDetector(onDoubleTap: _rewind),
+        forward: GestureDetector(onDoubleTap: _forward),
+      ),
+      LayoutBuilder(
+        builder: (_, box) => Center(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _onTapPlayAndPause,
+            child: Container(
+              width: box.maxWidth * 0.2,
+              height: box.maxHeight * 0.2,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.circle,
               ),
             ),
           ),
         ),
-        AnimatedBuilder(
-          animation: _query.video(context, listen: true),
-          builder: (_, __) => VideoCoreBuffering(),
-        ),
-        VideoCoreActiveSubtitleText(),
-        VideoCorePlayAndPause(showAMoment: _showAMomentPlayAndPause),
-        VideoCoreOverlay(),
-        CustomOpacityTransition(
-          visible: _showForwardStatus,
-          child: ValueListenableBuilder(
-            valueListenable: _forwardAndRewindAmount,
-            builder: (_, int seconds, __) => VideoCoreForwardAndRewindBar(
-              seconds: seconds,
-              position: _initialPosition,
-            ),
+      ),
+      AnimatedBuilder(
+        animation: _query.video(context, listen: true),
+        builder: (_, __) => VideoCoreBuffering(),
+      ),
+      VideoCoreActiveSubtitleText(),
+      VideoCorePlayAndPause(showAMoment: _showAMomentPlayAndPause),
+      VideoCoreOverlay(),
+      CustomOpacityTransition(
+        visible: _showForwardStatus,
+        child: ValueListenableBuilder(
+          valueListenable: _forwardAndRewindAmount,
+          builder: (_, int seconds, __) => VideoCoreForwardAndRewindBar(
+            seconds: seconds,
+            position: _initialForwardPosition,
           ),
         ),
-        ValueListenableBuilder(
-          valueListenable: _currentVolume,
-          builder: (_, double value, __) => VideoCoreVolumeBar(
-            visible: _showVolumeStatus,
-            progress: value / _maxVolume,
-          ),
+      ),
+      ValueListenableBuilder(
+        valueListenable: _currentVolume,
+        builder: (_, double value, __) => VideoCoreVolumeBar(
+          visible: _showVolumeStatus,
+          progress: value / _maxVolume,
         ),
-        VideoCoreThumbnail(),
-      ]),
-    );
+      ),
+      VideoCoreThumbnail(),
+    ]);
 
     return VideoCoreOrientation(builder: (isFullScreenLandscape) {
       return isFullScreenLandscape
-          ? player
-          : VideoCoreAspectRadio(child: player);
+          ? _globalGesture(player, isFullScreenLandscape)
+          : VideoCoreAspectRadio(
+              child: _globalGesture(player, isFullScreenLandscape));
     });
   }
 
   //--------//
   //GESTURES//
   //--------//
-  Widget _globalGesture(Widget child) {
+  Widget _globalGesture(Widget child, bool canScale) {
     return RawKeyboardListener(
       focusNode: _focusRawKeyboard,
       onKey: (e) {
@@ -320,20 +334,59 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
             _onKeypressVolume(false);
         }
       },
-      child: Listener(
-        onPointerDown: (e) => _pointers++,
-        onPointerUp: (e) => _pointers--,
-        child: GestureDetector(
-          //VOLUME
-          onVerticalDragStart: _volumeDragStart,
-          onVerticalDragUpdate: _volumeDragUpdate,
-          onVerticalDragEnd: (_) => _volumeDragEnd(),
-          //FORWARD AND REWIND
-          onHorizontalDragStart: _forwardDragStart,
-          onHorizontalDragUpdate: _forwardDragUpdate,
-          onHorizontalDragEnd: (_) => _forwardDragEnd(),
-          child: child,
-        ),
+      child: XGestureDetector(
+        //SCALE
+        onScaleStart: (_) {
+          _initialScale = _scale.value;
+          final size = context.media.size;
+          final video = _query.video(context).video!;
+          final aspectWidth = size.height * video.value.aspectRatio;
+
+          _initialScale = _scale.value;
+          _maxScale = size.width / aspectWidth;
+        },
+        onScaleUpdate: (details) {
+          final double newScale = _initialScale * details.scale;
+          if (newScale >= _minScale && newScale <= _maxScale)
+            _scale.value = newScale;
+        },
+        //FORWARD AND REWIND
+        onMoveUpdate: (details) {
+          final Offset position = details.localPos;
+          if (_dragInitialDelta == Offset.zero) {
+            final Offset delta = details.localDelta;
+            if (delta.dx.abs() > delta.dy.abs()) {
+              _dragDirection = Axis.horizontal;
+              _forwardDragStart(position);
+            } else {
+              _dragDirection = Axis.vertical;
+              _volumeDragStart(position);
+            }
+            _dragInitialDelta = delta;
+          }
+
+          switch (_dragDirection) {
+            case Axis.horizontal:
+              _forwardDragUpdate(position);
+              break;
+            case Axis.vertical:
+              _volumeDragUpdate(position);
+              break;
+          }
+        },
+        onMoveEnd: (details) {
+          _dragInitialDelta = Offset.zero;
+          switch (_dragDirection) {
+            case Axis.horizontal:
+              _forwardDragEnd();
+              break;
+            case Axis.vertical:
+              _volumeDragEnd();
+              break;
+          }
+        },
+        bypassTapEventOnDoubleTap: true,
+        child: child,
       ),
     );
   }
