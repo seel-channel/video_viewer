@@ -24,7 +24,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Center(child: SerieExample()),
+      body: Center(child: HLSVideoExample()),
     );
   }
 }
@@ -168,7 +168,8 @@ class _SerieExampleState extends State<SerieExample> {
             if (url.contains("m3u8")) {
               sources = await VideoSource.fromM3u8PlaylistUrl(
                 url,
-                formatter: (size) => "${size.height}p",
+                formatter: (quality) =>
+                    quality == "Auto" ? "Auto" : "${quality.split("x").last}p",
               );
             } else {
               sources = VideoSource.fromNetworkVideoSources(qualities);
@@ -241,7 +242,9 @@ class HLSVideoExample extends StatelessWidget {
     return FutureBuilder<Map<String, VideoSource>>(
       future: VideoSource.fromM3u8PlaylistUrl(
         "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8",
-        formatter: (size) => "${size.height}p",
+        descending: false,
+        formatter: (quality) =>
+            quality == "Auto" ? "Auto" : "${quality.split("x").last}p",
       ),
       builder: (_, data) {
         return data.hasData

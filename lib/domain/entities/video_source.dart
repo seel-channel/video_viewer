@@ -5,11 +5,6 @@ import 'package:video_viewer/video_viewer.dart';
 
 export 'package:video_player/video_player.dart';
 
-class VideoSize {
-  VideoSize(this.width, this.height);
-  final int width, height;
-}
-
 class VideoSource {
   VideoSource({
     required this.video,
@@ -60,47 +55,65 @@ class VideoSource {
   ///```
   final String intialSubtitle;
 
-  /// It is a function that returns a map from VideoPlayerController.network, the input
-  /// data must be of type URL.
+  ///It's a function that returns a map from VideoPlayerController.network, the input
+  ///data must be of type URL.
+  ///
+  ///If **[subtitle]** is no-null, set for all URLs the same subtitles.
   ///
   ///INPUT:
   ///```dart
-  ///getNetworkVideoPlayerControllers({
+  ///VideoSource.fromNetworkVideoSources({
   ///    "720p": "https://github.com/intel-iot-devkit/sample-videos/blob/master/classroom.mp4",
   ///    "1080p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
   ///})
   /// ```
   ///
+  ///
   ///OUTPUT:
   ///```dart
   ///{
-  ///    "720p": VideoSource(video: VideoPlayerController.network("https://github.com/intel-iot-devkit/sample-videos/blob/master/classroom.mp4")),
-  ///    "1080p": VideoSource(video: VideoPlayerController.network("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")),
+  ///    "720p": VideoSource(
+  ///       video: VideoPlayerController.network("https://github.com/intel-iot-devkit/sample-videos/blob/master/classroom.mp4"),
+  ///       intialSubtitle: initialSubtitle
+  ///       subtitle: subtitle,
+  ///    ),
+  ///    "1080p": VideoSource(
+  ///       video: VideoPlayerController.network("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"),
+  ///       intialSubtitle: initialSubtitle
+  ///       subtitle: subtitle,
+  ///    ),
   ///}
   /// ```
   static Map<String, VideoSource> fromNetworkVideoSources(
-      Map<String, String> sources) {
+    Map<String, String> sources, {
+    Map<String, VideoViewerSubtitle>? subtitle,
+    String initialSubtitle = "",
+  }) {
     Map<String, VideoSource> videoSource = {};
     for (String key in sources.keys)
       videoSource[key] = VideoSource(
         video: VideoPlayerController.network(sources[key]!),
+        subtitle: subtitle,
+        intialSubtitle: initialSubtitle,
       );
     return videoSource;
   }
 
-  /// It is a function that returns a map (`quality: fileData`), the input
-  /// data must be of type URL.
+  ///It's a function that returns a map from VideoPlayerController.network, the input
+  ///data must be of type URL.
   ///
   ///EXAMPLE:
   ///```dart
   ///VideoSource.fromM3u8VideoUrl(
   ///   "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8",
-  ///   formatter: (size) => "${size.height}p",
+  ///   formatter: (quality) => quality == "Auto" ? "Automatic" : "${quality.split("x").last}p",
   ///)
   /// ```
   static Future<Map<String, VideoSource>> fromM3u8PlaylistUrl(
     String m3u8, {
-    String Function(VideoSize video)? formatter,
+    Map<String, VideoViewerSubtitle>? subtitle,
+    String initialSubtitle = "",
+    String Function(String quality)? formatter,
     bool descending = true,
   }) async {
     final RegExp netRegx = RegExp(r'^(http|https):\/\/([\w.]+\/?)\S*');
@@ -137,27 +150,25 @@ class VideoSource {
     if (formatter != null) {
       Map<String, String> newSources = {};
       for (var entry in sources.entries) {
-        final quality = entry.key.split("x");
-        VideoSize size;
-        if (quality.length == 2)
-          size = VideoSize(
-            int.tryParse(quality.elementAt(0)) ?? 0,
-            int.tryParse(quality.elementAt(1)) ?? 0,
-          );
-        else
-          size = VideoSize(0, 0);
-        newSources[formatter(size)] = entry.value;
+        newSources[formatter(entry.key)] = entry.value;
       }
       sources = newSources;
     }
 
     if (descending) {
       Map<String, String> newSources = {};
+      newSources["Auto"] = m3u8;
       for (var entry in sources.entries.toList().reversed)
         newSources[entry.key] = entry.value;
       sources = newSources;
+    } else {
+      sources["Auto"] = m3u8;
     }
 
-    return VideoSource.fromNetworkVideoSources(sources);
+    return VideoSource.fromNetworkVideoSources(
+      sources,
+      subtitle: subtitle,
+      initialSubtitle: initialSubtitle,
+    );
   }
 }
