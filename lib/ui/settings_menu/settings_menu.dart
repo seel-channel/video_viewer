@@ -24,7 +24,11 @@ class SettingsMenu extends StatelessWidget {
 
     return Stack(children: [
       GestureDetector(
-        onTap: () => query.video(context).closeSettingsMenu(),
+        onTap: () {
+          final controller = query.video(context);
+          controller.closeSettingsMenu();
+          controller.showAndHideOverlay(true);
+        },
         child: Container(color: Colors.black.withOpacity(0.32)),
       ),
       CustomOpacityTransition(

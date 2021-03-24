@@ -27,16 +27,16 @@ class _OverlayBottomState extends State<OverlayBottom> {
   @override
   Widget build(BuildContext context) {
     final style = _query.videoStyle(context);
-    final video = _query.video(context, listen: true);
+    final controller = _query.video(context, listen: true);
 
-    final isFullscreen = video.isFullScreen;
-    final controller = video.video!;
+    final isFullscreen = controller.isFullScreen;
+    final video = controller.video!;
     final barStyle = style.progressBarStyle;
     final padding = barStyle.paddingBeetwen;
 
     final halfPadding = Margin.all(padding / 2);
 
-    final videoValue = controller.value;
+    final videoValue = video.value;
     final position = videoValue.position;
     final duration = videoValue.duration;
 
@@ -58,7 +58,7 @@ class _OverlayBottomState extends State<OverlayBottom> {
                 padding: halfPadding,
                 onTap: () {
                   _showRemaingText.value = !showText;
-                  video.cancelCloseOverlay();
+                  controller.cancelCloseOverlay();
                 },
                 child: Text(
                   showText
@@ -70,16 +70,19 @@ class _OverlayBottomState extends State<OverlayBottom> {
             ),
             SplashCircularIcon(
               padding: halfPadding,
-              onTap: video.openSettingsMenu,
+              onTap: () {
+                controller.openSettingsMenu();
+                controller.showAndHideOverlay(false);
+              },
               child: style.settingsStyle.settings,
             ),
             SplashCircularIcon(
               padding: halfPadding + Margin.right(padding / 2),
               onTap: () async {
                 if (!isFullscreen)
-                  await video.openFullScreen(context);
+                  await controller.openFullScreen(context);
                 else
-                  await video.closeFullScreen(context);
+                  await controller.closeFullScreen(context);
               },
               child:
                   isFullscreen ? barStyle.fullScreenExit : barStyle.fullScreen,
