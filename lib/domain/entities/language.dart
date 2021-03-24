@@ -5,6 +5,7 @@ class VideoViewerLanguage {
   final String settings;
   final String captionNone;
   final String normalSpeed;
+  final String seconds;
 
   ///CUSTOM LANGUAGE FOR VIDEO VIEWER
   const VideoViewerLanguage({
@@ -14,6 +15,7 @@ class VideoViewerLanguage {
     this.caption = "Caption",
     this.captionNone = "None",
     this.normalSpeed = "Normal",
+    this.seconds = "Seconds",
   });
 
   ///ENTER A STRING AND RETURN THE LANGUAGE OBJECT
@@ -28,13 +30,13 @@ class VideoViewerLanguage {
 
   ///**SPANISH LANGUAGE**
   static const VideoViewerLanguage es = VideoViewerLanguage(
-    settings: "Regresar",
-    quality: "Calidad",
-    speed: "Velocidad",
-    caption: "Subtítulos",
-    captionNone: "Ninguno",
-    normalSpeed: "Normal",
-  );
+      settings: "Regresar",
+      quality: "Calidad",
+      speed: "Velocidad",
+      caption: "Subtítulos",
+      captionNone: "Ninguno",
+      normalSpeed: "Normal",
+      seconds: "Segundos");
 
   ///**ENGLISH LANGUAGE**
   static const VideoViewerLanguage en = VideoViewerLanguage();
@@ -47,5 +49,6 @@ class VideoViewerLanguage {
     caption: "التسميات التوضيحية",
     normalSpeed: "طبيعي",
     captionNone: "لا شيء",
+    seconds: "ثواني",
   );
 }
