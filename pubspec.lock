@@ -79,6 +79,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  gesture_x_detector:
+    dependency: "direct main"
+    description:
+      name: gesture_x_detector
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   helpers:
     dependency: "direct main"
     description:

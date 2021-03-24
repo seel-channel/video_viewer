@@ -86,6 +86,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  gesture_x_detector:
+    dependency: transitive
+    description:
+      name: gesture_x_detector
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   helpers:
     dependency: transitive
     description:
@@ -265,7 +272,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.1.0"
+    version: "1.2.0"
 sdks:
   dart: ">=2.12.0 <3.0.0"
   flutter: ">=1.20.0"

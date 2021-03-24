@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:video_viewer/data/repositories/video.dart';
+import 'package:gesture_x_detector/gesture_x_detector.dart';
 
 import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/forward_and_rewind.dart';
 import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/layout.dart';
