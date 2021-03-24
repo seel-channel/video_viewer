@@ -32,6 +32,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   //REWIND AND FORWARD
   final ValueNotifier<int> _forwardAndRewindAmount = ValueNotifier<int>(1);
+  Duration _initialPosition = Duration.zero;
   int _defaultRewindAmount = 10;
   int _defaultForwardAmount = 10;
   bool _showForwardStatus = false;
@@ -122,9 +123,10 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   }
 
   void _forwardDragStart(DragStartDetails details) {
-    final video = _query.video(context);
-    if (!video.isShowingSettingsMenu && _pointers == 1)
+    final controller = _query.video(context);
+    if (!controller.isShowingSettingsMenu && _pointers == 1)
       setState(() {
+        _initialPosition = controller.video!.value.position;
         _horizontalDragStartOffset = details.globalPosition;
         _showForwardStatus = true;
       });
@@ -249,6 +251,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
             valueListenable: _forwardAndRewindAmount,
             builder: (_, int seconds, __) => VideoCoreForwardAndRewindAlert(
               seconds: seconds,
+              position: _initialPosition,
             ),
           ),
         ),

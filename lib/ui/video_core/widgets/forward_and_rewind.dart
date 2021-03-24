@@ -57,38 +57,22 @@ class VideoCoreForwardAndRewindAlert extends StatelessWidget {
   const VideoCoreForwardAndRewindAlert({
     Key? key,
     required this.seconds,
+    required this.position,
   }) : super(key: key);
 
   final int seconds;
+  final Duration position;
 
   @override
   Widget build(BuildContext context) {
     final query = VideoQuery();
     final video = query.video(context).video!;
     final style = query.videoStyle(context);
-    final progressStyle = style.progressBarStyle;
     final forwardStyle = style.forwardAndRewindStyle;
 
-    final position = video.value.position;
     final duration = video.value.duration;
-
-    final width = 100.0;
-    final height = style.progressBarStyle.bar.height;
-
-    // return Align(
-    //   alignment: Alignment.topCenter,
-    //   child: Container(
-    //     padding: forwardStyle.padding,
-    //     decoration: BoxDecoration(
-    //       color: forwardStyle.backgroundColor,
-    //       borderRadius: forwardStyle.borderRadius,
-    //     ),
-    //     child: AutoSizeText(
-    //       query.durationFormatter(Duration(seconds: amount!)),
-    //       style: style.textStyle,
-    //     ),
-    //   ),
-    // );
+    final height = forwardStyle.bar.height;
+    final width = forwardStyle.bar.width;
 
     return Center(
       child: Container(
@@ -103,23 +87,24 @@ class VideoCoreForwardAndRewindAlert extends StatelessWidget {
             style: style.textStyle,
           ),
           ClipRRect(
-            borderRadius: progressStyle.bar.borderRadius,
+            borderRadius: forwardStyle.borderRadius,
             child: SizedBox(
               height: height,
               width: width,
               child: Stack(children: [
-                Container(color: progressStyle.bar.background),
+                Container(color: forwardStyle.bar.background),
                 Container(
                   height: height,
                   width: ((position.inSeconds + seconds) / duration.inSeconds) *
                       width,
-                  color: progressStyle.bar.dot,
+                  color: forwardStyle.bar.color,
                 ),
                 Container(
-                  color: Colors.red,
+                  color: forwardStyle.bar.identifier,
                   width: 1,
                   margin: Margin.left(
-                      (position.inSeconds / duration.inSeconds) * width),
+                    (position.inSeconds / duration.inSeconds) * width,
+                  ),
                 ),
               ]),
             ),
