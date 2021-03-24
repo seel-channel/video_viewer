@@ -56,8 +56,8 @@ class BarStyle {
         this.borderRadius = borderRadius ?? EdgeRadius.all(5.0);
 
   BarStyle.forward({
-    this.width = 5,
-    this.height = 120,
+    this.width = 120,
+    this.height = 5,
     Color? color,
     Color? background,
     Color? identifier,

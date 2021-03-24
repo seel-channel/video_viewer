@@ -12,11 +12,14 @@ class ForwardAndRewindStyle {
     Color? backgroundColor,
     EdgeInsetsGeometry? padding,
     BorderRadius? borderRadius,
+    Color? ripple,
+    this.spaceBeetweenBarAndText = 10,
   })  : this.bar = bar ?? BarStyle.forward(),
-        this.padding = padding ?? Margin.all(20),
+        this.padding = padding ?? Margin.all(10),
         this.backgroundColor =
             backgroundColor ?? Colors.black.withOpacity(0.28),
-        this.borderRadius = borderRadius ?? EdgeRadius.all(20),
+        this.ripple = ripple ?? Colors.white.withOpacity(0.28),
+        this.borderRadius = borderRadius ?? EdgeRadius.all(10),
         this.rewind = rewind ?? Icon(Icons.fast_rewind, color: Colors.white),
         this.forward = forward ?? Icon(Icons.fast_forward, color: Colors.white);
 
@@ -68,4 +71,9 @@ class ForwardAndRewindStyle {
   ///BarStyle.forward()
   ///```
   final BarStyle bar;
+
+  final double spaceBeetweenBarAndText;
+
+  ///On double tap for rewind or forward the video viewer shows a ripple.
+  final Color ripple;
 }

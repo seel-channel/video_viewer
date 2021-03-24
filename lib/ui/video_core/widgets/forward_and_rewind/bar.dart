@@ -1,60 +1,10 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:video_viewer/data/repositories/video.dart';
-import 'package:video_viewer/ui/widgets/transitions.dart';
 
-class VideoCoreForwardAndRewind extends StatelessWidget {
-  const VideoCoreForwardAndRewind({
-    Key? key,
-    required this.showRewind,
-    required this.showForward,
-  }) : super(key: key);
-
-  final bool showRewind, showForward;
-
-  @override
-  Widget build(BuildContext context) {
-    final style = VideoQuery().videoStyle(context);
-    return VideoCoreForwardAndRewindLayout(
-      rewind: CustomOpacityTransition(
-        visible: showRewind,
-        child: Center(
-          child: style.forwardAndRewindStyle.rewind,
-        ),
-      ),
-      forward: CustomOpacityTransition(
-        visible: showForward,
-        child: Center(
-          child: style.forwardAndRewindStyle.forward,
-        ),
-      ),
-    );
-  }
-}
-
-class VideoCoreForwardAndRewindLayout extends StatelessWidget {
-  const VideoCoreForwardAndRewindLayout({
-    Key? key,
-    required this.rewind,
-    required this.forward,
-  }) : super(key: key);
-
-  final Widget rewind;
-  final Widget forward;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      Expanded(child: rewind),
-      SizedBox(width: context.media.width / 2),
-      Expanded(child: forward),
-    ]);
-  }
-}
-
-class VideoCoreForwardAndRewindAlert extends StatelessWidget {
-  const VideoCoreForwardAndRewindAlert({
+class VideoCoreForwardAndRewindBar extends StatelessWidget {
+  const VideoCoreForwardAndRewindBar({
     Key? key,
     required this.seconds,
     required this.position,
@@ -86,6 +36,7 @@ class VideoCoreForwardAndRewindAlert extends StatelessWidget {
             query.durationFormatter(Duration(seconds: seconds)),
             style: style.textStyle,
           ),
+          SizedBox(height: forwardStyle.spaceBeetweenBarAndText),
           ClipRRect(
             borderRadius: forwardStyle.borderRadius,
             child: SizedBox(

@@ -3,18 +3,19 @@ import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-
 import 'package:video_viewer/data/repositories/video.dart';
-import 'package:video_viewer/ui/video_core/widgets/aspect_ratio.dart';
-import 'package:video_viewer/ui/video_core/widgets/buffering.dart';
-import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind.dart';
-import 'package:video_viewer/ui/video_core/widgets/orientation.dart';
 
+import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/forward_and_rewind.dart';
+import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/layout.dart';
+import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/bar.dart';
 import 'package:video_viewer/ui/video_core/widgets/play_and_pause.dart';
-import 'package:video_viewer/ui/video_core/widgets/player.dart';
-import 'package:video_viewer/ui/video_core/widgets/thumbnail.dart';
+import 'package:video_viewer/ui/video_core/widgets/aspect_ratio.dart';
+import 'package:video_viewer/ui/video_core/widgets/orientation.dart';
 import 'package:video_viewer/ui/video_core/widgets/volume_bar.dart';
+import 'package:video_viewer/ui/video_core/widgets/thumbnail.dart';
+import 'package:video_viewer/ui/video_core/widgets/buffering.dart';
 import 'package:video_viewer/ui/video_core/widgets/subtitle.dart';
+import 'package:video_viewer/ui/video_core/widgets/player.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 import 'package:video_viewer/ui/overlay/overlay.dart';
 
@@ -102,8 +103,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   void _videoSeekTo(int amount) async {
     final video = _query.video(context).video!;
-    final seconds = video.value.position.inSeconds;
-    await video.seekTo(Duration(seconds: seconds + amount));
+    final position = video.value.position;
+    await video.seekTo(Duration(seconds: position.inSeconds + amount));
     await video.play();
   }
 
@@ -111,12 +112,10 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     _videoSeekTo(amount);
     setState(() {
       _forwardAndRewindAmount.value = amount;
-      _showForwardStatus = true;
       _showAMomentRewindIcons[index] = true;
     });
     Misc.delayed(600, () {
       setState(() {
-        _showForwardStatus = false;
         _showAMomentRewindIcons[index] = false;
       });
     });
@@ -249,7 +248,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           visible: _showForwardStatus,
           child: ValueListenableBuilder(
             valueListenable: _forwardAndRewindAmount,
-            builder: (_, int seconds, __) => VideoCoreForwardAndRewindAlert(
+            builder: (_, int seconds, __) => VideoCoreForwardAndRewindBar(
               seconds: seconds,
               position: _initialPosition,
             ),
@@ -265,6 +264,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         VideoCoreForwardAndRewind(
           showRewind: _showAMomentRewindIcons[0],
           showForward: _showAMomentRewindIcons[1],
+          rewindSeconds: -_defaultRewindAmount,
+          forwardSeconds: _defaultForwardAmount,
         ),
         VideoCoreThumbnail(),
       ]),
