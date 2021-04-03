@@ -18,7 +18,7 @@ class App extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key key}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class HomePage extends StatelessWidget {
 }
 
 class SerieExample extends StatefulWidget {
-  SerieExample({Key key}) : super(key: key);
+  SerieExample({Key? key}) : super(key: key);
 
   @override
   _SerieExampleState createState() => _SerieExampleState();
@@ -75,7 +75,7 @@ class _SerieExampleState extends State<SerieExample> {
   };
 
   String episode = "";
-  MapEntry<String, Map<String, String>> initial;
+  late MapEntry<String, Map<String, String>> initial;
 
   @override
   void initState() {
@@ -195,7 +195,7 @@ class _SerieExampleState extends State<SerieExample> {
                 width: 80,
                 height: 80,
                 color: Colors.white,
-                child: Image.network(thumbnails[entry.key], fit: BoxFit.cover),
+                child: Image.network(thumbnails[entry.key]!, fit: BoxFit.cover),
               ),
               Text(
                 entry.key,
@@ -235,7 +235,7 @@ class _SerieExampleState extends State<SerieExample> {
 // }
 
 class HLSVideoExample extends StatelessWidget {
-  const HLSVideoExample({Key key}) : super(key: key);
+  const HLSVideoExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -249,7 +249,7 @@ class HLSVideoExample extends StatelessWidget {
         return data.hasData
             ? VideoViewer(
                 language: VideoViewerLanguage.ar,
-                source: data.data,
+                source: data.data!,
                 onFullscreenFixLandscape: true,
                 style: VideoViewerStyle(
                   thumbnail: Image.network(
@@ -264,7 +264,7 @@ class HLSVideoExample extends StatelessWidget {
 }
 
 class WebVTTSubtitleVideoExample extends StatelessWidget {
-  const WebVTTSubtitleVideoExample({Key key}) : super(key: key);
+  const WebVTTSubtitleVideoExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +290,7 @@ class WebVTTSubtitleVideoExample extends StatelessWidget {
 }
 
 class SubRipSubtitleVideoExample extends StatelessWidget {
-  const SubRipSubtitleVideoExample({Key key}) : super(key: key);
+  const SubRipSubtitleVideoExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
