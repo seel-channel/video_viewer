@@ -1,3 +1,8 @@
+## [1.2.1]
+
+- Dependencies updated
+- Added `httpHeaders` option to `VideoPlayerController.network`
+
 ## [1.2.0]
 
 - Subtitles bugs fixed
