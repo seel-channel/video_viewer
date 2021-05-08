@@ -1,3 +1,7 @@
+## [1.2.2]
+
+- Null-check operator error fixed
+
 ## [1.2.1]
 
 - Dependencies updated

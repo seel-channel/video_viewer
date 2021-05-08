@@ -113,8 +113,10 @@ class VideoViewerController extends ChangeNotifier {
   @override
   Future<void> dispose() async {
     _closeOverlayButtons?.cancel();
-    await _video?.pause();
-    await _video!.dispose();
+    if (_video != null) {
+      await _video?.pause();
+      _video!.dispose();
+    }
     super.dispose();
   }
 

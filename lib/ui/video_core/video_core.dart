@@ -352,26 +352,28 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         },
         //FORWARD AND REWIND
         onMoveUpdate: (details) {
-          final Offset position = details.localPos;
-          if (_dragInitialDelta == Offset.zero) {
-            final Offset delta = details.localDelta;
-            if (delta.dx.abs() > delta.dy.abs()) {
-              _dragDirection = Axis.horizontal;
-              _forwardDragStart(position);
-            } else {
-              _dragDirection = Axis.vertical;
-              _volumeDragStart(position);
+          if (!_query.video(context).isDraggingProgressBar) {
+            final Offset position = details.localPos;
+            if (_dragInitialDelta == Offset.zero) {
+              final Offset delta = details.localDelta;
+              if (delta.dx.abs() > delta.dy.abs()) {
+                _dragDirection = Axis.horizontal;
+                _forwardDragStart(position);
+              } else {
+                _dragDirection = Axis.vertical;
+                _volumeDragStart(position);
+              }
+              _dragInitialDelta = delta;
             }
-            _dragInitialDelta = delta;
-          }
 
-          switch (_dragDirection) {
-            case Axis.horizontal:
-              _forwardDragUpdate(position);
-              break;
-            case Axis.vertical:
-              _volumeDragUpdate(position);
-              break;
+            switch (_dragDirection) {
+              case Axis.horizontal:
+                _forwardDragUpdate(position);
+                break;
+              case Axis.vertical:
+                _volumeDragUpdate(position);
+                break;
+            }
           }
         },
         onMoveEnd: (details) {
