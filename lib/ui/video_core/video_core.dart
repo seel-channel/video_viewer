@@ -5,11 +5,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
+import 'package:video_viewer/domain/entities/volume_control.dart';
 
 import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/forward_and_rewind.dart';
 import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/layout.dart';
 import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/bar.dart';
-import 'package:video_viewer/ui/video_core/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/video_core/widgets/aspect_ratio.dart';
 import 'package:video_viewer/ui/video_core/widgets/orientation.dart';
 import 'package:video_viewer/ui/video_core/widgets/volume_bar.dart';
@@ -19,6 +19,7 @@ import 'package:video_viewer/ui/video_core/widgets/subtitle.dart';
 import 'package:video_viewer/ui/video_core/widgets/player.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 import 'package:video_viewer/ui/overlay/overlay.dart';
+import 'package:volume_watcher/volume_watcher.dart';
 
 class VideoViewerCore extends StatefulWidget {
   VideoViewerCore({Key? key}) : super(key: key);
@@ -29,13 +30,15 @@ class VideoViewerCore extends StatefulWidget {
 
 class _VideoViewerCoreState extends State<VideoViewerCore> {
   final VideoQuery _query = VideoQuery();
-  bool _showAMomentPlayAndPause = false;
   Timer? _hidePlayAndPause;
 
   Offset _dragInitialDelta = Offset.zero;
   Axis _dragDirection = Axis.vertical;
 
-  //REWIND AND FORWARD
+  //------------------------------//
+  //REWIND AND FORWARD (VARIABLES)//
+  //------------------------------//
+  bool _isDraggingProgressBar = false;
   final ValueNotifier<int> _forwardAndRewindAmount = ValueNotifier<int>(1);
   Duration _initialForwardPosition = Duration.zero;
   int _rewindDoubleTapCount = 0;
@@ -48,26 +51,39 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   Offset _horizontalDragStartOffset = Offset.zero;
   List<bool> _showAMomentRewindIcons = [false, false];
 
-  //VOLUME
+  //------------------//
+  //VOLUME (VARIABLES)//
+  //------------------//
   final ValueNotifier<double> _currentVolume = ValueNotifier<double>(1.0);
   final FocusNode _focusRawKeyboard = FocusNode();
-  final double _maxVolume = 1.0;
+  double _maxVolume = 1.0;
   Offset _verticalDragStartOffset = Offset.zero;
   double _onDragStartVolume = 1;
   bool _showVolumeStatus = false;
   Timer? _closeVolumeStatus;
 
-  //SCALE
+  //-----------------//
+  //SCALE (VARIABLES)//
+  //-----------------//
   final ValueNotifier<double> _scale = ValueNotifier<double>(1.0);
   final double _minScale = 1.0;
   double _initialScale = 1.0, _maxScale = 1.0;
 
   @override
   void initState() {
-    Misc.onLayoutRendered(() {
+    Misc.onLayoutRendered(() async {
       final metadata = _query.videoMetadata(context);
       _defaultRewindAmount = metadata.rewindAmount;
       _defaultForwardAmount = metadata.forwardAmount;
+      switch (metadata.volumeControl) {
+        case VolumeControlType.device:
+          _maxVolume = await VolumeWatcher.getMaxVolume;
+
+          break;
+        case VolumeControlType.video:
+          _maxVolume = 1.0;
+          break;
+      }
       setState(() {});
     });
     super.initState();
@@ -92,11 +108,9 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     await video.onTapPlayAndPause();
     if (!video.isShowingOverlay) {
       setState(() {
-        _showAMomentPlayAndPause = true;
         _hidePlayAndPause?.cancel();
         _hidePlayAndPause = Misc.timer(600, () {
           _hidePlayAndPause?.cancel();
-          setState(() => _showAMomentPlayAndPause = false);
         });
       });
     }
@@ -188,7 +202,14 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       final fractional = _maxVolume * 0.05;
       if (volume >= _maxVolume - fractional) volume = _maxVolume;
       if (volume <= fractional) volume = 0.0;
-      await video.video!.setVolume(volume);
+      switch (_query.videoMetadata(context).volumeControl) {
+        case VolumeControlType.device:
+          await VolumeWatcher.setVolume(volume);
+          break;
+        case VolumeControlType.video:
+          await video.video!.setVolume(volume);
+          break;
+      }
       _currentVolume.value = volume;
     }
   }
@@ -247,6 +268,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           child: VideoCorePlayer(),
         ),
       ),
+      const VideoCoreActiveSubtitleText(),
       GestureDetector(
         onTap: _showAndHideOverlay,
         behavior: HitTestBehavior.opaque,
@@ -262,29 +284,11 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         rewind: GestureDetector(onDoubleTap: _rewind),
         forward: GestureDetector(onDoubleTap: _forward),
       ),
-      LayoutBuilder(
-        builder: (_, box) => Center(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: _onTapPlayAndPause,
-            child: Container(
-              width: box.maxWidth * 0.2,
-              height: box.maxHeight * 0.2,
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-        ),
-      ),
       AnimatedBuilder(
         animation: _query.video(context, listen: true),
         builder: (_, __) => VideoCoreBuffering(),
       ),
-      VideoCoreActiveSubtitleText(),
-      VideoCorePlayAndPause(showAMoment: _showAMomentPlayAndPause),
-      VideoCoreOverlay(),
+      const VideoCoreOverlay(),
       CustomOpacityTransition(
         visible: _showForwardStatus,
         child: ValueListenableBuilder(
@@ -302,7 +306,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           progress: value / _maxVolume,
         ),
       ),
-      VideoCoreThumbnail(),
+      const VideoCoreThumbnail(),
     ]);
 
     return VideoCoreOrientation(builder: (isFullScreenLandscape) {
@@ -351,8 +355,11 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
             _scale.value = newScale;
         },
         //FORWARD AND REWIND
+        onMoveStart: (_) {
+          _isDraggingProgressBar = _query.video(context).isDraggingProgressBar;
+        },
         onMoveUpdate: (details) {
-          if (!_query.video(context).isDraggingProgressBar) {
+          if (!_isDraggingProgressBar) {
             final Offset position = details.localPos;
             if (_dragInitialDelta == Offset.zero) {
               final Offset delta = details.localDelta;
@@ -377,6 +384,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           }
         },
         onMoveEnd: (details) {
+          _isDraggingProgressBar = false;
           _dragInitialDelta = Offset.zero;
           switch (_dragDirection) {
             case Axis.horizontal:

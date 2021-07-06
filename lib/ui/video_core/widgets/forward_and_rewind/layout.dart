@@ -15,7 +15,7 @@ class VideoCoreForwardAndRewindLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(children: [
       Expanded(child: rewind),
-      SizedBox(width: context.media.width / 4),
+      SizedBox(width: context.media.width / 3),
       Expanded(child: forward),
     ]);
   }
