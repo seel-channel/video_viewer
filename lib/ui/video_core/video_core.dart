@@ -152,11 +152,11 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //FORWARD AND REWIND (DRAG HORIZONTAL)//
   //------------------------------------//
   void _forwardDragStart(Offset globalPosition) {
-    final controller = _query.video(context);
-    if (!controller.isShowingSettingsMenu) {
+    final video = _query.video(context);
+    if (!video.isShowingSettingsMenu) {
       Misc.delayed(100, () {
         if (!_isDraggingProgressBar) {
-          _initialForwardPosition = controller.video!.value.position;
+          _initialForwardPosition = video.video!.value.position;
           _horizontalDragStartOffset = globalPosition;
           _showForwardStatus = true;
           setState(() {});
@@ -210,12 +210,16 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   void _volumeDragStart(Offset globalPosition) {
     final video = _query.video(context);
     if (!video.isShowingSettingsMenu) {
-      setState(() {
-        _closeVolumeStatus?.cancel();
-        _showVolumeStatus = true;
-        _onDragStartVolume = video.video!.value.volume;
-        _currentVolume.value = _onDragStartVolume;
-        _verticalDragStartOffset = globalPosition;
+      Misc.delayed(100, () {
+        if (!_isDraggingProgressBar) {
+          setState(() {
+            _closeVolumeStatus?.cancel();
+            _showVolumeStatus = true;
+            _onDragStartVolume = video.video!.value.volume;
+            _currentVolume.value = _onDragStartVolume;
+            _verticalDragStartOffset = globalPosition;
+          });
+        }
       });
     }
   }
