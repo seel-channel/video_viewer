@@ -1,0 +1,1 @@
+enum VolumeControlType { device, video }

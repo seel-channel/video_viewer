@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/domain/entities/language.dart';
+import 'package:video_viewer/domain/entities/volume_control.dart';
 import 'package:video_viewer/ui/video_core/video_core.dart';
 import 'package:video_viewer/domain/bloc/controller.dart';
 import 'package:video_viewer/domain/bloc/metadata.dart';
@@ -13,6 +14,7 @@ import 'package:video_viewer/domain/bloc/metadata.dart';
 export 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 export 'package:video_viewer/domain/entities/settings_menu_item.dart';
 export 'package:video_viewer/domain/entities/video_source.dart';
+export 'package:video_viewer/domain/entities/volume_control.dart';
 export 'package:video_viewer/domain/entities/subtitle.dart';
 export 'package:video_viewer/domain/entities/language.dart';
 export 'package:video_viewer/domain/bloc/controller.dart';
@@ -30,6 +32,7 @@ class VideoViewer extends StatefulWidget {
     this.defaultAspectRatio = 16 / 9,
     this.onFullscreenFixLandscape = false,
     this.language = VideoViewerLanguage.en,
+    this.volumeControl = VolumeControlType.device,
   })  : this.controller = controller ?? VideoViewerController(),
         this.style = style ?? VideoViewerStyle(),
         super(key: key);
@@ -84,6 +87,8 @@ class VideoViewer extends StatefulWidget {
 
   final VideoViewerController controller;
 
+  final VolumeControlType volumeControl;
+
   @override
   VideoViewerState createState() => VideoViewerState();
 }
@@ -134,6 +139,7 @@ class VideoViewerState extends State<VideoViewer> {
                   language: widget.language,
                   rewindAmount: widget.rewindAmount,
                   forwardAmount: widget.forwardAmount,
+                  volumeControl: widget.volumeControl,
                   defaultAspectRatio: widget.defaultAspectRatio,
                   onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
                 ),

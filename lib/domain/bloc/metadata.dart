@@ -1,14 +1,16 @@
 import 'package:video_viewer/domain/entities/language.dart';
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
+import 'package:video_viewer/domain/entities/volume_control.dart';
 
 class VideoViewerMetadata {
-  VideoViewerMetadata({
+  const VideoViewerMetadata({
     required this.style,
     required this.rewindAmount,
     required this.forwardAmount,
     required this.defaultAspectRatio,
     required this.onFullscreenFixLandscape,
     required this.language,
+    required this.volumeControl,
   });
 
   /// It is the Aspect Ratio that the widget.style.loading will take when the video
@@ -41,4 +43,6 @@ class VideoViewerMetadata {
 
   /// It is an argument where you can change the design of almost the entire VideoViewer
   final VideoViewerStyle style;
+
+  final VolumeControlType volumeControl;
 }
