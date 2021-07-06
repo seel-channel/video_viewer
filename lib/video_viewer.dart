@@ -145,10 +145,12 @@ class VideoViewerState extends State<VideoViewer> {
                 ),
               ),
             ],
-            builder: (_, __) => VideoViewerCore(),
+            builder: (_, child) => child!,
+            child: const VideoViewerCore(),
           )
         : AspectRatio(
             aspectRatio: widget.defaultAspectRatio,
-            child: widget.style.loading);
+            child: widget.style.loading,
+          );
   }
 }

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/services.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:video_viewer/domain/entities/volume_control.dart';
@@ -22,7 +21,7 @@ import 'package:video_viewer/ui/overlay/overlay.dart';
 import 'package:volume_watcher/volume_watcher.dart';
 
 class VideoViewerCore extends StatefulWidget {
-  VideoViewerCore({Key? key}) : super(key: key);
+  const VideoViewerCore({Key? key}) : super(key: key);
 
   @override
   _VideoViewerCoreState createState() => _VideoViewerCoreState();
@@ -78,7 +77,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       switch (metadata.volumeControl) {
         case VolumeControlType.device:
           _maxVolume = await VolumeWatcher.getMaxVolume;
-
           break;
         case VolumeControlType.video:
           _maxVolume = 1.0;
@@ -103,19 +101,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //-------------//
   //OVERLAY (TAP)//
   //-------------//
-  void _onTapPlayAndPause() async {
-    final video = _query.video(context);
-    await video.onTapPlayAndPause();
-    if (!video.isShowingOverlay) {
-      setState(() {
-        _hidePlayAndPause?.cancel();
-        _hidePlayAndPause = Misc.timer(600, () {
-          _hidePlayAndPause?.cancel();
-        });
-      });
-    }
-  }
-
   void _showAndHideOverlay([bool? show]) {
     _query.video(context).showAndHideOverlay(show);
     if (!_focusRawKeyboard.hasFocus)
@@ -251,21 +236,14 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     }
   }
 
-  void _onKeypressVolume(bool isArrowUp) {
-    _showVolumeStatus = true;
-    _closeVolumeStatus?.cancel();
-    _setVolume(_currentVolume.value + (isArrowUp ? 0.1 : -0.1));
-    _volumeDragEnd();
-  }
-
   @override
   Widget build(BuildContext context) {
-    Widget player = Stack(children: [
+    final Widget player = Stack(children: [
       ValueListenableBuilder(
         valueListenable: _scale,
         builder: (_, double scale, __) => Transform.scale(
           scale: scale,
-          child: VideoCorePlayer(),
+          child: const VideoCorePlayer(),
         ),
       ),
       const VideoCoreActiveSubtitleText(),
@@ -286,7 +264,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       ),
       AnimatedBuilder(
         animation: _query.video(context, listen: true),
-        builder: (_, __) => VideoCoreBuffering(),
+        builder: (_, __) => const VideoCoreBuffering(),
       ),
       const VideoCoreOverlay(),
       CustomOpacityTransition(
@@ -313,7 +291,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       return isFullScreenLandscape
           ? _globalGesture(player, isFullScreenLandscape)
           : VideoCoreAspectRadio(
-              child: _globalGesture(player, isFullScreenLandscape));
+              child: _globalGesture(player, isFullScreenLandscape),
+            );
     });
   }
 
@@ -321,83 +300,65 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //GESTURES//
   //--------//
   Widget _globalGesture(Widget child, bool canScale) {
-    return RawKeyboardListener(
-      focusNode: _focusRawKeyboard,
-      onKey: (e) {
-        final key = e.logicalKey;
-        if (e.runtimeType.toString() == 'RawKeyDownEvent') {
-          if (key == LogicalKeyboardKey.space)
-            _onTapPlayAndPause();
-          else if (key == LogicalKeyboardKey.arrowLeft)
-            _rewind();
-          else if (key == LogicalKeyboardKey.arrowRight)
-            _forward();
-          else if (key == LogicalKeyboardKey.arrowUp)
-            _onKeypressVolume(true);
-          else if (key == LogicalKeyboardKey.arrowDown)
-            _onKeypressVolume(false);
-        }
+    return XGestureDetector(
+      //SCALE
+      onScaleStart: (_) {
+        _initialScale = _scale.value;
+        final size = context.media.size;
+        final video = _query.video(context).video!;
+        final aspectWidth = size.height * video.value.aspectRatio;
+
+        _initialScale = _scale.value;
+        _maxScale = size.width / aspectWidth;
       },
-      child: XGestureDetector(
-        //SCALE
-        onScaleStart: (_) {
-          _initialScale = _scale.value;
-          final size = context.media.size;
-          final video = _query.video(context).video!;
-          final aspectWidth = size.height * video.value.aspectRatio;
-
-          _initialScale = _scale.value;
-          _maxScale = size.width / aspectWidth;
-        },
-        onScaleUpdate: (details) {
-          final double newScale = _initialScale * details.scale;
-          if (newScale >= _minScale && newScale <= _maxScale)
-            _scale.value = newScale;
-        },
-        //FORWARD AND REWIND
-        onMoveStart: (_) {
-          _isDraggingProgressBar = _query.video(context).isDraggingProgressBar;
-        },
-        onMoveUpdate: (details) {
-          if (!_isDraggingProgressBar) {
-            final Offset position = details.localPos;
-            if (_dragInitialDelta == Offset.zero) {
-              final Offset delta = details.localDelta;
-              if (delta.dx.abs() > delta.dy.abs()) {
-                _dragDirection = Axis.horizontal;
-                _forwardDragStart(position);
-              } else {
-                _dragDirection = Axis.vertical;
-                _volumeDragStart(position);
-              }
-              _dragInitialDelta = delta;
+      onScaleUpdate: (details) {
+        final double newScale = _initialScale * details.scale;
+        if (newScale >= _minScale && newScale <= _maxScale)
+          _scale.value = newScale;
+      },
+      //FORWARD AND REWIND
+      onMoveStart: (_) {
+        _isDraggingProgressBar = _query.video(context).isDraggingProgressBar;
+      },
+      onMoveUpdate: (details) {
+        if (!_isDraggingProgressBar) {
+          final Offset position = details.localPos;
+          if (_dragInitialDelta == Offset.zero) {
+            final Offset delta = details.localDelta;
+            if (delta.dx.abs() > delta.dy.abs()) {
+              _dragDirection = Axis.horizontal;
+              _forwardDragStart(position);
+            } else {
+              _dragDirection = Axis.vertical;
+              _volumeDragStart(position);
             }
-
-            switch (_dragDirection) {
-              case Axis.horizontal:
-                _forwardDragUpdate(position);
-                break;
-              case Axis.vertical:
-                _volumeDragUpdate(position);
-                break;
-            }
+            _dragInitialDelta = delta;
           }
-        },
-        onMoveEnd: (details) {
-          _isDraggingProgressBar = false;
-          _dragInitialDelta = Offset.zero;
+
           switch (_dragDirection) {
             case Axis.horizontal:
-              _forwardDragEnd();
+              _forwardDragUpdate(position);
               break;
             case Axis.vertical:
-              _volumeDragEnd();
+              _volumeDragUpdate(position);
               break;
           }
-        },
-        bypassTapEventOnDoubleTap: true,
-        child: child,
-      ),
+        }
+      },
+      onMoveEnd: (details) {
+        _isDraggingProgressBar = false;
+        _dragInitialDelta = Offset.zero;
+        switch (_dragDirection) {
+          case Axis.horizontal:
+            _forwardDragEnd();
+            break;
+          case Axis.vertical:
+            _volumeDragEnd();
+            break;
+        }
+      },
+      bypassTapEventOnDoubleTap: true,
+      child: child,
     );
   }
 }
