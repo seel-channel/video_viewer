@@ -1,19 +1,31 @@
 import 'dart:ui' as ui;
-import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:helpers/helpers.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
-class VideoProgressBar extends StatelessWidget {
+class VideoProgressBar extends StatefulWidget {
   const VideoProgressBar({Key? key}) : super(key: key);
 
   @override
+  _VideoProgressBarState createState() => _VideoProgressBarState();
+}
+
+class _VideoProgressBarState extends State<VideoProgressBar> {
+  final ValueNotifier<Duration> _progressBarDraggingBuffer =
+      ValueNotifier<Duration>(Duration.zero);
+
+  @override
   Widget build(BuildContext context) {
-    return ListenableProvider(
-      create: (_) => ValueNotifier<int>(1000),
+    return MultiProvider(
+      providers: [
+        ListenableProvider(create: (_) => ValueNotifier<int>(1000)),
+        ListenableProvider.value(value: _progressBarDraggingBuffer),
+      ],
       child: LayoutBuilder(
         builder: (_, constraints) {
           final _query = VideoQuery();
@@ -26,76 +38,53 @@ class VideoProgressBar extends StatelessWidget {
           final Duration position = video.value.position;
           final Duration duration = video.value.duration;
           final double width = constraints.maxWidth;
-          final double progressWidth =
-              (position.inMilliseconds / duration.inMilliseconds) * width;
 
           final bar = style.bar;
 
-          return _ProgressBarGesture(
-            width: width,
-            child: Padding(
-              padding: Margin.vertical(style.paddingBeetwen),
-              child: Stack(
-                alignment: AlignmentDirectional.centerStart,
-                children: [
-                  _ProgressBar(width: width, color: bar.background),
-                  _ProgressBar(
-                    width: (controller.maxBuffering.inMilliseconds /
-                            duration.inMilliseconds) *
-                        width,
-                    color: bar.secondBackground,
-                  ),
-                  _ProgressBar(width: progressWidth, color: bar.color),
-                  _DotIsDragging(maxWidth: width),
-                  _Dot(maxWidth: width),
-                  CustomOpacityTransition(
-                    visible: controller.isDraggingProgressBar,
-                    child: CustomPaint(
-                      painter: _TextPositionPainter(
-                        barStyle: style,
-                        position: video.value.position,
-                        width: progressWidth,
-                        style: videoStyle.textStyle,
+          return ValueListenableBuilder(
+            valueListenable: _progressBarDraggingBuffer,
+            builder: (_, Duration value, ___) {
+              final Duration draggingPosition =
+                  controller.isDraggingProgressBar ? value : position;
+              final double progressWidth =
+                  (draggingPosition.inMilliseconds / duration.inMilliseconds) *
+                      width;
+
+              return _ProgressBarGesture(
+                width: width,
+                child: Padding(
+                  padding: Margin.vertical(style.paddingBeetwen),
+                  child: Stack(
+                    alignment: AlignmentDirectional.centerStart,
+                    children: [
+                      _ProgressBar(width: width, color: bar.background),
+                      _ProgressBar(
+                        color: bar.secondBackground,
+                        width: (controller.maxBuffering.inMilliseconds /
+                                duration.inMilliseconds) *
+                            width,
                       ),
-                    ),
+                      _ProgressBar(width: progressWidth, color: bar.color),
+                      _DotIsDragging(width: width, dotPosition: progressWidth),
+                      _Dot(width: width, dotPosition: progressWidth),
+                      CustomOpacityTransition(
+                        visible: controller.isDraggingProgressBar,
+                        child: CustomPaint(
+                          painter: _TextPositionPainter(
+                            position: draggingPosition,
+                            barStyle: style,
+                            width: progressWidth,
+                            style: videoStyle.textStyle,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
-      ),
-    );
-  }
-}
-
-class _DotIsDragging extends StatelessWidget {
-  const _DotIsDragging({Key? key, required this.maxWidth}) : super(key: key);
-
-  final double maxWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    final _query = VideoQuery();
-    final controller = _query.video(context, listen: true);
-    final style = _query.videoStyle(context).progressBarStyle;
-
-    final video = controller.video!;
-    final position = video.value.position.inMilliseconds;
-    final duration = video.value.duration.inMilliseconds;
-
-    final double widthPos = (position / duration) * maxWidth;
-    final double dotWidth = style.bar.identifierWidth;
-
-    return BooleanTween(
-      animate: controller.isDraggingProgressBar &&
-          (widthPos > dotWidth) &&
-          (widthPos < maxWidth - dotWidth),
-      tween: Tween<double>(begin: 0, end: 0.4),
-      builder: (_, double value, __) => _Dot(
-        maxWidth: maxWidth,
-        opacity: value,
-        multiplicator: 2,
       ),
     );
   }
@@ -110,18 +99,29 @@ class _ProgressBarGesture extends StatefulWidget {
 
   final Widget? child;
   final double? width;
+
   @override
   __ProgressBarGestureState createState() => __ProgressBarGestureState();
 }
 
 class __ProgressBarGestureState extends State<_ProgressBarGesture> {
-  final _query = VideoQuery();
+  final VideoQuery _query = VideoQuery();
+  late VideoPlayerController _video;
 
-  void _seekToRelativePosition(Offset local, [bool showText = false]) async {
-    final video = _query.video(context).video!;
+  @override
+  void initState() {
+    _video = _query.video(context).video!;
+    super.initState();
+  }
+
+  void _seekToRelativePosition(Offset local, [bool showText = false]) {
     final double localPos = local.dx / widget.width!;
-    final Duration position = video.value.duration * localPos;
-    await video.seekTo(position);
+    final Duration position = _video.value.duration * localPos;
+
+    if (position >= Duration.zero && position <= _video.value.duration) {
+      Provider.of<ValueNotifier<Duration>>(context, listen: false).value =
+          position;
+    }
   }
 
   void play() {
@@ -138,7 +138,10 @@ class __ProgressBarGestureState extends State<_ProgressBarGesture> {
     _query.video(context).isDraggingProgressBar = true;
   }
 
-  void _endDragging() {
+  void _endDragging() async {
+    await _video.seekTo(
+      Provider.of<ValueNotifier<Duration>>(context, listen: false).value,
+    );
     _query.video(context).isDraggingProgressBar = false;
     Misc.delayed(50, () => play());
   }
@@ -199,32 +202,64 @@ class _ProgressBar extends StatelessWidget {
   }
 }
 
+class _DotIsDragging extends StatelessWidget {
+  const _DotIsDragging({
+    Key? key,
+    required this.width,
+    required this.dotPosition,
+  }) : super(key: key);
+
+  final double width;
+  final double dotPosition;
+
+  @override
+  Widget build(BuildContext context) {
+    final VideoQuery _query = VideoQuery();
+    final controller = _query.video(context, listen: true);
+    final style = _query.videoStyle(context).progressBarStyle;
+
+    final double dotWidth = style.bar.identifierWidth;
+
+    return BooleanTween(
+      animate: controller.isDraggingProgressBar &&
+          (dotPosition > dotWidth) &&
+          (dotPosition < width - dotWidth),
+      tween: Tween<double>(begin: 0, end: 0.4),
+      builder: (_, double value, __) => _Dot(
+        width: width,
+        dotPosition: dotPosition,
+        opacity: value,
+        multiplicator: 2,
+      ),
+    );
+  }
+}
+
 class _Dot extends StatelessWidget {
   const _Dot({
     Key? key,
-    this.maxWidth,
+    required this.width,
+    required this.dotPosition,
     this.opacity = 1,
     this.multiplicator = 1,
   }) : super(key: key);
 
-  final double? maxWidth, opacity;
+  final double? width, opacity;
   final int multiplicator;
+  final double dotPosition;
 
   @override
   Widget build(BuildContext context) {
-    final query = VideoQuery();
+    final VideoQuery query = VideoQuery();
     final animation = Provider.of<ValueNotifier<int>>(context);
     final style = query.videoStyle(context).progressBarStyle;
-    final video = query.video(context, listen: true).video!;
 
-    final dotSize = style.bar.identifierWidth;
+    final double dotSize = style.bar.identifierWidth;
 
-    final double widthPos = (video.value.position.inMilliseconds /
-            video.value.duration.inMilliseconds) *
-        maxWidth!;
     final double dotWidth = dotSize * 2;
-    final double width =
-        widthPos < dotSize ? dotWidth : widthPos + dotSize * multiplicator;
+    final double width = dotPosition < dotSize
+        ? dotWidth
+        : dotPosition + dotSize * multiplicator;
 
     return ValueListenableBuilder(
       valueListenable: animation,
