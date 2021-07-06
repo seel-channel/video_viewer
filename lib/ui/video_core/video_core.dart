@@ -98,6 +98,10 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     super.dispose();
   }
 
+  void _draggingListener() {
+    _isDraggingProgressBar = _query.video(context).isDraggingProgressBar;
+  }
+
   //-------------//
   //OVERLAY (TAP)//
   //-------------//
@@ -149,12 +153,16 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //------------------------------------//
   void _forwardDragStart(Offset globalPosition) {
     final controller = _query.video(context);
-    if (!controller.isShowingSettingsMenu)
-      setState(() {
-        _initialForwardPosition = controller.video!.value.position;
-        _horizontalDragStartOffset = globalPosition;
-        _showForwardStatus = true;
+    if (!controller.isShowingSettingsMenu) {
+      Misc.delayed(100, () {
+        if (!_isDraggingProgressBar) {
+          _initialForwardPosition = controller.video!.value.position;
+          _horizontalDragStartOffset = globalPosition;
+          _showForwardStatus = true;
+          setState(() {});
+        }
       });
+    }
   }
 
   void _forwardDragUpdate(Offset globalPosition) {
@@ -238,7 +246,17 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget player = Stack(children: [
+    return VideoCoreOrientation(builder: (isFullScreenLandscape) {
+      return isFullScreenLandscape
+          ? _globalGesture(isFullScreenLandscape)
+          : VideoCoreAspectRadio(
+              child: _globalGesture(isFullScreenLandscape),
+            );
+    });
+  }
+
+  Widget _player() {
+    return Stack(children: [
       ValueListenableBuilder(
         valueListenable: _scale,
         builder: (_, double scale, __) => Transform.scale(
@@ -286,22 +304,16 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       ),
       const VideoCoreThumbnail(),
     ]);
-
-    return VideoCoreOrientation(builder: (isFullScreenLandscape) {
-      return isFullScreenLandscape
-          ? _globalGesture(player, isFullScreenLandscape)
-          : VideoCoreAspectRadio(
-              child: _globalGesture(player, isFullScreenLandscape),
-            );
-    });
   }
 
   //--------//
   //GESTURES//
   //--------//
-  Widget _globalGesture(Widget child, bool canScale) {
+  Widget _globalGesture(bool canScale) {
     return XGestureDetector(
-      //SCALE
+      //--------------//
+      //SCALE GESTURES//
+      //--------------//
       onScaleStart: (_) {
         _initialScale = _scale.value;
         final size = context.media.size;
@@ -311,16 +323,18 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         _initialScale = _scale.value;
         _maxScale = size.width / aspectWidth;
       },
-      onScaleUpdate: (details) {
+      onScaleUpdate: (ScaleEvent details) {
         final double newScale = _initialScale * details.scale;
         if (newScale >= _minScale && newScale <= _maxScale)
           _scale.value = newScale;
       },
-      //FORWARD AND REWIND
+      //---------------------------//
+      //VOLUME AND FORWARD GESTURES//
+      //---------------------------//
       onMoveStart: (_) {
-        _isDraggingProgressBar = _query.video(context).isDraggingProgressBar;
+        _query.video(context).addListener(_draggingListener);
       },
-      onMoveUpdate: (details) {
+      onMoveUpdate: (MoveEvent details) {
         if (!_isDraggingProgressBar) {
           final Offset position = details.localPos;
           if (_dragInitialDelta == Offset.zero) {
@@ -334,7 +348,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
             }
             _dragInitialDelta = delta;
           }
-
           switch (_dragDirection) {
             case Axis.horizontal:
               _forwardDragUpdate(position);
@@ -345,7 +358,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           }
         }
       },
-      onMoveEnd: (details) {
+      onMoveEnd: (_) {
+        _query.video(context).removeListener(_draggingListener);
         _isDraggingProgressBar = false;
         _dragInitialDelta = Offset.zero;
         switch (_dragDirection) {
@@ -358,7 +372,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         }
       },
       bypassTapEventOnDoubleTap: true,
-      child: child,
+      child: _player(),
     );
   }
 }
