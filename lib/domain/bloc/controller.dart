@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:universal_html/html.dart' as html;
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:video_viewer/ui/fullscreen.dart';
 import 'package:video_viewer/data/repositories/video.dart';
@@ -23,10 +21,6 @@ class VideoViewerController extends ChangeNotifier {
   /// After [dispose] all further calls are ignored.
   VideoViewerController() {
     this.isShowingSecondarySettingsMenus = List.filled(12, false);
-    if (kIsWeb)
-      html.document.activeElement!.onFullscreenChange.listen((_) {
-        _isFullScreen = html.document.fullscreenElement != null;
-      });
   }
 
   /// Receive a list of all the resources to be played.
@@ -333,40 +327,26 @@ class VideoViewerController extends ChangeNotifier {
   ///When you want to open FullScreen Page, you need pass the FullScreen's context,
   ///because this function do **Navigator.push(context, MaterialPageRoute(...))**
   Future<void> openFullScreen(BuildContext context) async {
-    if (kIsWeb) {
-      final children =
-          html.document.getElementsByTagName("video").first.parent!.children;
-      for (int i = 0; i < children.length; i++) {
-        final element = children[i];
-        if (element.tagName.toLowerCase() == "video") {
-          element.requestFullscreen();
-          break;
-        }
-      }
-    } else {
-      _isFullScreen = true;
-      final query = VideoQuery();
-      final metadata = query.videoMetadata(context);
-      await context.toTransparentPage(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider.value(value: query.video(context)),
-            Provider.value(value: metadata),
-          ],
-          child: FullScreenPage(),
-        ),
-        duration: metadata.style.transitions,
-      );
-      notifyListeners();
-    }
+    _isFullScreen = true;
+    final query = VideoQuery();
+    final metadata = query.videoMetadata(context);
+    await context.toTransparentPage(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: query.video(context)),
+          Provider.value(value: metadata),
+        ],
+        child: FullScreenPage(),
+      ),
+      duration: metadata.style.transitions,
+    );
+    notifyListeners();
   }
 
   ///When you want to close FullScreen Page, you need pass the FullScreen's context,
   ///because this function do **Navigator.pop(context);**
   Future<void> closeFullScreen(BuildContext context) async {
-    if (kIsWeb) {
-      html.document.exitFullscreen();
-    } else if (_isFullScreen) {
+    if (_isFullScreen) {
       _isFullScreen = false;
       context.goBack();
       await Misc.setSystemOverlay(SystemOverlay.values);
