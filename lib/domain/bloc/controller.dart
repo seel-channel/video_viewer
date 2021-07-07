@@ -7,6 +7,7 @@ import 'package:video_viewer/ui/fullscreen.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/entities/subtitle.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
+import 'package:wakelock/wakelock.dart';
 
 class VideoViewerController extends ChangeNotifier {
   /// Controls a platform video viewer, and provides updates when the state is
@@ -104,6 +105,23 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> initialize(
+    Map<String, VideoSource> sources, {
+    bool autoPlay = true,
+  }) async {
+    _source = sources;
+    final String activedSource = sources.keys.toList().first;
+    final VideoSource source = sources.values.toList().first;
+
+    await changeSource(
+      source: source,
+      name: activedSource,
+      autoPlay: autoPlay,
+    );
+
+    Wakelock.enable();
+  }
+
   @override
   Future<void> dispose() async {
     _closeOverlayButtons?.cancel();
@@ -111,6 +129,7 @@ class VideoViewerController extends ChangeNotifier {
       await _video?.pause();
       _video!.dispose();
     }
+    Wakelock.disable();
     super.dispose();
   }
 
@@ -336,7 +355,7 @@ class VideoViewerController extends ChangeNotifier {
           ChangeNotifierProvider.value(value: query.video(context)),
           Provider.value(value: metadata),
         ],
-        child: FullScreenPage(),
+        child: const FullScreenPage(),
       ),
       duration: metadata.style.transitions,
     );

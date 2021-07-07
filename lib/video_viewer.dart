@@ -105,10 +105,6 @@ class VideoViewerState extends State<VideoViewer> {
 
   @override
   void initState() {
-    _controller = widget.controller;
-    _controller.source = widget.source;
-    _controller.looping = widget.looping;
-    _controller.source = widget.source;
     _initVideoViewer();
     super.initState();
   }
@@ -120,16 +116,10 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   void _initVideoViewer() async {
-    final activedSource = widget.source.keys.toList().first;
-    final source = widget.source.values.toList().first;
-
-    await _controller.changeSource(
-      source: source,
-      name: activedSource,
-      autoPlay: widget.autoPlay,
-    );
-
+    _controller = widget.controller;
+    _controller.looping = widget.looping;
     _controller.isShowingThumbnail = widget.style.thumbnail != null;
+    await _controller.initialize(widget.source, autoPlay: widget.autoPlay);
     setState(() => _initialized = true);
   }
 

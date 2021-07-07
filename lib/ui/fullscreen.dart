@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/ui/video_core/video_core.dart';
-import 'package:wakelock/wakelock.dart';
 
 class FullScreenPage extends StatefulWidget {
-  FullScreenPage({Key? key}) : super(key: key);
+  const FullScreenPage({Key? key}) : super(key: key);
 
   @override
   _FullScreenPageState createState() => _FullScreenPageState();
@@ -26,7 +25,6 @@ class _FullScreenPageState extends State<FullScreenPage> {
       _systemResetTimer = Misc.periodic(3000, _resetSystem);
       _fixedLandscape = metadata.onFullscreenFixLandscape;
       Future.delayed(metadata.style.transitions, _resetSystem);
-      Wakelock.enable();
       setState(() {});
     });
   }
@@ -35,7 +33,6 @@ class _FullScreenPageState extends State<FullScreenPage> {
   void dispose() {
     _systemResetTimer?.cancel();
     _systemResetTimer = null;
-    Wakelock.disable();
     super.dispose();
   }
 
