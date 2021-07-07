@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
+import 'package:cached_video_player/cached_video_player.dart';
 
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';

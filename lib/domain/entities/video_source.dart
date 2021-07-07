@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:video_player/video_player.dart';
+import 'package:cached_video_player/cached_video_player.dart';
 import 'package:video_viewer/video_viewer.dart';
 
-export 'package:video_player/video_player.dart';
+export 'package:cached_video_player/cached_video_player.dart';
 
 class VideoSource {
   VideoSource({
