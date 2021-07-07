@@ -2,6 +2,7 @@ library video_viewer;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_viewer/domain/entities/cache_manager.dart';
 
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
@@ -11,6 +12,7 @@ import 'package:video_viewer/ui/video_core/video_core.dart';
 import 'package:video_viewer/domain/bloc/controller.dart';
 import 'package:video_viewer/domain/bloc/metadata.dart';
 
+export 'package:video_viewer/domain/entities/cache_manager.dart';
 export 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 export 'package:video_viewer/domain/entities/settings_menu_item.dart';
 export 'package:video_viewer/domain/entities/video_source.dart';
@@ -32,9 +34,11 @@ class VideoViewer extends StatefulWidget {
     this.defaultAspectRatio = 16 / 9,
     this.onFullscreenFixLandscape = false,
     this.language = VideoViewerLanguage.en,
-    this.volumeControl = VolumeControlType.device,
+    this.volumeManager = VideoViewerVolumeManager.device,
+    VideoViewerCacheManager? cacheManager,
   })  : this.controller = controller ?? VideoViewerController(),
         this.style = style ?? VideoViewerStyle(),
+        this.cacheManager = cacheManager ?? VideoViewerCacheManager(),
         super(key: key);
 
   /// Once the video is initialized, it will be played
@@ -87,7 +91,9 @@ class VideoViewer extends StatefulWidget {
 
   final VideoViewerController controller;
 
-  final VolumeControlType volumeControl;
+  final VideoViewerVolumeManager volumeManager;
+
+  final VideoViewerCacheManager cacheManager;
 
   @override
   VideoViewerState createState() => VideoViewerState();
@@ -139,7 +145,7 @@ class VideoViewerState extends State<VideoViewer> {
                   language: widget.language,
                   rewindAmount: widget.rewindAmount,
                   forwardAmount: widget.forwardAmount,
-                  volumeControl: widget.volumeControl,
+                  volumeManager: widget.volumeManager,
                   defaultAspectRatio: widget.defaultAspectRatio,
                   onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
                 ),

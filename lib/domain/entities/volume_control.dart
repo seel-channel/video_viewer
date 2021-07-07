@@ -1,1 +1,1 @@
-enum VolumeControlType { device, video }
+enum VideoViewerVolumeManager { device, video }

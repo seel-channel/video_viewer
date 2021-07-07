@@ -10,7 +10,7 @@ class VideoViewerMetadata {
     required this.defaultAspectRatio,
     required this.onFullscreenFixLandscape,
     required this.language,
-    required this.volumeControl,
+    required this.volumeManager,
   });
 
   /// It is the Aspect Ratio that the widget.style.loading will take when the video
@@ -44,5 +44,5 @@ class VideoViewerMetadata {
   /// It is an argument where you can change the design of almost the entire VideoViewer
   final VideoViewerStyle style;
 
-  final VolumeControlType volumeControl;
+  final VideoViewerVolumeManager volumeManager;
 }

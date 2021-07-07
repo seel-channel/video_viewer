@@ -74,11 +74,11 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       final metadata = _query.videoMetadata(context);
       _defaultRewindAmount = metadata.rewindAmount;
       _defaultForwardAmount = metadata.forwardAmount;
-      switch (metadata.volumeControl) {
-        case VolumeControlType.device:
+      switch (metadata.volumeManager) {
+        case VideoViewerVolumeManager.device:
           _maxVolume = await VolumeWatcher.getMaxVolume;
           break;
-        case VolumeControlType.video:
+        case VideoViewerVolumeManager.video:
           _maxVolume = 1.0;
           break;
       }
@@ -195,11 +195,11 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       final fractional = _maxVolume * 0.05;
       if (volume >= _maxVolume - fractional) volume = _maxVolume;
       if (volume <= fractional) volume = 0.0;
-      switch (_query.videoMetadata(context).volumeControl) {
-        case VolumeControlType.device:
+      switch (_query.videoMetadata(context).volumeManager) {
+        case VideoViewerVolumeManager.device:
           await VolumeWatcher.setVolume(volume);
           break;
-        case VolumeControlType.video:
+        case VideoViewerVolumeManager.video:
           await video.video!.setVolume(volume);
           break;
       }
@@ -253,61 +253,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     return VideoCoreOrientation(builder: (isFullScreenLandscape) {
       return isFullScreenLandscape
           ? _globalGesture(isFullScreenLandscape)
-          : VideoCoreAspectRadio(
-              child: _globalGesture(isFullScreenLandscape),
-            );
+          : VideoCoreAspectRadio(child: _globalGesture(isFullScreenLandscape));
     });
-  }
-
-  Widget _player() {
-    return Stack(children: [
-      ValueListenableBuilder(
-        valueListenable: _scale,
-        builder: (_, double scale, __) => Transform.scale(
-          scale: scale,
-          child: const VideoCorePlayer(),
-        ),
-      ),
-      const VideoCoreActiveSubtitleText(),
-      GestureDetector(
-        onTap: _showAndHideOverlay,
-        behavior: HitTestBehavior.opaque,
-        child: Container(height: double.infinity, width: double.infinity),
-      ),
-      VideoCoreForwardAndRewind(
-        showRewind: _showAMomentRewindIcons[0],
-        showForward: _showAMomentRewindIcons[1],
-        rewindSeconds: _defaultRewindAmount * _rewindDoubleTapCount,
-        forwardSeconds: _defaultForwardAmount * _forwardDoubleTapCount,
-      ),
-      VideoCoreForwardAndRewindLayout(
-        rewind: GestureDetector(onDoubleTap: _rewind),
-        forward: GestureDetector(onDoubleTap: _forward),
-      ),
-      AnimatedBuilder(
-        animation: _query.video(context, listen: true),
-        builder: (_, __) => const VideoCoreBuffering(),
-      ),
-      const VideoCoreOverlay(),
-      CustomOpacityTransition(
-        visible: _showForwardStatus,
-        child: ValueListenableBuilder(
-          valueListenable: _forwardAndRewindAmount,
-          builder: (_, int seconds, __) => VideoCoreForwardAndRewindBar(
-            seconds: seconds,
-            position: _initialForwardPosition,
-          ),
-        ),
-      ),
-      ValueListenableBuilder(
-        valueListenable: _currentVolume,
-        builder: (_, double value, __) => VideoCoreVolumeBar(
-          visible: _showVolumeStatus,
-          progress: value / _maxVolume,
-        ),
-      ),
-      const VideoCoreThumbnail(),
-    ]);
   }
 
   //--------//
@@ -378,5 +325,56 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       bypassTapEventOnDoubleTap: true,
       child: _player(),
     );
+  }
+
+  Widget _player() {
+    return Stack(children: [
+      ValueListenableBuilder(
+        valueListenable: _scale,
+        builder: (_, double scale, __) => Transform.scale(
+          scale: scale,
+          child: const VideoCorePlayer(),
+        ),
+      ),
+      const VideoCoreActiveSubtitleText(),
+      GestureDetector(
+        onTap: _showAndHideOverlay,
+        behavior: HitTestBehavior.opaque,
+        child: Container(height: double.infinity, width: double.infinity),
+      ),
+      VideoCoreForwardAndRewind(
+        showRewind: _showAMomentRewindIcons[0],
+        showForward: _showAMomentRewindIcons[1],
+        rewindSeconds: _defaultRewindAmount * _rewindDoubleTapCount,
+        forwardSeconds: _defaultForwardAmount * _forwardDoubleTapCount,
+      ),
+      VideoCoreForwardAndRewindLayout(
+        rewind: GestureDetector(onDoubleTap: _rewind),
+        forward: GestureDetector(onDoubleTap: _forward),
+      ),
+      AnimatedBuilder(
+        animation: _query.video(context, listen: true),
+        builder: (_, __) => const VideoCoreBuffering(),
+      ),
+      const VideoCoreOverlay(),
+      CustomOpacityTransition(
+        visible: _showForwardStatus,
+        child: ValueListenableBuilder(
+          valueListenable: _forwardAndRewindAmount,
+          builder: (_, int seconds, __) => VideoCoreForwardAndRewindBar(
+            seconds: seconds,
+            position: _initialForwardPosition,
+          ),
+        ),
+      ),
+      ValueListenableBuilder(
+        valueListenable: _currentVolume,
+        builder: (_, double value, __) => VideoCoreVolumeBar(
+          visible: _showVolumeStatus,
+          progress: value / _maxVolume,
+        ),
+      ),
+      const VideoCoreThumbnail(),
+    ]);
   }
 }
