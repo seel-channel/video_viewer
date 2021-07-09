@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:video_viewer/domain/entities/volume_control.dart';
+import 'package:video_viewer/ui/video_core/widgets/ad.dart';
 
 import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/forward_and_rewind.dart';
 import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/layout.dart';
@@ -375,6 +376,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         ),
       ),
       const VideoCoreThumbnail(),
+      const VideoCoreAdViewer(),
     ]);
   }
 }

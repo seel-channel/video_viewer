@@ -30,6 +30,8 @@ class VideoViewerStyle {
     Widget? buffering,
     TextStyle? textStyle,
     this.transitions = const Duration(milliseconds: 400),
+    this.skipAdBuilder,
+    this.skipAdAlignment = Alignment.bottomRight,
   })  : this.loading = loading ??
             Center(
               child: CircularProgressIndicator(strokeWidth: 1.6),
@@ -111,6 +113,10 @@ class VideoViewerStyle {
   ///  TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)
   ///```
   final TextStyle textStyle;
+
+  final Widget Function(Duration)? skipAdBuilder;
+
+  final Alignment skipAdAlignment;
 
   VideoViewerStyle copywith({
     Widget? thumbnail,

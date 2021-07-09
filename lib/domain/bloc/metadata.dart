@@ -4,12 +4,12 @@ import 'package:video_viewer/domain/entities/volume_control.dart';
 
 class VideoViewerMetadata {
   const VideoViewerMetadata({
-    required this.style,
+    required this.defaultAspectRatio,
     required this.rewindAmount,
     required this.forwardAmount,
-    required this.defaultAspectRatio,
     required this.onFullscreenFixLandscape,
     required this.language,
+    required this.style,
     required this.volumeManager,
   });
 

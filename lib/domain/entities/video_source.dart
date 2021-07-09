@@ -8,9 +8,12 @@ export 'package:cached_video_player/cached_video_player.dart';
 class VideoSource {
   VideoSource({
     required this.video,
-    this.subtitle,
     this.intialSubtitle = "",
+    this.subtitle,
+    this.ads,
   });
+
+  final List<VideoViewerAd>? ads;
 
   ///VideoPlayerController is from [video_player package.](https://pub.dev/packages/video_player)
   ///```dart
@@ -87,6 +90,7 @@ class VideoSource {
   static Map<String, VideoSource> fromNetworkVideoSources(
     Map<String, String> sources, {
     Map<String, VideoViewerSubtitle>? subtitle,
+    List<VideoViewerAd>? ads,
     String initialSubtitle = "",
   }) {
     Map<String, VideoSource> videoSource = {};
@@ -95,6 +99,7 @@ class VideoSource {
         video: VideoPlayerController.network(sources[key]!),
         subtitle: subtitle,
         intialSubtitle: initialSubtitle,
+        ads: ads,
       );
     return videoSource;
   }
@@ -113,6 +118,7 @@ class VideoSource {
     String m3u8, {
     Map<String, VideoViewerSubtitle>? subtitle,
     String initialSubtitle = "",
+    List<VideoViewerAd>? ads,
     String Function(String quality)? formatter,
     bool descending = true,
   }) async {
@@ -167,6 +173,7 @@ class VideoSource {
 
     return VideoSource.fromNetworkVideoSources(
       sources,
+      ads: ads,
       subtitle: subtitle,
       initialSubtitle: initialSubtitle,
     );

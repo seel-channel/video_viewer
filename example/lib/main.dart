@@ -14,7 +14,7 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.grey[100],
-        body: Center(child: WebVTTSubtitleVideoExample()),
+        body: Center(child: AdsVideoExample()),
       ),
     );
   }
@@ -203,27 +203,39 @@ class _SerieExampleState extends State<SerieExample> {
   }
 }
 
-// class PortraitVideoExample extends StatelessWidget {
-//   const PortraitVideoExample({Key key}) : super(key: key);
+class AdsVideoExample extends StatelessWidget {
+  const AdsVideoExample({Key? key}) : super(key: key);
 
-//   @override
-//   Widget build(BuildContext context) {
-//     final Map<String, String> src = {
-//       "1":
-//           "https://assets.mixkit.co/videos/preview/mixkit-mysterious-pale-looking-fashion-woman-at-winter-39878-large.mp4",
-//       "2":
-//           "https://assets.mixkit.co/videos/preview/mixkit-winter-fashion-cold-looking-woman-concept-video-39874-large.mp4",
-//     };
+  @override
+  Widget build(BuildContext context) {
+    final Map<String, String> src = {
+      "1":
+          "https://assets.mixkit.co/videos/preview/mixkit-mysterious-pale-looking-fashion-woman-at-winter-39878-large.mp4",
+      "2":
+          "https://assets.mixkit.co/videos/preview/mixkit-winter-fashion-cold-looking-woman-concept-video-39874-large.mp4",
+    };
 
-//     return VideoViewer(
-//       language: VideoViewerLanguage.es,
-//       source: VideoSource.fromNetworkVideoSources(src),
-//       style: VideoViewerStyle(
-//         settingsStyle: SettingsMenuStyle(paddingBetween: 10),
-//       ),
-//     );
-//   }
-// }
+    return VideoViewer(
+      language: VideoViewerLanguage.es,
+      source: VideoSource.fromNetworkVideoSources(
+        src,
+        ads: [
+          VideoViewerAd(
+            durationToSkip: Duration(seconds: 5),
+            // durationToStart: Duration(seconds: 4),
+            fractionToStart: 0,
+            child: Container(
+              color: Colors.red,
+            ),
+          ),
+        ],
+      ),
+      style: VideoViewerStyle(
+        settingsStyle: SettingsMenuStyle(paddingBetween: 10),
+      ),
+    );
+  }
+}
 
 class HLSVideoExample extends StatelessWidget {
   const HLSVideoExample({Key? key}) : super(key: key);
