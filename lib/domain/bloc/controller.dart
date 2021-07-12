@@ -65,17 +65,6 @@ class VideoViewerController extends ChangeNotifier {
   VideoViewerSubtitle? _subtitle;
   VideoPlayerController? _video;
 
-  @override
-  Future<void> dispose() async {
-    _video?.removeListener(_videoListener);
-    await _video?.pause();
-    await _video?.dispose();
-    _deleteAdTimer();
-    _closeOverlayButtons?.cancel();
-    Wakelock.disable();
-    super.dispose();
-  }
-
   Duration get beginRange {
     final Duration duration = video!.value.duration;
     final Tween<Duration>? range = activeSource?.range;
@@ -173,7 +162,20 @@ class VideoViewerController extends ChangeNotifier {
       source: entry.value,
       autoPlay: autoPlay,
     );
+    printAmber("VIDEO VIEWER INITIALIZED");
     Wakelock.enable();
+  }
+
+  @override
+  Future<void> dispose() async {
+    printAmber("VIDEO VIEWER DISPOSED");
+    _closeOverlayButtons?.cancel();
+    _deleteAdTimer();
+    Wakelock.disable();
+    _video?.removeListener(_videoListener);
+    _video?.pause();
+    _video?.dispose();
+    super.dispose();
   }
 
   ///The [source.video] must be initialized previously
@@ -459,10 +461,9 @@ class VideoViewerController extends ChangeNotifier {
   //-------//
   //OVERLAY//
   //-------//
-
   void showAndHideOverlay([bool? show]) {
     _isShowingOverlay = show ?? !_isShowingOverlay;
-    if (_isShowingOverlay) _isGoingToCloseOverlay = false;
+    if (_isShowingOverlay) cancelCloseOverlay();
     notifyListeners();
   }
 
@@ -525,9 +526,9 @@ class VideoViewerController extends ChangeNotifier {
   Future<void> closeFullScreen(BuildContext context) async {
     if (_isFullScreen) {
       _isFullScreen = false;
-      context.goBack();
       await Misc.setSystemOverlay(SystemOverlay.values);
       await Misc.setSystemOrientation(SystemOrientation.values);
+      context.goBack();
       notifyListeners();
     }
   }
