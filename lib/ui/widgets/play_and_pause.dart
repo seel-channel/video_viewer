@@ -21,7 +21,7 @@ class PlayAndPause extends StatelessWidget {
     final style = query.videoMetadata(context).style.playAndPauseStyle;
 
     return SplashCircularIcon(
-      onTap: video.onTapPlayAndPause,
+      onTap: video.playOrPause,
       padding: padding,
       child: type == PlayAndPauseType.bottom
           ? !video.isPlaying

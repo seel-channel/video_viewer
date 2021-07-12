@@ -6,7 +6,7 @@ class VideoViewerAd {
     required this.child,
     this.durationToStart,
     this.fractionToStart,
-    this.durationToEnd = const Duration(seconds: 12),
+    this.durationToEnd = const Duration(seconds: 8),
   })  : assert(
           (fractionToStart != null && durationToStart == null) ||
               (fractionToStart == null && durationToStart != null),

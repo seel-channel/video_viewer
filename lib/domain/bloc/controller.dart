@@ -2,13 +2,13 @@ import 'dart:async';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:video_viewer/domain/entities/ads.dart';
+import 'package:wakelock/wakelock.dart';
 
 import 'package:video_viewer/ui/fullscreen.dart';
+import 'package:video_viewer/domain/entities/ads.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/entities/subtitle.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
-import 'package:wakelock/wakelock.dart';
 
 const int _kMillisecondsToHideTheOverlay = 2800;
 
@@ -24,10 +24,11 @@ class VideoViewerController extends ChangeNotifier {
   ///
   /// After [dispose] all further calls are ignored.
   VideoViewerController() {
-    this.isShowingSecondarySettingsMenus = List.filled(12, false);
+    isShowingSecondarySettingsMenus.addAll(List.filled(8, false));
   }
 
-  List<bool> isShowingSecondarySettingsMenus = [];
+  final List<VideoViewerAd> adsSeen = [];
+  final List<bool> isShowingSecondarySettingsMenus = [];
   late bool looping;
 
   VideoViewerAd? _activeAd;
@@ -38,6 +39,7 @@ class VideoViewerController extends ChangeNotifier {
   Duration? _adTimeWatched;
   List<VideoViewerAd>? _ads;
   Timer? _closeOverlayButtons;
+  Duration? _duration;
   bool _isBuffering = false,
       _isShowingOverlay = false,
       _isFullScreen = false,
@@ -47,9 +49,7 @@ class VideoViewerController extends ChangeNotifier {
       _isShowingMainSettingsMenu = false,
       _isDraggingProgressBar = false;
 
-  int _lastVideoPosition = 0;
   Duration _maxBuffering = Duration.zero;
-  Duration? _duration;
 
   /// Receive a list of all the resources to be played.
   ///
@@ -131,13 +131,6 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
-  int get lastVideoPosition => _lastVideoPosition;
-
-  set lastVideoPosition(int value) {
-    _lastVideoPosition = value;
-    notifyListeners();
-  }
-
   bool get isShowingSettingsMenu => _isShowingSettingsMenu;
 
   set isShowingSettingsMenu(bool value) {
@@ -166,111 +159,23 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  //-----------------//
+  //SOURCE CONTROLLER//
+  //-----------------//
   Future<void> initialize(
     Map<String, VideoSource> sources, {
     bool autoPlay = true,
   }) async {
+    final MapEntry<String, VideoSource> entry = sources.entries.first;
     _source = sources;
-    final String activedSource = sources.keys.toList().first;
-    final VideoSource source = sources.values.toList().first;
     await changeSource(
-      source: source,
-      name: activedSource,
+      name: entry.key,
+      source: entry.value,
       autoPlay: autoPlay,
     );
     Wakelock.enable();
   }
 
-  Future<void> seekTo(Duration position) async {
-    await _video?.seekTo(position);
-  }
-
-  Future<void> play() async {
-    if (position >= duration) await seekTo(beginRange);
-    await _video?.play();
-  }
-
-  Future<void> pause() async {
-    await _video?.pause();
-  }
-
-  //---------//
-  //LISTENERS//
-  //---------//
-  void _videoListener() {
-    final value = _video!.value;
-    final Duration position = value.position;
-    final Duration duration = value.duration;
-    final bool buffering = video!.value.isBuffering;
-
-    final Tween<Duration>? range = activeSource?.range;
-
-    if (range != null) {
-      final Duration end = endRange;
-      final Duration begin = beginRange;
-      if (position < begin || position >= end) {
-        if (looping) {
-          _video?.seekTo(begin);
-        } else if (isPlaying && position >= end) {
-          _video?.pause();
-        }
-      }
-    }
-
-    if (isPlaying && isShowingThumbnail) {
-      _isShowingThumbnail = false;
-      notifyListeners();
-    }
-
-    if (_isBuffering != buffering && !_isDraggingProgressBar) {
-      _isBuffering = buffering;
-      notifyListeners();
-    }
-
-    _maxBuffering = Duration.zero;
-    for (DurationRange range in _video!.value.buffered) {
-      final Duration end = range.end;
-      if (end > maxBuffering) {
-        _maxBuffering = end;
-        notifyListeners();
-      }
-    }
-
-    if (_isShowingOverlay) {
-      if (isPlaying) {
-        if (position >= duration && looping) {
-          _video!.seekTo(Duration.zero);
-        } else {
-          if (_closeOverlayButtons == null) _startCloseOverlay();
-        }
-      } else if (_isGoingToCloseOverlay) cancelCloseOverlay();
-    }
-
-    if (_subtitle != null) {
-      if (_activeSubtitleData != null) {
-        if (!(position > _activeSubtitleData!.start &&
-            position < _activeSubtitleData!.end)) _findSubtitle();
-      } else {
-        _findSubtitle();
-      }
-    }
-
-    if (_ads != null) {
-      if (_activeAd != null) {
-        final Duration start = _getAdStartTime(_activeAd!);
-        if (!(position > start &&
-            position < start + _activeAd!.durationToEnd)) {
-          _findAd();
-        }
-      } else {
-        _findAd();
-      }
-    }
-  }
-
-  //-----------------//
-  //SOURCE CONTROLLER//
-  //-----------------//
   ///The [source.video] must be initialized previously
   ///
   ///[inheritValues] has the function to inherit last controller values.
@@ -288,6 +193,7 @@ class VideoViewerController extends ChangeNotifier {
   }) async {
     final double speed = _video?.value.playbackSpeed ?? 1.0;
 
+    //Change the subtitles
     if (source.subtitle != null) {
       final subtitle = source.subtitle![source.intialSubtitle];
       if (subtitle != null) {
@@ -298,25 +204,34 @@ class VideoViewerController extends ChangeNotifier {
       }
     }
 
+    //Delete all ads seen
     _ads = source.ads;
-    _activeSourceName = name;
+    if (_ads != null) {
+      for (int i = 0; i < _ads!.length; i++) {
+        for (final adSeen in adsSeen) {
+          if (_ads![i] == adSeen) _ads?.removeAt(i);
+        }
+      }
+    }
 
+    //Initialize the video
     await source.video.initialize();
     _video?.removeListener(_videoListener);
     _video = source.video;
     _video?.addListener(_videoListener);
+    _activeSourceName = name;
+    _duration = endRange - beginRange;
 
+    //Update it inheritValues
     await _video?.setPlaybackSpeed(speed);
     await _video?.setLooping(looping);
     if (inheritValues || source.range != null) {
       await seekTo(source.range != null ? beginRange : position);
     }
-    _duration = endRange - beginRange;
     if (autoPlay) await play();
     notifyListeners();
   }
 
-  ///DON'T TOUCH >:]
   Future<void> changeSubtitle({
     required VideoViewerSubtitle? subtitle,
     required String subtitleName,
@@ -328,9 +243,151 @@ class VideoViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
-  //-----------------//
-  //ADS AND SUBTITLES//
-  //-----------------//
+  //-------------//
+  //VIDEO CONTROL//
+  //-------------//
+  Future<void> playOrPause() async {
+    if (isPlaying) {
+      await pause();
+    } else {
+      await play();
+    }
+  }
+
+  Future<void> play() async {
+    if (position >= duration) await seekTo(beginRange);
+    await _video?.play();
+  }
+
+  Future<void> pause() async {
+    await _video?.pause();
+  }
+
+  Future<void> seekTo(Duration position) async {
+    await _video?.seekTo(position);
+  }
+
+  void _videoListener() {
+    final VideoPlayerValue value = _video!.value;
+    final Tween<Duration>? range = activeSource?.range;
+    final Duration position = value.position;
+    final Duration duration = value.duration;
+    final bool buffering = value.isBuffering;
+
+    //Cut the video from Source range
+    if (range != null) {
+      final Duration end = endRange;
+      final Duration begin = beginRange;
+      if (position < begin || position >= end) {
+        if (looping) {
+          _video?.seekTo(begin);
+        } else if (isPlaying && position >= end) {
+          _video?.pause();
+        }
+      }
+    }
+
+    //Hide the Thumbnail when the player is playing for first time
+    if (isPlaying && isShowingThumbnail) {
+      _isShowingThumbnail = false;
+      notifyListeners();
+    }
+
+    //Show the Buffering Widget
+    if (_isBuffering != buffering && !_isDraggingProgressBar) {
+      _isBuffering = buffering;
+      notifyListeners();
+    }
+
+    //Update the buffering progress bar
+    _maxBuffering = Duration.zero;
+    for (DurationRange range in _video!.value.buffered) {
+      final Duration end = range.end;
+      if (end > maxBuffering) {
+        _maxBuffering = end;
+        notifyListeners();
+      }
+    }
+
+    //Hide the overlay after _kMillisecondsToHideTheOverlay milliseconds
+    //when the video is playing
+    if (_isShowingOverlay) {
+      if (isPlaying) {
+        if (position >= duration && looping) {
+          _video!.seekTo(Duration.zero);
+        } else {
+          if (_closeOverlayButtons == null) _startCloseOverlay();
+        }
+      } else if (_isGoingToCloseOverlay) cancelCloseOverlay();
+    }
+
+    //Show the current Subtitle
+    if (_subtitle != null) {
+      if (_activeSubtitleData != null) {
+        if (!(position > _activeSubtitleData!.start &&
+            position < _activeSubtitleData!.end)) _findSubtitle();
+      } else {
+        _findSubtitle();
+      }
+    }
+
+    //Show the current Ad
+    if (_ads != null) {
+      if (_activeAd != null) {
+        final Duration start = _getAdStartTime(_activeAd!);
+        if (!(position > start &&
+            position < start + _activeAd!.durationToEnd)) {
+          _findAd();
+        }
+      } else {
+        _findAd();
+      }
+    }
+  }
+
+  //---//
+  //ADS//
+  //---//
+  Future<void> skipAd() async {
+    _activeAd = null;
+    _deleteAdTimer();
+    await play();
+    notifyListeners();
+  }
+
+  void _findAd() async {
+    final Duration position = this.position;
+    bool foundOne = false;
+
+    for (VideoViewerAd ad in _ads!) {
+      final Duration start = _getAdStartTime(ad);
+      if (position > start &&
+          position < start + ad.durationToEnd &&
+          _activeAd != ad) {
+        _activeAd = ad;
+        await _video?.pause();
+        _ads?.remove(ad);
+        _createAdTimer();
+        adsSeen.add(ad);
+        foundOne = true;
+        notifyListeners();
+        break;
+      }
+    }
+
+    if (!foundOne && _activeAd != null) {
+      _activeAd = null;
+      _deleteAdTimer();
+      notifyListeners();
+    }
+  }
+
+  Duration _getAdStartTime(VideoViewerAd ad) {
+    final double? fractionToStart = ad.fractionToStart;
+    final Duration? durationToStart = ad.durationToStart;
+    return durationToStart ?? duration * fractionToStart!;
+  }
+
   void _createAdTimer() {
     final Duration refreshDuration = Duration(milliseconds: 500);
     _activeAdTimeRemaing = Timer.periodic(refreshDuration, (timer) {
@@ -354,49 +411,9 @@ class VideoViewerController extends ChangeNotifier {
     _activeAdTimeRemaing = null;
   }
 
-  void skipAd() {
-    _activeAd = null;
-    _deleteAdTimer();
-    play();
-    notifyListeners();
-  }
-
-  Duration _getAdStartTime(VideoViewerAd ad) {
-    final double? fractionToStart = ad.fractionToStart;
-    final Duration? durationToStart = ad.durationToStart;
-    return durationToStart ?? _video!.value.duration * fractionToStart!;
-  }
-
-  void _findAd() async {
-    final VideoPlayerValue videoValue = _video!.value;
-    final Duration position = videoValue.position;
-    bool foundOne = false;
-
-    for (VideoViewerAd ad in _ads!) {
-      final Duration start = _getAdStartTime(ad);
-      if (position > start &&
-          position < start + ad.durationToEnd &&
-          _activeAd != ad) {
-        _activeAd = ad;
-        await _video?.pause();
-        _ads!.remove(ad);
-        for (final entry in _source!.entries) {
-          entry.value.ads?.remove(ad);
-        }
-        foundOne = true;
-        _createAdTimer();
-        notifyListeners();
-        break;
-      }
-    }
-
-    if (!foundOne && _activeAd != null) {
-      _activeAd = null;
-      _deleteAdTimer();
-      notifyListeners();
-    }
-  }
-
+  //---------//
+  //SUBTITLES//
+  //---------//
   void _findSubtitle() {
     final Duration position = _video!.value.position;
     bool foundOne = false;
@@ -419,7 +436,6 @@ class VideoViewerController extends ChangeNotifier {
   //-----//
   //TIMER//
   //-----//
-  ///DON'T TOUCH >:]
   void cancelCloseOverlay() {
     _isGoingToCloseOverlay = false;
     _closeOverlayButtons?.cancel();
@@ -443,18 +459,6 @@ class VideoViewerController extends ChangeNotifier {
   //-------//
   //OVERLAY//
   //-------//
-  Future<void> onTapPlayAndPause() async {
-    final value = _video!.value;
-    if (isPlaying) {
-      await pause();
-      if (!_isShowingOverlay) _isShowingOverlay = false;
-    } else {
-      if (value.position >= value.duration) await _video!.seekTo(Duration.zero);
-      _lastVideoPosition = _lastVideoPosition - 1;
-      await play();
-    }
-    notifyListeners();
-  }
 
   void showAndHideOverlay([bool? show]) {
     _isShowingOverlay = show ?? !_isShowingOverlay;
@@ -498,10 +502,10 @@ class VideoViewerController extends ChangeNotifier {
   //FULLSCREEN//
   //----------//
   ///When you want to open FullScreen Page, you need pass the FullScreen's context,
-  ///because this function do **Navigator.push(context, MaterialPageRoute(...))**
+  ///because this function do **Navigator.push(context, TransparentRoute(...))**
   Future<void> openFullScreen(BuildContext context) async {
     _isFullScreen = true;
-    final query = VideoQuery();
+    final VideoQuery query = VideoQuery();
     final metadata = query.videoMetadata(context);
     await context.toTransparentPage(
       MultiProvider(
