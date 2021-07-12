@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 
 class VideoViewerAd {
   VideoViewerAd({
+    required this.child,
+    required this.durationToSkip,
     this.durationToStart,
     this.fractionToStart,
-    required this.durationToSkip,
-    required this.child,
   })  : assert(
           (fractionToStart != null && durationToStart == null) ||
               (fractionToStart == null && durationToStart != null),
@@ -18,4 +18,42 @@ class VideoViewerAd {
   final Duration durationToSkip;
   final Duration? durationToStart;
   final double? fractionToStart;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is VideoViewerAd &&
+        other.child == child &&
+        other.durationToSkip == durationToSkip &&
+        other.durationToStart == durationToStart &&
+        other.fractionToStart == fractionToStart;
+  }
+
+  @override
+  int get hashCode {
+    return child.hashCode ^
+        durationToSkip.hashCode ^
+        durationToStart.hashCode ^
+        fractionToStart.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'VideoViewerAd(child: $child, durationToSkip: $durationToSkip, durationToStart: $durationToStart, fractionToStart: $fractionToStart)';
+  }
+
+  VideoViewerAd copyWith({
+    Widget? child,
+    Duration? durationToSkip,
+    Duration? durationToStart,
+    double? fractionToStart,
+  }) {
+    return VideoViewerAd(
+      child: child ?? this.child,
+      durationToSkip: durationToSkip ?? this.durationToSkip,
+      durationToStart: durationToStart ?? this.durationToStart,
+      fractionToStart: fractionToStart ?? this.fractionToStart,
+    );
+  }
 }

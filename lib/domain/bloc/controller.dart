@@ -337,7 +337,9 @@ class VideoViewerController extends ChangeNotifier {
         _activeAd = ad;
         _video?.pause();
         _ads!.remove(ad);
-        if (activeSource != null) _source?[activeSource!]?.ads?.remove(ad);
+        for (final entry in _source!.entries) {
+          entry.value.ads?.remove(ad);
+        }
         foundOne = true;
         _createAdTimer();
         notifyListeners();
