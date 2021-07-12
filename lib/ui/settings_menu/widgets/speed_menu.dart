@@ -12,22 +12,21 @@ class SpeedMenu extends StatelessWidget {
     final video = query.video(context, listen: true);
     final metadata = query.videoMetadata(context, listen: true);
 
-    final speed = video.video!.value.playbackSpeed;
+    final double speed = video.video!.value.playbackSpeed;
 
-    return SecondaryMenu(
-      children: [
-        for (double i = 0.5; i <= 2; i += 0.25)
-          CustomInkWell(
-            onTap: () {
-              final video = query.video(context);
-              video.video!.setPlaybackSpeed(i);
-              video.closeAllSecondarySettingsMenus();
-            },
-            child: CustomText(
-                text: i == 1.0 ? metadata.language.normalSpeed : "x$i",
-                selected: i == speed),
+    return SecondaryMenu(children: [
+      for (double i = 0.5; i <= 2; i += 0.25)
+        CustomInkWell(
+          onTap: () {
+            final video = query.video(context);
+            video.video!.setPlaybackSpeed(i);
+            video.closeAllSecondarySettingsMenus();
+          },
+          child: CustomText(
+            text: i == 1.0 ? metadata.language.normalSpeed : "$i",
+            selected: i == speed,
           ),
-      ],
-    );
+        ),
+    ]);
   }
 }

@@ -7,6 +7,7 @@ import 'package:video_viewer/domain/entities/styles/progress_bar.dart';
 import 'package:video_viewer/domain/entities/styles/volume_bar.dart';
 import 'package:video_viewer/domain/entities/styles/subtitle.dart';
 
+export 'package:video_viewer/domain/entities/styles/bar.dart';
 export 'package:video_viewer/domain/entities/styles/forward_and_rewind.dart';
 export 'package:video_viewer/domain/entities/styles/play_and_pause.dart';
 export 'package:video_viewer/domain/entities/styles/settings_menu.dart';

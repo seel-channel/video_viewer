@@ -120,6 +120,7 @@ class VideoViewerState extends State<VideoViewer> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget? thumbnail = widget.style.thumbnail;
     return _initialized
         ? MultiProvider(
             providers: [
@@ -141,7 +142,10 @@ class VideoViewerState extends State<VideoViewer> {
           )
         : AspectRatio(
             aspectRatio: widget.defaultAspectRatio,
-            child: widget.style.loading,
+            child: Stack(children: [
+              if (thumbnail != null) Positioned.fill(child: thumbnail),
+              Center(child: widget.style.loading),
+            ]),
           );
   }
 }

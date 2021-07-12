@@ -10,6 +10,8 @@ import 'package:video_viewer/domain/entities/subtitle.dart';
 import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:wakelock/wakelock.dart';
 
+const int _kMillisecondsToHideTheOverlay = 2800;
+
 class VideoViewerController extends ChangeNotifier {
   /// Controls a platform video viewer, and provides updates when the state is
   /// changing.
@@ -383,7 +385,7 @@ class VideoViewerController extends ChangeNotifier {
   void _startCloseOverlay() {
     if (!_isGoingToCloseOverlay) {
       _isGoingToCloseOverlay = true;
-      _closeOverlayButtons = Misc.timer(3200, () {
+      _closeOverlayButtons = Misc.timer(_kMillisecondsToHideTheOverlay, () {
         if (isPlaying) {
           _isShowingOverlay = false;
           cancelCloseOverlay();
