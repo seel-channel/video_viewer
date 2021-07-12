@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_video_player/cached_video_player.dart';
 
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
@@ -106,31 +105,32 @@ class _ProgressBarGesture extends StatefulWidget {
 
 class __ProgressBarGestureState extends State<_ProgressBarGesture> {
   final VideoQuery _query = VideoQuery();
-  late VideoPlayerController _video;
 
-  @override
-  void initState() {
-    _video = _query.video(context).video!;
-    super.initState();
+  set videoPosition(Duration value) {
+    Provider.of<ValueNotifier<Duration>>(context, listen: false).value = value;
+  }
+
+  set animationMilliseconds(int value) {
+    Provider.of<ValueNotifier<int>>(context, listen: false).value = value;
   }
 
   void _seekToRelativePosition(Offset local, [bool showText = false]) {
+    final video = _query.video(context).video!;
     final double localPos = local.dx / widget.width!;
-    final Duration position = _video.value.duration * localPos;
+    final Duration position = video.value.duration * localPos;
 
-    if (position >= Duration.zero && position <= _video.value.duration) {
-      Provider.of<ValueNotifier<Duration>>(context, listen: false).value =
-          position;
+    if (position >= Duration.zero && position <= video.value.duration) {
+      videoPosition = position;
     }
   }
 
   Future<void> play() async {
-    Provider.of<ValueNotifier<int>>(context, listen: false).value = 1000;
+    animationMilliseconds = 1000;
     await _query.video(context).video?.play();
   }
 
   Future<void> pause() async {
-    Provider.of<ValueNotifier<int>>(context, listen: false).value = 0;
+    animationMilliseconds = 0;
     await _query.video(context).video?.pause();
   }
 
@@ -139,11 +139,12 @@ class __ProgressBarGestureState extends State<_ProgressBarGesture> {
   }
 
   Future<void> _endDragging() async {
-    await _video.seekTo(
+    final controller = _query.video(context);
+    await controller.video?.seekTo(
       Provider.of<ValueNotifier<Duration>>(context, listen: false).value,
     );
-    _query.video(context).isDraggingProgressBar = false;
-    if (_query.video(context).activeAd == null) await play();
+    controller.isDraggingProgressBar = false;
+    if (controller.activeAd == null) await play();
   }
 
   @override
