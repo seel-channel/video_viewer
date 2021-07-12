@@ -7,12 +7,14 @@ class PlayAndPauseWidgetStyle {
   PlayAndPauseWidgetStyle({
     Widget? play,
     Widget? pause,
+    Widget? replay,
     Color? background,
     this.circleBorder,
     this.circleRadius = 40,
-  })  : this.background = background ?? Color(0xFF295acc).withOpacity(0.8),
-        this.play = play ?? Icon(Icons.play_arrow, color: Colors.white),
-        this.pause = pause ?? Icon(Icons.pause, color: Colors.white);
+  })  : background = background ?? Color(0xFF295acc).withOpacity(0.8),
+        play = play ?? Icon(Icons.play_arrow, color: Colors.white),
+        pause = pause ?? Icon(Icons.pause, color: Colors.white),
+        replay = replay ?? Icon(Icons.replay, color: Colors.white);
 
   /// It is the icon that will have the play of the progress bar and also
   /// the one that appears in the middle of the screen
@@ -22,6 +24,15 @@ class PlayAndPauseWidgetStyle {
   ///  Icon(Icons.play_arrow, color: Colors.white);
   ///```
   final Widget play;
+
+  /// It is the icon that will have the play of the progress bar and also
+  /// the one that appears in the middle of the screen
+  ///
+  ///DEFAULT:
+  ///```dart
+  ///  Icon(Icons.play_arrow, color: Colors.white);
+  ///```
+  final Widget replay;
 
   /// It is the icon that will have the pause of the progress bar and also
   /// the one that appears in the middle of the screen
@@ -61,4 +72,5 @@ class PlayAndPauseWidgetStyle {
 
   Widget get playWidget => _base(play, background);
   Widget get pauseWidget => _base(pause, background);
+  Widget get replayWidget => _base(replay, background);
 }

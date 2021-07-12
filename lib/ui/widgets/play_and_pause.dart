@@ -16,20 +16,23 @@ class PlayAndPause extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final query = VideoQuery();
-    final video = query.video(context, listen: true);
+    final VideoQuery query = VideoQuery();
+    final controller = query.video(context, listen: true);
     final style = query.videoMetadata(context).style.playAndPauseStyle;
+    final bool isPlaying = !controller.isPlaying;
 
     return SplashCircularIcon(
-      onTap: video.playOrPause,
+      onTap: controller.playOrPause,
       padding: padding,
       child: type == PlayAndPauseType.bottom
-          ? !video.isPlaying
+          ? isPlaying
               ? style.play
               : style.pause
-          : !video.isPlaying
-              ? style.playWidget
-              : style.pauseWidget,
+          : controller.position >= controller.duration
+              ? style.replayWidget
+              : isPlaying
+                  ? style.playWidget
+                  : style.pauseWidget,
     );
   }
 }

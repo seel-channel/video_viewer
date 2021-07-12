@@ -18,6 +18,7 @@ import 'package:video_viewer/ui/video_core/widgets/thumbnail.dart';
 import 'package:video_viewer/ui/video_core/widgets/buffering.dart';
 import 'package:video_viewer/ui/video_core/widgets/subtitle.dart';
 import 'package:video_viewer/ui/video_core/widgets/player.dart';
+import 'package:video_viewer/ui/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 import 'package:video_viewer/ui/overlay/overlay.dart';
 import 'package:volume_watcher/volume_watcher.dart';
@@ -368,7 +369,19 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       ),
       AnimatedBuilder(
         animation: _query.video(context, listen: true),
-        builder: (_, __) => const VideoCoreBuffering(),
+        builder: (_, __) {
+          final controller = _query.video(context);
+          return Stack(children: [
+            const VideoCoreBuffering(),
+            CustomOpacityTransition(
+              visible: controller.position >= controller.duration &&
+                  !controller.isShowingOverlay,
+              child: const Center(
+                child: PlayAndPause(type: PlayAndPauseType.center),
+              ),
+            ),
+          ]);
+        },
       ),
       const VideoCoreOverlay(),
       CustomOpacityTransition(
