@@ -153,8 +153,9 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //------------------------------------//
   //FORWARD AND REWIND (DRAG HORIZONTAL)//
   //------------------------------------//
-  void _forwardDragStart(Offset globalPosition) {
+  void _forwardDragStart(Offset globalPosition) async {
     final controller = _query.video(context);
+    await controller.pause();
     if (!controller.isShowingSettingsMenu) {
       Misc.delayed(100, () {
         if (_canListenerMove(controller)) {
@@ -171,18 +172,19 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     final controller = _query.video(context);
     if (!controller.isShowingSettingsMenu) {
       final double diff = _horizontalDragStartOffset.dx - globalPosition.dx;
-      final double multiplicator = (diff.abs() / 25);
       final int duration = controller.duration.inSeconds;
       final int position = controller.position.inSeconds;
-      final int amount = -((diff / 10).round() * multiplicator).round();
-
-      if ((position + amount) <= duration && (position + amount) >= 0)
-        _forwardAndRewindAmount.value = amount;
+      final int seconds = -(diff / (200 / duration)).round();
+      final int relativePosition = position + seconds;
+      if (relativePosition <= duration && relativePosition >= 0) {
+        _forwardAndRewindAmount.value = seconds;
+      }
     }
   }
 
-  void _forwardDragEnd() {
+  void _forwardDragEnd() async {
     final controller = _query.video(context);
+    await controller.play();
     if (!controller.isShowingSettingsMenu && _showForwardStatus) {
       setState(() => _showForwardStatus = false);
       _videoSeekTo(_forwardAndRewindAmount.value);

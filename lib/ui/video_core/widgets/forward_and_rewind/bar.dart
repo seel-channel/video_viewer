@@ -47,8 +47,9 @@ class VideoCoreForwardAndRewindBar extends StatelessWidget {
               ),
               Container(
                 height: height,
-                width: ((position.inSeconds + seconds) / duration.inSeconds) *
-                    width,
+                width: (((position.inSeconds + seconds) / duration.inSeconds) *
+                        width)
+                    .clamp(0.0, width),
                 decoration: BoxDecoration(
                   color: forwardStyle.bar.color,
                   borderRadius: forwardStyle.borderRadius,
@@ -56,8 +57,8 @@ class VideoCoreForwardAndRewindBar extends StatelessWidget {
               ),
               CustomPaint(
                 painter: _InitialPositionIdentifierPainter(
-                  color: forwardStyle.bar.identifier,
                   position: (position.inSeconds / duration.inSeconds) * width,
+                  color: forwardStyle.bar.identifier,
                   width: forwardStyle.bar.identifierWidth,
                 ),
                 size: Size.infinite,
