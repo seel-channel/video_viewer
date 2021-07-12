@@ -151,22 +151,31 @@ class MainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> children = [
+      SearchBar(),
+      SizedBox(height: kSectionPadding),
+      Headline6("Series"),
+      SizedBox(height: kPadding),
+      MoviesSlider(kSeriesData),
+      SizedBox(height: kSectionPadding),
+      Headline6("Movies"),
+      SizedBox(height: kPadding),
+      MoviesSlider(kMoviesData),
+    ]
+        .map((element) => element is MoviesSlider
+            ? element
+            : Padding(
+                padding: const Margin.horizontal(kSectionPadding),
+                child: element,
+              ))
+        .toList();
+
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: kAllSectionPadding,
+          padding: const Margin.vertical(kPadding),
           physics: const BouncingScrollPhysics(),
-          children: const [
-            SearchBar(),
-            SizedBox(height: kSectionPadding),
-            Headline6("Series"),
-            SizedBox(height: kPadding),
-            MoviesSlider(kSeriesData),
-            SizedBox(height: kSectionPadding),
-            Headline6("Movies"),
-            SizedBox(height: kPadding),
-            MoviesSlider(kMoviesData),
-          ],
+          children: children,
         ),
       ),
     );
@@ -268,7 +277,20 @@ class MoviesSlider extends StatefulWidget {
 }
 
 class _MoviesSliderState extends State<MoviesSlider> {
-  final PageController _pageController = PageController();
+  late PageController _pageController = PageController();
+
+  @override
+  void initState() {
+    Misc.onLayoutRendered(() {
+      setState(() {
+        final double width = context.media.width;
+        _pageController = PageController(
+          viewportFraction: (width - kSectionPadding * 2) / width,
+        );
+      });
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -295,24 +317,21 @@ class _MoviesSliderState extends State<MoviesSlider> {
             animation: _pageController,
             builder: (_, child) {
               double itemOffset = 0.0;
-
               try {
                 itemOffset = (_pageController.page ?? 0.0) - index;
               } catch (_) {
                 itemOffset = 0.0;
               }
-
               final double distortionValue = curve.transform(
                 (1 - (itemOffset.abs() * (1 - minScale)))
                     .clamp(0.0, 1.0)
                     .toDouble(),
               );
-
               return Transform.scale(
                 scale: distortionValue,
                 child: Align(
                   alignment: Alignment(
-                    curve.transform(itemOffset.abs()),
+                    curve.transform(itemOffset.abs().clamp(0.0, 1.0)),
                     0.0,
                   ),
                   child: SizedBox(
