@@ -1,432 +1,456 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:helpers/helpers.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:video_viewer/video_viewer.dart';
+
+enum MovieStyle { card, page }
+
+const double kButtonHeight = 48;
+const double kCardAspectRatio = 0.75;
+
+const double kPadding = 20;
+const double kSectionPadding = 40;
+const EdgeInsets kAllPadding = Margin.all(kPadding);
+const EdgeInsets kAllSectionPadding = Margin.all(kSectionPadding);
+
+const BorderRadius kAllBorderRadius = BorderRadius.all(
+  Radius.circular(kPadding),
+);
+
+const List<Movie> kSeriesData = [
+  Movie(
+    url: "https://i.blogs.es/0f0871/the-witcher/1366_2000.jpeg",
+    title: "The Witcher",
+    category: "Fantasy",
+    isFavorite: true,
+  ),
+  Movie(
+    url:
+        "https://www.muycomputer.com/wp-content/uploads/2021/04/SombrayHueso-1000x600.jpg",
+    title: "Shadow and Bone",
+    category: "Fantasy",
+    isFavorite: false,
+  ),
+  Movie(
+    url: "https://ismorbo.com/wp-content/uploads/2020/03/ldr.jpg",
+    title: "Love, Death & Robots",
+    category: "Sci-fi, Fantasy",
+    isFavorite: true,
+  ),
+];
+
+const List<Movie> kMoviesData = [
+  Movie(
+    url: "https://es.web.img3.acsta.net/pictures/18/11/16/11/31/2850705.jpg",
+    title: "Mortal Machines",
+    category: "Sci-fi",
+    isFavorite: true,
+  ),
+  Movie(
+    url:
+        "https://pics.filmaffinity.com/La_guerra_del_ma_ana-735069980-large.jpg",
+    title: "The tomorrow war",
+    category: "Sci-fi",
+    isFavorite: false,
+  ),
+  Movie(
+    url: "https://pbs.twimg.com/media/EUk_a2LUEAEIwhd.jpg",
+    title: "The Platform",
+    category: "Sci-fi",
+    isFavorite: true,
+  ),
+];
+
+class Movie {
+  const Movie({
+    required this.url,
+    required this.title,
+    required this.category,
+    this.isFavorite = false,
+  });
+
+  final String url, title, category;
+  final bool isFavorite;
+}
 
 void main() => runApp(App());
 
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light));
+    Misc.setSystemOverlayStyle(
+      statusBarIconBrightness: Brightness.dark,
+      statusBarColor: Colors.transparent,
+    );
     return MaterialApp(
       title: 'Video Viewer Example',
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: Colors.grey[100],
-        body: Center(child: AdsVideoExample()),
+      theme: ThemeData(
+        scaffoldBackgroundColor: Color(0xFFf9fbfe),
+        cardColor: Color(0xFFfbfafe),
+        primaryColor: Color(0xFFd81e27),
+        shadowColor: Color(0xFF324754).withOpacity(0.24),
+        textTheme: TextTheme(
+          headline4: GoogleFonts.montserrat(
+            color: Colors.white,
+            fontSize: 34,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.4,
+          ),
+          headline5: GoogleFonts.montserrat(
+            color: Color(0xFF324754),
+            fontSize: 24,
+            fontWeight: FontWeight.w500,
+          ),
+          headline6: GoogleFonts.montserrat(
+            color: Color(0xFF324754),
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+          ),
+          bodyText1: GoogleFonts.montserrat(
+            color: Color(0xFF324754),
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+          ),
+          subtitle1: GoogleFonts.montserrat(
+            color: Colors.white,
+            fontSize: 12,
+          ),
+          subtitle2: GoogleFonts.montserrat(
+            color: Color(0xFF819ab1),
+            fontSize: 12,
+          ),
+          button: GoogleFonts.montserrat(
+            color: Colors.white,
+            letterSpacing: 0.8,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
+      home: const MainPage(),
     );
   }
 }
 
-class SerieExample extends StatefulWidget {
-  SerieExample({Key? key}) : super(key: key);
-
-  @override
-  _SerieExampleState createState() => _SerieExampleState();
-}
-
-class _SerieExampleState extends State<SerieExample> {
-  final VideoViewerController controller = VideoViewerController();
-  final Map<String, Map<String, String>> database = {
-    "第1集": {
-      "超清":
-          "https://ks-xpc4.xpccdn.com/ff6c8b38-79a6-4040-b220-899e579a5c28.mp4",
-    },
-    "第2集": {
-      "超清":
-          "https://hls.syrme.top/hls/5ac73019-c1bc-4f5b-b295-52ff6a29a9e7/playlist.m3u8"
-    },
-    "第3集": {
-      "超清":
-          "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8"
-    },
-    "第4集": {
-      "超清":
-          "https://ks-xpc4.xpccdn.com/ff6c8b38-79a6-4040-b220-899e579a5c28.mp4"
-    },
-    "第5集": {
-      "超清":
-          "https://ks-xpc4.xpccdn.com/3368e540-b1f9-4832-8167-a2334da19b5c.mp4"
-    },
-  };
-
-  final Map<String, String> thumbnails = {
-    "第1集":
-        "https://cloudfront-us-east-1.images.arcpublishing.com/semana/FUM2RCCVW5EL5LQYCDVC6VRO2U.jpg",
-    "第2集":
-        "https://www.elcomercio.com/files/article_main/uploads/2019/03/29/5c9e3ddfc85ca.jpeg",
-    "第3集":
-        "https://cloudfront-us-east-1.images.arcpublishing.com/semana/FUM2RCCVW5EL5LQYCDVC6VRO2U.jpg",
-    "第4集":
-        "https://www.elcomercio.com/files/article_main/uploads/2019/03/29/5c9e3ddfc85ca.jpeg",
-    "第5集":
-        "https://cloudfront-us-east-1.images.arcpublishing.com/semana/FUM2RCCVW5EL5LQYCDVC6VRO2U.jpg",
-  };
-
-  String episode = "";
-  late MapEntry<String, Map<String, String>> initial;
-
-  @override
-  void initState() {
-    initial = database.entries.first;
-    episode = initial.key;
-    super.initState();
-  }
+//-----//
+//PAGES//
+//-----//
+class MainPage extends StatelessWidget {
+  const MainPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: Center(
-        child: VideoViewer(
-          source: VideoSource.fromNetworkVideoSources(initial.value),
-          controller: controller,
-          language: VideoViewerLanguage.es,
-          style: VideoViewerStyle(
-            header: Builder(
-              builder: (innerContext) {
-                return Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Game of Thrones: $episode",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            settingsStyle: SettingsMenuStyle(
-              paddingBetween: 10,
-              items: [
-                SettingsMenuItem(
-                  themed: SettingsMenuItemThemed(
-                    title: "Episodes",
-                    subtitle: episode,
-                    icon: Icon(
-                      Icons.view_module_outlined,
-                      color: Colors.white,
-                    ),
-                  ),
-                  secondaryMenuWidth: 300,
-                  secondaryMenu: Padding(
-                    padding: EdgeInsets.only(top: 5),
-                    child: Center(
-                      child: Container(
-                        child: Wrap(
-                          spacing: 20,
-                          runSpacing: 10,
-                          children: [
-                            for (var entry in database.entries)
-                              episodeImage(entry)
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget episodeImage(MapEntry<String, Map<String, String>> entry) {
-    return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(5)),
-      child: Material(
-        child: InkWell(
-          onTap: () async {
-            final episodeName = entry.key;
-            final qualities = entry.value;
-
-            Map<String, VideoSource> sources;
-            String url = qualities.entries.first.value;
-
-            if (url.contains("m3u8")) {
-              sources = await VideoSource.fromM3u8PlaylistUrl(
-                url,
-                formatter: (quality) =>
-                    quality == "Auto" ? "Auto" : "${quality.split("x").last}p",
-              );
-            } else {
-              sources = VideoSource.fromNetworkVideoSources(qualities);
-            }
-
-            final video = sources.entries.first;
-
-            await controller.changeSource(
-              inheritValues: false, //RESET SPEED TO NORMAL AND POSITION TO ZERO
-              source: video.value,
-              name: video.key,
-            );
-
-            controller.closeAllSecondarySettingsMenus();
-            controller.source = sources;
-            episode = episodeName;
-            setState(() {});
-          },
-          child: Stack(
-            alignment: AlignmentDirectional.bottomCenter,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                color: Colors.white,
-                child: Image.network(thumbnails[entry.key]!, fit: BoxFit.cover),
-              ),
-              Text(
-                entry.key,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              )
-            ],
-          ),
+      body: SafeArea(
+        child: ListView(
+          padding: kAllSectionPadding,
+          physics: const BouncingScrollPhysics(),
+          children: const [
+            SearchBar(),
+            SizedBox(height: kSectionPadding),
+            Headline6("Series"),
+            SizedBox(height: kPadding),
+            MoviesSlider(kSeriesData),
+            SizedBox(height: kSectionPadding),
+            Headline6("Movies"),
+            SizedBox(height: kPadding),
+            MoviesSlider(kMoviesData),
+          ],
         ),
       ),
     );
   }
 }
 
-class AdsVideoExample extends StatelessWidget {
-  const AdsVideoExample({Key? key}) : super(key: key);
+class MovieDetailsPage extends StatelessWidget {
+  const MovieDetailsPage(this.movie, {Key? key}) : super(key: key);
+
+  final Movie movie;
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, String> src = {
-      "1":
-          "https://assets.mixkit.co/videos/preview/mixkit-mysterious-pale-looking-fashion-woman-at-winter-39878-large.mp4",
-      "2":
-          "https://assets.mixkit.co/videos/preview/mixkit-winter-fashion-cold-looking-woman-concept-video-39874-large.mp4",
-    };
+    final Color primary = context.color.primary;
 
-    return VideoViewer(
-      language: VideoViewerLanguage.es,
-      source: VideoSource.fromNetworkVideoSources(
-        src,
-        ads: [
-          VideoViewerAd(
-            durationToSkip: Duration(seconds: 5),
-            // durationToStart: Duration(seconds: 4),
-            fractionToStart: 0,
-            child: Container(
-              color: Colors.red,
+    return Scaffold(
+      body: SafeArea(
+        child: Column(children: [
+          VideoViewer(
+            source: {
+              "SubRip Text": VideoSource(
+                video: VideoPlayerController.network(
+                    "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
+                subtitle: {
+                  "English": VideoViewerSubtitle.network(
+                    "https://felipemurguia.com/assets/txt/WEBVTT_English.txt",
+                    type: SubtitleType.webvtt,
+                  ),
+                },
+              )
+            },
+            style: VideoViewerStyle(
+              playAndPauseStyle: PlayAndPauseWidgetStyle(background: primary),
+              progressBarStyle: ProgressBarStyle(
+                bar: BarStyle.progress(color: primary),
+              ),
+              thumbnail: Stack(children: [
+                Positioned.fill(child: MovieImage(movie)),
+                Positioned.fill(
+                  child: Image.network(movie.url, fit: BoxFit.cover),
+                ),
+              ]),
             ),
           ),
+          Padding(
+            padding: kAllSectionPadding,
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Expanded(child: MovieTitle(movie, type: MovieStyle.page)),
+              const SizedBox(width: kPadding),
+              MovieFavoriteIcon(movie, type: MovieStyle.page)
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+//-------//
+//WIDGETS//
+//-------//
+class MovieCard extends StatelessWidget {
+  const MovieCard(this.movie, {Key? key}) : super(key: key);
+  final Movie movie;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomContainer(
+      height: double.infinity,
+      child: ClipRRect(
+        borderRadius: kAllBorderRadius,
+        child: AspectRatio(
+          aspectRatio: kCardAspectRatio,
+          child: Stack(children: [
+            Positioned.fill(child: MovieImage(movie)),
+            SplashTap(
+              onTap: () => context.to(MovieDetailsPage(movie)),
+              child: Container(color: Colors.transparent),
+            ),
+            Padding(padding: kAllPadding, child: MovieTitle(movie)),
+            Padding(
+              padding: kAllPadding,
+              child: Align(
+                alignment: Alignment.topRight,
+                child: MovieFavoriteIcon(movie),
+              ),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+class MoviesSlider extends StatefulWidget {
+  const MoviesSlider(this.movies, {Key? key}) : super(key: key);
+  final List<Movie> movies;
+
+  @override
+  _MoviesSliderState createState() => _MoviesSliderState();
+}
+
+class _MoviesSliderState extends State<MoviesSlider> {
+  final PageController _pageController = PageController();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const Curve curve = Curves.ease;
+    const double minScale = 0.6;
+
+    return AspectRatio(
+      aspectRatio: kCardAspectRatio,
+      child: LayoutBuilder(builder: (_, constraints) {
+        final Size size = constraints.biggest;
+        return PageView.builder(
+          itemCount: widget.movies.length,
+          clipBehavior: Clip.none,
+          scrollDirection: Axis.horizontal,
+          controller: _pageController,
+          physics: const BouncingScrollPhysics(),
+          itemBuilder: (_, int index) => AnimatedBuilder(
+            animation: _pageController,
+            builder: (_, child) {
+              double itemOffset = 0.0;
+
+              try {
+                itemOffset = (_pageController.page ?? 0.0) - index;
+              } catch (_) {
+                itemOffset = 0.0;
+              }
+
+              final double distortionValue = curve.transform(
+                (1 - (itemOffset.abs() * (1 - minScale)))
+                    .clamp(0.0, 1.0)
+                    .toDouble(),
+              );
+
+              return Transform.scale(
+                scale: distortionValue,
+                child: Align(
+                  alignment: Alignment(
+                    curve.transform(itemOffset.abs()),
+                    0.0,
+                  ),
+                  child: SizedBox(
+                    height: distortionValue * size.height,
+                    width: size.width,
+                    child: child,
+                  ),
+                ),
+              );
+            },
+            child: MovieCard(widget.movies[index]),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class MovieImage extends StatelessWidget {
+  const MovieImage(this.movie, {Key? key}) : super(key: key);
+  final Movie movie;
+
+  @override
+  Widget build(BuildContext context) {
+    return Hero(
+      tag: movie.title + "Thumbnail",
+      child: ClipRRect(
+        borderRadius: kAllBorderRadius,
+        child: Image.network(movie.url, fit: BoxFit.cover),
+      ),
+    );
+  }
+}
+
+class MovieFavoriteIcon extends StatelessWidget {
+  const MovieFavoriteIcon(this.movie, {Key? key, this.type = MovieStyle.card})
+      : super(key: key);
+  final Movie movie;
+  final MovieStyle type;
+
+  @override
+  Widget build(BuildContext context) {
+    final BuildColor color = context.color;
+    final IconData iconData =
+        movie.isFavorite ? Icons.favorite : Icons.favorite_outline;
+
+    return Hero(
+      tag: movie.title + "Favorite",
+      child: type == MovieStyle.card
+          ? ClipRRect(
+              borderRadius: kAllBorderRadius,
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                child: Container(
+                  height: kButtonHeight,
+                  width: kButtonHeight,
+                  alignment: Alignment.center,
+                  color: color.card.withOpacity(0.16),
+                  child: Icon(iconData, color: color.card),
+                ),
+              ),
+            )
+          : CustomContainer(
+              width: kButtonHeight,
+              child: Icon(iconData, color: color.primary),
+            ),
+    );
+  }
+}
+
+class MovieTitle extends StatelessWidget {
+  const MovieTitle(this.movie, {Key? key, this.type = MovieStyle.card})
+      : super(key: key);
+  final Movie movie;
+  final MovieStyle type;
+
+  @override
+  Widget build(BuildContext context) {
+    TextStyle? style;
+    if (type == MovieStyle.page) {
+      style = TextStyle(color: context.textTheme.bodyText1?.color);
+    }
+
+    return Hero(
+      tag: movie.title + "Title",
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Headline4(movie.title, style: style),
+          Subtitle1(movie.category, style: style),
         ],
       ),
-      style: VideoViewerStyle(
-        settingsStyle: SettingsMenuStyle(paddingBetween: 10),
+    );
+  }
+}
+
+class CustomContainer extends StatelessWidget {
+  const CustomContainer({
+    Key? key,
+    required this.child,
+    this.height = kButtonHeight,
+    this.width,
+  }) : super(key: key);
+
+  final Widget child;
+  final double height;
+  final double? width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      width: width,
+      decoration: BoxDecoration(
+        borderRadius: kAllBorderRadius,
+        color: context.color.card,
+        boxShadow: [
+          BoxShadow(
+            color: context.color.shadow,
+            spreadRadius: 2,
+            blurRadius: 16,
+            offset: Offset(4, 8),
+          )
+        ],
       ),
+      child: child,
     );
   }
 }
 
-class HLSVideoExample extends StatelessWidget {
-  const HLSVideoExample({Key? key}) : super(key: key);
+class SearchBar extends StatelessWidget {
+  const SearchBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, VideoSource>>(
-      future: VideoSource.fromM3u8PlaylistUrl(
-        "https://sfux-ext.sfux.info/hls/chapter/105/1588724110/1588724110.m3u8",
-        formatter: (quality) =>
-            quality == "Auto" ? "Auto" : "${quality.split("x").last}p",
-      ),
-      builder: (_, data) {
-        return data.hasData
-            ? VideoViewer(
-                language: VideoViewerLanguage.ar,
-                source: data.data!,
-                onFullscreenFixLandscape: true,
-                style: VideoViewerStyle(
-                  thumbnail: Image.network(
-                    "https://play-lh.googleusercontent.com/aA2iky4PH0REWCcPs9Qym2X7e9koaa1RtY-nKkXQsDVU6Ph25_9GkvVuyhS72bwKhN1P",
-                  ),
-                ),
-              )
-            : CircularProgressIndicator();
-      },
-    );
-  }
-}
-
-class WebVTTSubtitleVideoExample extends StatelessWidget {
-  const WebVTTSubtitleVideoExample({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return VideoViewer(
-      source: {
-        "WebVTT Caption": VideoSource(
-          intialSubtitle: "Spanish",
-          video: VideoPlayerController.network(
-            "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4",
-          ),
-          subtitle: {
-            "English": VideoViewerSubtitle.network(
-              "https://felipemurguia.com/assets/txt/WEBVTT_English.txt",
-            ),
-            "Spanish": VideoViewerSubtitle.network(
-              "https://felipemurguia.com/assets/txt/WEBVTT_Spanish.txt",
-            ),
-          },
-        )
-      },
-    );
-  }
-}
-
-class SubRipSubtitleVideoExample extends StatelessWidget {
-  const SubRipSubtitleVideoExample({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final String content = '''
-      1
-      00:00:03,400 --> 00:00:06,177
-      In this lesson, we're going to
-      be talking about finance. And
-
-      2
-      00:00:06,177 --> 00:00:10,009
-      one of the most important aspects
-      of finance is interest.
-
-      3
-      00:00:10,009 --> 00:00:13,655
-      When I go to a bank or some
-      other lending institution
-
-      4
-      00:00:13,655 --> 00:00:17,720
-      to borrow money, the bank is happy
-      to give me that money. But then I'm
-
-      5
-      00:00:17,900 --> 00:00:21,480
-      going to be paying the bank for the
-      privilege of using their money. And that
-
-      6
-      00:00:21,660 --> 00:00:26,440
-      amount of money that I pay the bank is
-      called interest. Likewise, if I put money
-
-      7
-      00:00:26,620 --> 00:00:31,220
-      in a savings account or I purchase a
-      certificate of deposit, the bank just
-
-      8
-      00:00:31,300 --> 00:00:35,800
-      doesn't put my money in a little box
-      and leave it there until later. They take
-
-      9
-      00:00:35,800 --> 00:00:40,822
-      my money and lend it to someone
-      else. So they are using my money.
-
-      10
-      00:00:40,822 --> 00:00:44,400
-      The bank has to pay me for the privilege
-      of using my money.
-
-      11
-      00:00:44,400 --> 00:00:48,700
-      Now what makes banks
-      profitable is the rate
-
-      12
-      00:00:48,700 --> 00:00:53,330
-      that they charge people to use the bank's
-      money is higher than the rate that they
-
-      13
-      00:00:53,510 --> 00:01:00,720
-      pay people like me to use my money. The
-      amount of interest that a person pays or
-
-      14
-      00:01:00,800 --> 00:01:06,640
-      earns is dependent on three things. It's
-      dependent on how much money is involved.
-
-      15
-      00:01:06,820 --> 00:01:11,300
-      It's dependent upon the rate of interest
-      being paid or the rate of interest being
-
-      16
-      00:01:11,480 --> 00:01:17,898
-      charged. And it's also dependent upon
-      how much time is involved. If I have
-
-      17
-      00:01:17,898 --> 00:01:22,730
-      a loan and I want to decrease the amount
-      of interest that I'm going to pay, then
-
-      18
-      00:01:22,800 --> 00:01:28,040
-      I'm either going to have to decrease how
-      much money I borrow, I'm going to have
-
-      19
-      00:01:28,220 --> 00:01:32,420
-      to borrow the money over a shorter period
-      of time, or I'm going to have to find a
-
-      20
-      00:01:32,600 --> 00:01:37,279
-      lending institution that charges a lower
-      interest rate. On the other hand, if I
-
-      21
-      00:01:37,279 --> 00:01:41,480
-      want to earn more interest on my
-      investment, I'm going to have to invest
-
-      22
-      00:01:41,480 --> 00:01:46,860
-      more money, leave the money in the
-      account for a longer period of time, or
-
-      23
-      00:01:46,860 --> 00:01:49,970
-      find an institution that will pay
-      me a higher interest rate.
-      ''';
-
-    return VideoViewer(
-      source: {
-        "SubRip Caption": VideoSource(
-          video: VideoPlayerController.network(
-              "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
-          subtitle: {
-            "English": VideoViewerSubtitle.content(
-              content,
-              type: SubtitleType.srt,
-            ),
-          },
-        )
-      },
+    final TextStyle? subtitle2 = context.textTheme.subtitle2;
+    return CustomContainer(
+      child: Row(children: [
+        Padding(
+          padding: const Margin.horizontal(kPadding),
+          child: Icon(Icons.search, color: subtitle2?.color),
+        ),
+        Expanded(child: Text("Search in catalog...", style: subtitle2)),
+      ]),
     );
   }
 }
