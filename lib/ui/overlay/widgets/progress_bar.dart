@@ -124,26 +124,26 @@ class __ProgressBarGestureState extends State<_ProgressBarGesture> {
     }
   }
 
-  void play() {
-    _query.video(context).video?.play();
+  Future<void> play() async {
     Provider.of<ValueNotifier<int>>(context, listen: false).value = 1000;
+    await _query.video(context).video?.play();
   }
 
-  void pause() {
-    _query.video(context).video?.pause();
+  Future<void> pause() async {
     Provider.of<ValueNotifier<int>>(context, listen: false).value = 0;
+    await _query.video(context).video?.pause();
   }
 
   void _startDragging() {
     _query.video(context).isDraggingProgressBar = true;
   }
 
-  void _endDragging() async {
+  Future<void> _endDragging() async {
     await _video.seekTo(
       Provider.of<ValueNotifier<Duration>>(context, listen: false).value,
     );
     _query.video(context).isDraggingProgressBar = false;
-    Misc.delayed(50, () => play());
+    if (_query.video(context).activeAd == null) await play();
   }
 
   @override
@@ -181,8 +181,8 @@ class _ProgressBar extends StatelessWidget {
     required this.color,
   }) : super(key: key);
 
-  final double width;
   final Color color;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
@@ -209,8 +209,8 @@ class _DotIsDragging extends StatelessWidget {
     required this.dotPosition,
   }) : super(key: key);
 
-  final double width;
   final double dotPosition;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
@@ -244,9 +244,9 @@ class _Dot extends StatelessWidget {
     this.multiplicator = 1,
   }) : super(key: key);
 
-  final double? width, opacity;
-  final int multiplicator;
   final double dotPosition;
+  final int multiplicator;
+  final double? width, opacity;
 
   @override
   Widget build(BuildContext context) {
@@ -285,10 +285,10 @@ class _Dot extends StatelessWidget {
 class _TextPositionPainter extends CustomPainter {
   _TextPositionPainter({this.width, this.position, this.style, this.barStyle});
 
-  final double? width;
+  final ProgressBarStyle? barStyle;
   final Duration? position;
   final TextStyle? style;
-  final ProgressBarStyle? barStyle;
+  final double? width;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -348,8 +348,8 @@ class _TextPositionPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TextPositionPainter oldDelegate) => false;
+  bool shouldRebuildSemantics(_TextPositionPainter oldDelegate) => false;
 
   @override
-  bool shouldRebuildSemantics(_TextPositionPainter oldDelegate) => false;
+  bool shouldRepaint(_TextPositionPainter oldDelegate) => false;
 }
