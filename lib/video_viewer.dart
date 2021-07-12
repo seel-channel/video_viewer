@@ -87,14 +87,28 @@ class VideoViewer extends StatefulWidget {
   /// ```
   final VideoViewerLanguage language;
 
+  /// Controls a platform video viewer, and provides updates when the state is
+  /// changing.
+  ///
+  /// Instances must be initialized with initialize.
+  ///...
+  /// The video is displayed in a Flutter app by creating a [VideoPlayer] widget.
+  ///
+  /// To reclaim the resources used by the player call [dispose].
+  ///
+  /// After [dispose] all further calls are ignored.
   final VideoViewerController? controller;
 
+  ///On VerticalSwapingGesture the video is able to control the **video volume** or **device volume**.
   final VideoViewerVolumeManager volumeManager;
 
+  ///When the video is fullscreen and landscape mode, It's able to scale itself until the screen boundaries
   final bool enableFullscreenScale;
 
+  ///On VerticalSwapingGesture the video is able to control the **video volume** or **device volume**.
   final bool enableVerticalSwapingGesture;
 
+  ///On HorizontalSwapingGesture the video is able to control the forward and rewind of itself
   final bool enableHorizontalSwapingGesture;
 
   @override
