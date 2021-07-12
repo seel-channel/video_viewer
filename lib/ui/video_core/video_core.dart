@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
+import 'package:video_viewer/domain/bloc/controller.dart';
 import 'package:video_viewer/domain/entities/volume_control.dart';
 import 'package:video_viewer/ui/video_core/widgets/ad.dart';
 
@@ -38,7 +39,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //------------------------------//
   //REWIND AND FORWARD (VARIABLES)//
   //------------------------------//
-  bool _isDraggingProgressBar = false;
   final ValueNotifier<int> _forwardAndRewindAmount = ValueNotifier<int>(1);
   Duration _initialForwardPosition = Duration.zero;
   int _rewindDoubleTapCount = 0;
@@ -99,10 +99,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     super.dispose();
   }
 
-  void _draggingListener() {
-    _isDraggingProgressBar = _query.video(context).isDraggingProgressBar;
-  }
-
   //-------------//
   //OVERLAY (TAP)//
   //-------------//
@@ -110,6 +106,11 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     _query.video(context).showAndHideOverlay(show);
     if (!_focusRawKeyboard.hasFocus)
       FocusScope.of(context).requestFocus(_focusRawKeyboard);
+  }
+
+  bool _canListenerMove([VideoViewerController? video]) {
+    video ??= _query.video(context);
+    return !(video.isDraggingProgressBar || video.activeAd != null);
   }
 
   //-------------------------------//
@@ -156,7 +157,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     final video = _query.video(context);
     if (!video.isShowingSettingsMenu) {
       Misc.delayed(100, () {
-        if (!_isDraggingProgressBar) {
+        if (_canListenerMove(video)) {
           _initialForwardPosition = video.video!.value.position;
           _horizontalDragStartOffset = globalPosition;
           _showForwardStatus = true;
@@ -212,7 +213,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     final video = _query.video(context);
     if (!video.isShowingSettingsMenu) {
       Misc.delayed(100, () {
-        if (!_isDraggingProgressBar) {
+        if (_canListenerMove(video)) {
           setState(() {
             _closeVolumeStatus?.cancel();
             _showVolumeStatus = true;
@@ -283,11 +284,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       //---------------------------//
       //VOLUME AND FORWARD GESTURES//
       //---------------------------//
-      onMoveStart: (_) {
-        _query.video(context).addListener(_draggingListener);
-      },
       onMoveUpdate: (MoveEvent details) {
-        if (!_isDraggingProgressBar) {
+        if (_canListenerMove()) {
           final Offset position = details.localPos;
           if (_dragInitialDelta == Offset.zero) {
             final Offset delta = details.localDelta;
@@ -311,8 +309,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         }
       },
       onMoveEnd: (_) {
-        _query.video(context).removeListener(_draggingListener);
-        _isDraggingProgressBar = false;
         _dragInitialDelta = Offset.zero;
         switch (_dragDirection) {
           case Axis.horizontal:
@@ -323,7 +319,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
             break;
         }
       },
-      bypassTapEventOnDoubleTap: true,
       child: _player(),
     );
   }
