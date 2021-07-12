@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 
 import 'package:video_viewer/domain/entities/styles/forward_and_rewind.dart';
 import 'package:video_viewer/domain/entities/styles/play_and_pause.dart';
-import 'package:video_viewer/domain/entities/styles/settings_menu.dart';
 import 'package:video_viewer/domain/entities/styles/progress_bar.dart';
-import 'package:video_viewer/domain/entities/styles/volume_bar.dart';
+import 'package:video_viewer/domain/entities/styles/settings_menu.dart';
 import 'package:video_viewer/domain/entities/styles/subtitle.dart';
+import 'package:video_viewer/domain/entities/styles/volume_bar.dart';
 
 export 'package:video_viewer/domain/entities/styles/bar.dart';
 export 'package:video_viewer/domain/entities/styles/forward_and_rewind.dart';
 export 'package:video_viewer/domain/entities/styles/play_and_pause.dart';
-export 'package:video_viewer/domain/entities/styles/settings_menu.dart';
 export 'package:video_viewer/domain/entities/styles/progress_bar.dart';
-export 'package:video_viewer/domain/entities/styles/volume_bar.dart';
+export 'package:video_viewer/domain/entities/styles/settings_menu.dart';
 export 'package:video_viewer/domain/entities/styles/subtitle.dart';
+export 'package:video_viewer/domain/entities/styles/volume_bar.dart';
 
 class VideoViewerStyle {
   /// It is the main class of VideoViewer styles, in this class you can almost
@@ -25,11 +25,11 @@ class VideoViewerStyle {
     ForwardAndRewindStyle? forwardAndRewindStyle,
     VolumeBarStyle? volumeBarStyle,
     SubtitleStyle? subtitleStyle,
-    this.header,
-    this.thumbnail,
     Widget? loading,
     Widget? buffering,
     TextStyle? textStyle,
+    this.thumbnail,
+    this.header,
     this.transitions = const Duration(milliseconds: 400),
     this.skipAdBuilder,
     this.skipAdAlignment = Alignment.bottomRight,
@@ -122,30 +122,77 @@ class VideoViewerStyle {
 
   final Alignment skipAdAlignment;
 
-  VideoViewerStyle copywith({
+  VideoViewerStyle copyWith({
+    SettingsMenuStyle? settingsStyle,
+    VolumeBarStyle? volumeBarStyle,
+    ProgressBarStyle? progressBarStyle,
+    SubtitleStyle? subtitleStyle,
+    ForwardAndRewindStyle? forwardAndRewindStyle,
+    PlayAndPauseWidgetStyle? playAndPauseStyle,
     Widget? thumbnail,
     Widget? header,
     Widget? loading,
     Widget? buffering,
+    Duration? transitions,
     TextStyle? textStyle,
-    VolumeBarStyle? volumeBarStyle,
-    ProgressBarStyle? progressBarStyle,
-    SettingsMenuStyle? settingsStyle,
-    PlayAndPauseWidgetStyle? playAndPauseStyle,
-    ForwardAndRewindStyle? forwardAndRewindStyle,
+    Widget Function(Duration)? skipAdBuilder,
+    Alignment? skipAdAlignment,
   }) {
     return VideoViewerStyle(
-      header: header ?? this.header,
-      loading: loading ?? this.loading,
-      thumbnail: thumbnail,
-      buffering: buffering ?? this.buffering,
-      textStyle: textStyle ?? this.textStyle,
       settingsStyle: settingsStyle ?? this.settingsStyle,
       volumeBarStyle: volumeBarStyle ?? this.volumeBarStyle,
       progressBarStyle: progressBarStyle ?? this.progressBarStyle,
-      playAndPauseStyle: playAndPauseStyle ?? this.playAndPauseStyle,
+      subtitleStyle: subtitleStyle ?? this.subtitleStyle,
       forwardAndRewindStyle:
           forwardAndRewindStyle ?? this.forwardAndRewindStyle,
+      playAndPauseStyle: playAndPauseStyle ?? this.playAndPauseStyle,
+      thumbnail: thumbnail ?? this.thumbnail,
+      header: header ?? this.header,
+      loading: loading ?? this.loading,
+      buffering: buffering ?? this.buffering,
+      transitions: transitions ?? this.transitions,
+      textStyle: textStyle ?? this.textStyle,
+      skipAdBuilder: skipAdBuilder ?? this.skipAdBuilder,
+      skipAdAlignment: skipAdAlignment ?? this.skipAdAlignment,
     );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is VideoViewerStyle &&
+        other.settingsStyle == settingsStyle &&
+        other.volumeBarStyle == volumeBarStyle &&
+        other.progressBarStyle == progressBarStyle &&
+        other.subtitleStyle == subtitleStyle &&
+        other.forwardAndRewindStyle == forwardAndRewindStyle &&
+        other.playAndPauseStyle == playAndPauseStyle &&
+        other.thumbnail == thumbnail &&
+        other.header == header &&
+        other.loading == loading &&
+        other.buffering == buffering &&
+        other.transitions == transitions &&
+        other.textStyle == textStyle &&
+        other.skipAdBuilder == skipAdBuilder &&
+        other.skipAdAlignment == skipAdAlignment;
+  }
+
+  @override
+  int get hashCode {
+    return settingsStyle.hashCode ^
+        volumeBarStyle.hashCode ^
+        progressBarStyle.hashCode ^
+        subtitleStyle.hashCode ^
+        forwardAndRewindStyle.hashCode ^
+        playAndPauseStyle.hashCode ^
+        thumbnail.hashCode ^
+        header.hashCode ^
+        loading.hashCode ^
+        buffering.hashCode ^
+        transitions.hashCode ^
+        textStyle.hashCode ^
+        skipAdBuilder.hashCode ^
+        skipAdAlignment.hashCode;
   }
 }
