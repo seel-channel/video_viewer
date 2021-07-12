@@ -5,7 +5,6 @@
 ## My other APIs
 
 - [Scroll Navigation](https://pub.dev/packages/scroll_navigation)
-- [Video Editor](https://pub.dev/packages/video_editor)
 - [Helpers](https://pub.dev/packages/helpers)
 
 <br>
@@ -14,8 +13,9 @@
 
 - Amazing UI / UX.
 - Fancy animations.
+- Auto Cached Video
+- Custom Ads Support.
 - Fully customizable.
-- Multiplataform support.
 - HLS (m3u8) format support.
 - Captions (Subtitles) support.
 - Easy and powerful implementation! :)

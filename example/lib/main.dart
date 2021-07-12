@@ -354,30 +354,34 @@ class _SerieVideoViewerState extends State<SerieVideoViewer> {
 
   void onEpisodeThumbnailTap(MapEntry<String, SerieSource> entry) async {
     final String episodeName = entry.key;
-    final SerieSource qualities = entry.value;
-    final String url = qualities.source.entries.first.value;
+    if (episode != episodeName) {
+      final SerieSource qualities = entry.value;
+      final String url = qualities.source.entries.first.value;
 
-    late Map<String, VideoSource> sources;
+      late Map<String, VideoSource> sources;
 
-    if (url.contains("m3u8")) {
-      sources = await VideoSource.fromM3u8PlaylistUrl(url);
+      if (url.contains("m3u8")) {
+        sources = await VideoSource.fromM3u8PlaylistUrl(url);
+      } else {
+        sources = VideoSource.fromNetworkVideoSources(qualities.source);
+      }
+
+      final MapEntry<String, VideoSource> video = sources.entries.first;
+
+      controller.closeSettingsMenu();
+
+      await controller.changeSource(
+        inheritValues: false, //RESET SPEED TO NORMAL AND POSITION TO ZERO
+        source: video.value,
+        name: video.key,
+      );
+
+      episode = episodeName;
+      controller.source = sources;
+      setState(() {});
     } else {
-      sources = VideoSource.fromNetworkVideoSources(qualities.source);
+      controller.closeSettingsMenu();
     }
-
-    final MapEntry<String, VideoSource> video = sources.entries.first;
-
-    controller.closeSettingsMenu();
-
-    await controller.changeSource(
-      inheritValues: false, //RESET SPEED TO NORMAL AND POSITION TO ZERO
-      source: video.value,
-      name: video.key,
-    );
-
-    controller.source = sources;
-    episode = episodeName;
-    setState(() {});
   }
 
   @override

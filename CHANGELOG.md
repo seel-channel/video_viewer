@@ -1,3 +1,12 @@
+## [1.2.3]
+
+Added
+- Ads  
+- Wakelock 
+- Auto Cached video
+- New project example
+- Control device volume
+
 ## [1.2.2]
 
 - Null-check operator error fixed
