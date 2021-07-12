@@ -12,9 +12,9 @@ import 'package:video_viewer/domain/entities/volume_control.dart';
 import 'package:video_viewer/ui/video_core/video_core.dart';
 
 export 'package:video_viewer/domain/bloc/controller.dart';
+export 'package:video_viewer/domain/entities/ads.dart';
 export 'package:video_viewer/domain/entities/language.dart';
 export 'package:video_viewer/domain/entities/settings_menu_item.dart';
-export 'package:video_viewer/domain/entities/ads.dart';
 export 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 export 'package:video_viewer/domain/entities/subtitle.dart';
 export 'package:video_viewer/domain/entities/video_source.dart';
@@ -34,6 +34,9 @@ class VideoViewer extends StatefulWidget {
     this.onFullscreenFixLandscape = false,
     this.language = VideoViewerLanguage.en,
     this.volumeManager = VideoViewerVolumeManager.device,
+    this.enableFullscreenScale = true,
+    this.enableVerticalSwapingGesture = true,
+    this.enableHorizontalSwapingGesture = true,
   })  : this.controller = controller ?? VideoViewerController(),
         this.style = style ?? VideoViewerStyle(),
         super(key: key);
@@ -90,6 +93,12 @@ class VideoViewer extends StatefulWidget {
 
   final VideoViewerVolumeManager volumeManager;
 
+  final bool enableFullscreenScale;
+
+  final bool enableVerticalSwapingGesture;
+
+  final bool enableHorizontalSwapingGesture;
+
   @override
   VideoViewerState createState() => VideoViewerState();
 }
@@ -134,6 +143,11 @@ class VideoViewerState extends State<VideoViewer> {
                   volumeManager: widget.volumeManager,
                   defaultAspectRatio: widget.defaultAspectRatio,
                   onFullscreenFixLandscape: widget.onFullscreenFixLandscape,
+                  enableFullscreenScale: widget.enableFullscreenScale,
+                  enableVerticalSwapingGesture:
+                      widget.enableVerticalSwapingGesture,
+                  enableHorizontalSwapingGesture:
+                      widget.enableHorizontalSwapingGesture,
                 ),
               ),
             ],

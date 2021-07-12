@@ -263,64 +263,79 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //GESTURES//
   //--------//
   Widget _globalGesture(bool canScale) {
-    return XGestureDetector(
-      //--------------//
-      //SCALE GESTURES//
-      //--------------//
-      onScaleStart: (_) {
-        _initialScale = _scale.value;
-        final size = context.media.size;
-        final video = _query.video(context).video!;
-        final aspectWidth = size.height * video.value.aspectRatio;
+    final metadata = _query.videoMetadata(context);
+    final bool horizontal = metadata.enableHorizontalSwapingGesture;
+    final bool vertical = metadata.enableVerticalSwapingGesture;
+    final bool scale = metadata.onFullscreenFixLandscape;
 
-        _initialScale = _scale.value;
-        _maxScale = size.width / aspectWidth;
-      },
-      onScaleUpdate: (ScaleEvent details) {
-        final double newScale = _initialScale * details.scale;
-        if (newScale >= _minScale && newScale <= _maxScale)
-          _scale.value = newScale;
-      },
-      //---------------------------//
-      //VOLUME AND FORWARD GESTURES//
-      //---------------------------//
-      onMoveUpdate: (MoveEvent details) {
-        if (_canListenerMove()) {
-          final Offset position = details.localPos;
-          if (_dragInitialDelta == Offset.zero) {
-            final Offset delta = details.localDelta;
-            if (delta.dx.abs() > delta.dy.abs()) {
-              _dragDirection = Axis.horizontal;
-              _forwardDragStart(position);
-            } else {
-              _dragDirection = Axis.vertical;
-              _volumeDragStart(position);
-            }
-            _dragInitialDelta = delta;
-          }
-          switch (_dragDirection) {
-            case Axis.horizontal:
-              _forwardDragUpdate(position);
-              break;
-            case Axis.vertical:
-              _volumeDragUpdate(position);
-              break;
-          }
-        }
-      },
-      onMoveEnd: (_) {
-        _dragInitialDelta = Offset.zero;
-        switch (_dragDirection) {
-          case Axis.horizontal:
-            _forwardDragEnd();
-            break;
-          case Axis.vertical:
-            _volumeDragEnd();
-            break;
-        }
-      },
-      child: _player(),
-    );
+    return scale || horizontal || vertical
+        ? XGestureDetector(
+            //--------------//
+            //SCALE GESTURES//
+            //--------------//
+            onScaleStart: scale
+                ? (_) {
+                    _initialScale = _scale.value;
+                    final size = context.media.size;
+                    final video = _query.video(context).video!;
+                    final aspectWidth = size.height * video.value.aspectRatio;
+
+                    _initialScale = _scale.value;
+                    _maxScale = size.width / aspectWidth;
+                  }
+                : null,
+            onScaleUpdate: scale
+                ? (ScaleEvent details) {
+                    final double newScale = _initialScale * details.scale;
+                    if (newScale >= _minScale && newScale <= _maxScale)
+                      _scale.value = newScale;
+                  }
+                : null,
+            //---------------------------//
+            //VOLUME AND FORWARD GESTURES//
+            //---------------------------//
+            onMoveUpdate: horizontal || vertical
+                ? (MoveEvent details) {
+                    if (_canListenerMove()) {
+                      final Offset position = details.localPos;
+                      if (_dragInitialDelta == Offset.zero) {
+                        final Offset delta = details.localDelta;
+                        if (delta.dx.abs() > delta.dy.abs() && horizontal) {
+                          _dragDirection = Axis.horizontal;
+                          _forwardDragStart(position);
+                        } else if (vertical) {
+                          _dragDirection = Axis.vertical;
+                          _volumeDragStart(position);
+                        }
+                        _dragInitialDelta = delta;
+                      }
+                      switch (_dragDirection) {
+                        case Axis.horizontal:
+                          if (horizontal) _forwardDragUpdate(position);
+                          break;
+                        case Axis.vertical:
+                          if (vertical) _volumeDragUpdate(position);
+                          break;
+                      }
+                    }
+                  }
+                : null,
+            onMoveEnd: horizontal || vertical
+                ? (_) {
+                    _dragInitialDelta = Offset.zero;
+                    switch (_dragDirection) {
+                      case Axis.horizontal:
+                        if (horizontal) _forwardDragEnd();
+                        break;
+                      case Axis.vertical:
+                        if (vertical) _volumeDragEnd();
+                        break;
+                    }
+                  }
+                : null,
+            child: _player(),
+          )
+        : _player();
   }
 
   Widget _player() {

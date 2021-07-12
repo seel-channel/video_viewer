@@ -11,6 +11,9 @@ class VideoViewerMetadata {
     required this.language,
     required this.style,
     required this.volumeManager,
+    required this.enableFullscreenScale,
+    required this.enableVerticalSwapingGesture,
+    required this.enableHorizontalSwapingGesture,
   });
 
   /// It is the Aspect Ratio that the widget.style.loading will take when the video
@@ -45,4 +48,10 @@ class VideoViewerMetadata {
   final VideoViewerStyle style;
 
   final VideoViewerVolumeManager volumeManager;
+
+  final bool enableFullscreenScale;
+
+  final bool enableVerticalSwapingGesture;
+
+  final bool enableHorizontalSwapingGesture;
 }
