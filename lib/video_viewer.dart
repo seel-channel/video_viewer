@@ -21,25 +21,23 @@ export 'package:video_viewer/domain/entities/video_source.dart';
 export 'package:video_viewer/domain/entities/volume_control.dart';
 
 class VideoViewer extends StatefulWidget {
-  VideoViewer({
+  const VideoViewer({
     Key? key,
-    VideoViewerStyle? style,
-    VideoViewerController? controller,
+    required this.source,
+    this.style,
+    this.controller,
     this.autoPlay = false,
     this.looping = false,
     this.defaultAspectRatio = 16 / 9,
     this.rewindAmount = -10,
     this.forwardAmount = 10,
-    required this.source,
     this.onFullscreenFixLandscape = false,
     this.language = VideoViewerLanguage.en,
     this.volumeManager = VideoViewerVolumeManager.device,
     this.enableFullscreenScale = true,
     this.enableVerticalSwapingGesture = true,
     this.enableHorizontalSwapingGesture = true,
-  })  : this.controller = controller ?? VideoViewerController(),
-        this.style = style ?? VideoViewerStyle(),
-        super(key: key);
+  }) : super(key: key);
 
   /// Once the video is initialized, it will be played
   final bool autoPlay;
@@ -48,7 +46,7 @@ class VideoViewer extends StatefulWidget {
   final bool looping;
 
   /// It is an argument where you can change the design of almost the entire VideoViewer
-  final VideoViewerStyle style;
+  final VideoViewerStyle? style;
 
   /// It is the Aspect Ratio that the widget.style.loading will take when the video
   /// is not initialized yet
@@ -89,7 +87,7 @@ class VideoViewer extends StatefulWidget {
   /// ```
   final VideoViewerLanguage language;
 
-  final VideoViewerController controller;
+  final VideoViewerController? controller;
 
   final VideoViewerVolumeManager volumeManager;
 
@@ -105,10 +103,13 @@ class VideoViewer extends StatefulWidget {
 
 class VideoViewerState extends State<VideoViewer> {
   late VideoViewerController _controller;
+  late VideoViewerStyle _style;
   bool _initialized = false;
 
   @override
   void initState() {
+    _controller = widget.controller ?? VideoViewerController();
+    _style = widget.style ?? VideoViewerStyle();
     _initVideoViewer();
     super.initState();
   }
@@ -120,23 +121,22 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   void _initVideoViewer() async {
-    _controller = widget.controller;
     _controller.looping = widget.looping;
-    _controller.isShowingThumbnail = widget.style.thumbnail != null;
+    _controller.isShowingThumbnail = _style.thumbnail != null;
     await _controller.initialize(widget.source, autoPlay: widget.autoPlay);
     setState(() => _initialized = true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final Widget? thumbnail = widget.style.thumbnail;
+    final Widget? thumbnail = _style.thumbnail;
     return _initialized
         ? MultiProvider(
             providers: [
               ChangeNotifierProvider.value(value: _controller),
               Provider.value(
                 value: VideoViewerMetadata(
-                  style: widget.style,
+                  style: _style,
                   language: widget.language,
                   rewindAmount: widget.rewindAmount,
                   forwardAmount: widget.forwardAmount,
@@ -158,7 +158,7 @@ class VideoViewerState extends State<VideoViewer> {
             aspectRatio: widget.defaultAspectRatio,
             child: Stack(children: [
               if (thumbnail != null) Positioned.fill(child: thumbnail),
-              Center(child: widget.style.loading),
+              Center(child: _style.loading),
             ]),
           );
   }
