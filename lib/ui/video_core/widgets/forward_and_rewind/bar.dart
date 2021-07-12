@@ -21,6 +21,7 @@ class VideoCoreForwardAndRewindBar extends StatelessWidget {
     final Duration duration = controller.duration;
     final double height = forwardStyle.bar.height;
     final double width = forwardStyle.bar.width;
+    final int relativePosition = position.inSeconds + seconds;
 
     return Center(
       child: Container(
@@ -31,7 +32,7 @@ class VideoCoreForwardAndRewindBar extends StatelessWidget {
         ),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Text(
-            query.durationFormatter(Duration(seconds: seconds)),
+            query.durationFormatter(Duration(seconds: relativePosition)),
             style: style.textStyle,
           ),
           SizedBox(height: forwardStyle.spaceBeetweenBarAndText),
@@ -47,8 +48,7 @@ class VideoCoreForwardAndRewindBar extends StatelessWidget {
               ),
               Container(
                 height: height,
-                width: (((position.inSeconds + seconds) / duration.inSeconds) *
-                        width)
+                width: ((relativePosition / duration.inSeconds) * width)
                     .clamp(0.0, width),
                 decoration: BoxDecoration(
                   color: forwardStyle.bar.color,
@@ -56,12 +56,12 @@ class VideoCoreForwardAndRewindBar extends StatelessWidget {
                 ),
               ),
               CustomPaint(
+                size: Size.infinite,
                 painter: _InitialPositionIdentifierPainter(
                   position: (position.inSeconds / duration.inSeconds) * width,
                   color: forwardStyle.bar.identifier,
                   width: forwardStyle.bar.identifierWidth,
                 ),
-                size: Size.infinite,
               ),
             ]),
           ),

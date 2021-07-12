@@ -32,16 +32,14 @@ class VideoViewerCore extends StatefulWidget {
 
 class _VideoViewerCoreState extends State<VideoViewerCore> {
   final VideoQuery _query = VideoQuery();
-  Timer? _hidePlayAndPause;
-
-  Offset _dragInitialDelta = Offset.zero;
-  Axis _dragDirection = Axis.vertical;
 
   //------------------------------//
   //REWIND AND FORWARD (VARIABLES)//
   //------------------------------//
   final ValueNotifier<int> _forwardAndRewindAmount = ValueNotifier<int>(1);
   Duration _initialForwardPosition = Duration.zero;
+  Offset _dragInitialDelta = Offset.zero;
+  Axis _dragDirection = Axis.vertical;
   int _rewindDoubleTapCount = 0;
   int _forwardDoubleTapCount = 0;
   int _defaultRewindAmount = -10;
@@ -56,7 +54,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //VOLUME (VARIABLES)//
   //------------------//
   final ValueNotifier<double> _currentVolume = ValueNotifier<double>(1.0);
-  final FocusNode _focusRawKeyboard = FocusNode();
   double _maxVolume = 1.0;
   Offset _verticalDragStartOffset = Offset.zero;
   double _onDragStartVolume = 1;
@@ -93,9 +90,9 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   void dispose() {
     _scale.dispose();
     _currentVolume.dispose();
-    _focusRawKeyboard.dispose();
-    _hidePlayAndPause?.cancel();
     _closeVolumeStatus?.cancel();
+    _rewindDoubleTapTimer?.cancel();
+    _forwardDoubleTapTimer?.cancel();
     _forwardAndRewindAmount.dispose();
     super.dispose();
   }
@@ -103,11 +100,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //-------------//
   //OVERLAY (TAP)//
   //-------------//
-  void _showAndHideOverlay([bool? show]) {
-    _query.video(context).showAndHideOverlay(show);
-    if (!_focusRawKeyboard.hasFocus)
-      FocusScope.of(context).requestFocus(_focusRawKeyboard);
-  }
 
   bool _canListenerMove([VideoViewerController? video]) {
     video ??= _query.video(context);
@@ -353,7 +345,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       ),
       const VideoCoreActiveSubtitleText(),
       GestureDetector(
-        onTap: _showAndHideOverlay,
+        onTap: () => _query.video(context).showAndHideOverlay(),
         behavior: HitTestBehavior.opaque,
         child: Container(height: double.infinity, width: double.infinity),
       ),
