@@ -66,6 +66,7 @@ class VideoViewerController extends ChangeNotifier {
 
   @override
   Future<void> dispose() async {
+    _deleteAdTimer();
     _closeOverlayButtons?.cancel();
     if (_video != null) {
       await _video?.pause();
@@ -275,7 +276,8 @@ class VideoViewerController extends ChangeNotifier {
     if (_ads != null) {
       if (_activeAd != null) {
         final Duration start = _getAdStartTime(_activeAd!);
-        if (!(position > start && position < start + Duration(seconds: 2))) {
+        if (!(position > start &&
+            position < start + _activeAd!.durationToEnd)) {
           _findAd();
         }
       } else {
@@ -301,7 +303,6 @@ class VideoViewerController extends ChangeNotifier {
           timer.cancel();
         }
       }
-
       notifyListeners();
     });
   }
@@ -324,7 +325,7 @@ class VideoViewerController extends ChangeNotifier {
     return durationToStart ?? _video!.value.duration * fractionToStart!;
   }
 
-  void _findAd() {
+  void _findAd() async {
     final VideoPlayerValue videoValue = _video!.value;
     final Duration position = videoValue.position;
     bool foundOne = false;
@@ -335,7 +336,7 @@ class VideoViewerController extends ChangeNotifier {
           position < start + ad.durationToEnd &&
           _activeAd != ad) {
         _activeAd = ad;
-        _video?.pause();
+        await _video?.pause();
         _ads!.remove(ad);
         for (final entry in _source!.entries) {
           entry.value.ads?.remove(ad);
