@@ -35,7 +35,10 @@ class VideoViewerStyle {
     this.skipAdAlignment = Alignment.bottomRight,
   })  : this.loading = loading ??
             Center(
-              child: CircularProgressIndicator(strokeWidth: 1.6),
+              child: CircularProgressIndicator(
+                strokeWidth: 1.6,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
             ),
         this.buffering = buffering ??
             Center(

@@ -188,6 +188,7 @@ class MoviePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = context.textTheme;
     final Color primary = context.color.primary;
     return Scaffold(
       body: SafeArea(
@@ -206,14 +207,26 @@ class MoviePage extends StatelessWidget {
               )
             },
             style: VideoViewerStyle(
+              textStyle: textTheme.subtitle1,
               playAndPauseStyle: PlayAndPauseWidgetStyle(background: primary),
               progressBarStyle: ProgressBarStyle(
                 bar: BarStyle.progress(color: primary),
               ),
+              header: Container(
+                width: double.infinity,
+                padding: kAllPadding,
+                child: Headline6(
+                  movie.title,
+                  style: TextStyle(color: textTheme.headline4?.color),
+                ),
+              ),
               thumbnail: Stack(children: [
                 Positioned.fill(child: MovieImage(movie)),
                 Positioned.fill(
-                  child: Image.network(movie.url, fit: BoxFit.cover),
+                  child: Image.network(
+                    movie.url,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ]),
             ),
