@@ -2,10 +2,11 @@ import 'package:flutter/cupertino.dart';
 
 class VideoViewerAd {
   VideoViewerAd({
-    required this.child,
     required this.durationToSkip,
+    required this.child,
     this.durationToStart,
     this.fractionToStart,
+    this.durationToEnd = const Duration(seconds: 12),
   })  : assert(
           (fractionToStart != null && durationToStart == null) ||
               (fractionToStart == null && durationToStart != null),
@@ -14,10 +15,20 @@ class VideoViewerAd {
         assert((fractionToStart ?? 0.0) >= 0 && (fractionToStart ?? 1.0) <= 1.0,
             "fractionToStart must be greater or equal than 0.0 and lower or equal than 1.0");
 
+  /// It is the ad to show
   final Widget child;
+
+  /// It is the duration to wait to skip the ad
   final Duration durationToSkip;
+
+  /// It is the position of the video when it will show the ad
   final Duration? durationToStart;
+
+  /// It is used when you want to show an ad in the porcetange of the video. For example, the half of the video (0.5), a quarter of the video (0.25)
   final double? fractionToStart;
+
+  /// It is a threshold that serves to create a range where the video will be shown, that is, if your video starts on second 35 and the duration to end is 8 seconds, then in a range from second 35 to second 43 it will be able to show the ad.
+  final Duration durationToEnd;
 
   @override
   bool operator ==(Object other) {
@@ -36,24 +47,5 @@ class VideoViewerAd {
         durationToSkip.hashCode ^
         durationToStart.hashCode ^
         fractionToStart.hashCode;
-  }
-
-  @override
-  String toString() {
-    return 'VideoViewerAd(child: $child, durationToSkip: $durationToSkip, durationToStart: $durationToStart, fractionToStart: $fractionToStart)';
-  }
-
-  VideoViewerAd copyWith({
-    Widget? child,
-    Duration? durationToSkip,
-    Duration? durationToStart,
-    double? fractionToStart,
-  }) {
-    return VideoViewerAd(
-      child: child ?? this.child,
-      durationToSkip: durationToSkip ?? this.durationToSkip,
-      durationToStart: durationToStart ?? this.durationToStart,
-      fractionToStart: fractionToStart ?? this.fractionToStart,
-    );
   }
 }

@@ -332,7 +332,7 @@ class VideoViewerController extends ChangeNotifier {
     for (VideoViewerAd ad in _ads!) {
       final Duration start = _getAdStartTime(ad);
       if (position > start &&
-          position < start + Duration(seconds: 2) &&
+          position < start + ad.durationToEnd &&
           _activeAd != ad) {
         _activeAd = ad;
         _video?.pause();
