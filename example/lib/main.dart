@@ -1,7 +1,9 @@
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
-import 'package:helpers/helpers.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:helpers/helpers.dart';
+
 import 'package:video_viewer/video_viewer.dart';
 
 //------//
@@ -11,14 +13,67 @@ enum MovieStyle { card, page }
 
 class Movie {
   const Movie({
-    required this.url,
+    required this.thumbnail,
     required this.title,
     required this.category,
     this.isFavorite = false,
   });
 
-  final String url, title, category;
+  final String thumbnail, title, category;
   final bool isFavorite;
+}
+
+class Serie extends Movie {
+  const Serie({
+    required this.source,
+    required String thumbnail,
+    required String title,
+    required String category,
+    bool isFavorite = false,
+  }) : super(
+          thumbnail: thumbnail,
+          title: title,
+          category: category,
+          isFavorite: isFavorite,
+        );
+
+  final Map<String, SerieSource> source;
+}
+
+class SerieSource {
+  const SerieSource({
+    required this.thumbnail,
+    required this.source,
+  });
+
+  final Map<String, String> source;
+  final String thumbnail;
+}
+
+class CustomVideoViewerStyle extends VideoViewerStyle {
+  CustomVideoViewerStyle({required Movie movie, required BuildContext context})
+      : super(
+          textStyle: context.textTheme.subtitle1,
+          playAndPauseStyle:
+              PlayAndPauseWidgetStyle(background: context.color.primary),
+          progressBarStyle: ProgressBarStyle(
+            bar: BarStyle.progress(color: context.color.primary),
+          ),
+          header: Container(
+            width: double.infinity,
+            padding: kAllPadding,
+            child: Headline6(
+              movie.title,
+              style: TextStyle(color: context.textTheme.headline4?.color),
+            ),
+          ),
+          thumbnail: Stack(children: [
+            Positioned.fill(child: MovieImage(movie)),
+            Positioned.fill(
+              child: Image.network(movie.thumbnail, fit: BoxFit.cover),
+            ),
+          ]),
+        );
 }
 
 //---------//
@@ -36,22 +91,43 @@ const BorderRadius kAllBorderRadius = BorderRadius.all(
   Radius.circular(kPadding),
 );
 
-const List<Movie> kSeriesData = [
-  Movie(
-    url: "https://i.blogs.es/0f0871/the-witcher/1366_2000.jpeg",
+const Map<String, SerieSource> kTheWitcherSource = {
+  "Trailer 1": SerieSource(
+    thumbnail: "https://i.ytimg.com/vi/ETY44yszyNc/maxresdefault.jpg",
+    source: {
+      "video":
+          "https://felipemurguia.com/assets/videos/the_witcher_trailer.mp4",
+    },
+  ),
+  "Trailer 2": SerieSource(
+    thumbnail:
+        "https://i.blogs.es/0f91c5/the-witcher-temporada-2-cartel/450_1000.jpeg",
+    source: {
+      "video":
+          "https://felipemurguia.com/assets/videos/the_witcher_trailer.mp4",
+    },
+  )
+};
+
+const List<Serie> kSeriesData = [
+  Serie(
+    source: kTheWitcherSource,
+    thumbnail: "https://i.blogs.es/0f0871/the-witcher/1366_2000.jpeg",
     title: "The Witcher",
     category: "Fantasy",
     isFavorite: true,
   ),
-  Movie(
-    url:
+  Serie(
+    source: kTheWitcherSource,
+    thumbnail:
         "https://www.muycomputer.com/wp-content/uploads/2021/04/SombrayHueso-1000x600.jpg",
     title: "Shadow and Bone",
     category: "Fantasy",
     isFavorite: false,
   ),
-  Movie(
-    url: "https://ismorbo.com/wp-content/uploads/2020/03/ldr.jpg",
+  Serie(
+    source: kTheWitcherSource,
+    thumbnail: "https://ismorbo.com/wp-content/uploads/2020/03/ldr.jpg",
     title: "Love, Death & Robots",
     category: "Sci-fi, Fantasy",
     isFavorite: true,
@@ -60,20 +136,21 @@ const List<Movie> kSeriesData = [
 
 const List<Movie> kMoviesData = [
   Movie(
-    url: "https://es.web.img3.acsta.net/pictures/18/11/16/11/31/2850705.jpg",
+    thumbnail:
+        "https://es.web.img3.acsta.net/pictures/18/11/16/11/31/2850705.jpg",
     title: "Mortal Machines",
     category: "Sci-fi",
     isFavorite: true,
   ),
   Movie(
-    url:
+    thumbnail:
         "https://pics.filmaffinity.com/La_guerra_del_ma_ana-735069980-large.jpg",
     title: "The tomorrow war",
     category: "Sci-fi",
     isFavorite: false,
   ),
   Movie(
-    url: "https://pbs.twimg.com/media/EUk_a2LUEAEIwhd.jpg",
+    thumbnail: "https://pbs.twimg.com/media/EUk_a2LUEAEIwhd.jpg",
     title: "The Platform",
     category: "Sci-fi",
     isFavorite: true,
@@ -184,53 +261,17 @@ class MainPage extends StatelessWidget {
 
 class MoviePage extends StatelessWidget {
   const MoviePage(this.movie, {Key? key}) : super(key: key);
+
   final Movie movie;
 
   @override
   Widget build(BuildContext context) {
-    final TextTheme textTheme = context.textTheme;
-    final Color primary = context.color.primary;
     return Scaffold(
       body: SafeArea(
         child: Column(children: [
-          VideoViewer(
-            source: {
-              "SubRip Text": VideoSource(
-                video: VideoPlayerController.network(
-                    "https://www.speechpad.com/proxy/get/marketing/samples/standard-captions-example.mp4"),
-                subtitle: {
-                  "English": VideoViewerSubtitle.network(
-                    "https://felipemurguia.com/assets/txt/WEBVTT_English.txt",
-                    type: SubtitleType.webvtt,
-                  ),
-                },
-              )
-            },
-            style: VideoViewerStyle(
-              textStyle: textTheme.subtitle1,
-              playAndPauseStyle: PlayAndPauseWidgetStyle(background: primary),
-              progressBarStyle: ProgressBarStyle(
-                bar: BarStyle.progress(color: primary),
-              ),
-              header: Container(
-                width: double.infinity,
-                padding: kAllPadding,
-                child: Headline6(
-                  movie.title,
-                  style: TextStyle(color: textTheme.headline4?.color),
-                ),
-              ),
-              thumbnail: Stack(children: [
-                Positioned.fill(child: MovieImage(movie)),
-                Positioned.fill(
-                  child: Image.network(
-                    movie.url,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ]),
-            ),
-          ),
+          movie is Serie
+              ? SerieVideoViewer(movie as Serie)
+              : MovieVideoViewer(movie),
           Padding(
             padding: kAllSectionPadding,
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -245,11 +286,185 @@ class MoviePage extends StatelessWidget {
   }
 }
 
+class MovieVideoViewer extends StatelessWidget {
+  const MovieVideoViewer(this.movie, {Key? key}) : super(key: key);
+
+  final Movie movie;
+
+  @override
+  Widget build(BuildContext context) {
+    return VideoViewer(source: {
+      movie.title: VideoSource(
+        video: VideoPlayerController.network(
+          "https://felipemurguia.com/assets/videos/the_witcher_trailer.mp4",
+        ),
+        ads: [
+          VideoViewerAd(
+            durationToStart: Duration.zero,
+            child: Container(
+              color: Colors.black,
+              child: Center(child: Headline4("AD ZERO")),
+            ),
+            durationToSkip: Duration.zero,
+          ),
+          VideoViewerAd(
+            fractionToStart: 0.5,
+            child: Container(
+              color: Colors.black,
+              child: Center(child: Headline4("AD HALF")),
+            ),
+            durationToSkip: Duration(seconds: 4),
+          ),
+        ],
+      ),
+    }, style: CustomVideoViewerStyle(movie: movie, context: context));
+  }
+}
+
+class SerieVideoViewer extends StatefulWidget {
+  const SerieVideoViewer(this.serie, {Key? key}) : super(key: key);
+
+  final Serie serie;
+
+  @override
+  _SerieVideoViewerState createState() => _SerieVideoViewerState();
+}
+
+class _SerieVideoViewerState extends State<SerieVideoViewer> {
+  final VideoViewerController controller = VideoViewerController();
+  String episode = "";
+  late MapEntry<String, SerieSource> initial;
+
+  @override
+  void initState() {
+    initial = widget.serie.source.entries.first;
+    episode = initial.key;
+    super.initState();
+  }
+
+  void onEpisodeThumbnailTap(MapEntry<String, SerieSource> entry) async {
+    final episodeName = entry.key;
+    final qualities = entry.value;
+
+    Map<String, VideoSource> sources;
+    String url = qualities.source.entries.first.value;
+
+    if (url.contains("m3u8")) {
+      sources = await VideoSource.fromM3u8PlaylistUrl(url);
+    } else {
+      sources = VideoSource.fromNetworkVideoSources(qualities.source);
+    }
+
+    final video = sources.entries.first;
+
+    await controller.changeSource(
+      inheritValues: false, //RESET SPEED TO NORMAL AND POSITION TO ZERO
+      source: video.value,
+      name: video.key,
+    );
+
+    controller.closeAllSecondarySettingsMenus();
+    controller.source = sources;
+    episode = episodeName;
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VideoViewer(
+      controller: controller,
+      source: VideoSource.fromNetworkVideoSources(initial.value.source),
+      style: CustomVideoViewerStyle(movie: widget.serie, context: context)
+          .copyWith(
+        settingsStyle: SettingsMenuStyle(
+          paddingBetween: 10,
+          items: [
+            SettingsMenuItem(
+              themed: SettingsMenuItemThemed(
+                title: "Episodes",
+                subtitle: episode,
+                icon: Icon(
+                  Icons.view_module_outlined,
+                  color: Colors.white,
+                ),
+              ),
+              secondaryMenuWidth: 300,
+              secondaryMenu: Padding(
+                padding: EdgeInsets.only(top: 5),
+                child: Center(
+                  child: Container(
+                    child: Wrap(
+                      spacing: 20,
+                      runSpacing: 10,
+                      children: [
+                        for (var entry in widget.serie.source.entries)
+                          SerieEpisodeThumbnail(
+                            title: entry.key,
+                            url: entry.value.thumbnail,
+                            onTap: () => onEpisodeThumbnailTap(entry),
+                          )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SerieEpisodeThumbnail extends StatelessWidget {
+  const SerieEpisodeThumbnail({
+    Key? key,
+    required this.title,
+    required this.url,
+    required this.onTap,
+  }) : super(key: key);
+
+  final VoidCallback onTap;
+  final String title;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: kAllBorderRadius,
+      child: Material(
+        child: InkWell(
+          onTap: onTap,
+          child: Stack(
+            alignment: AlignmentDirectional.bottomCenter,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                color: Colors.white,
+                child: Image.network(url, fit: BoxFit.cover),
+              ),
+              Text(
+                title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 //-------//
 //WIDGETS//
 //-------//
 class MovieCard extends StatelessWidget {
   const MovieCard(this.movie, {Key? key}) : super(key: key);
+
   final Movie movie;
 
   @override
@@ -283,6 +498,7 @@ class MovieCard extends StatelessWidget {
 
 class MoviesSlider extends StatefulWidget {
   const MoviesSlider(this.movies, {Key? key}) : super(key: key);
+
   final List<Movie> movies;
 
   @override
@@ -291,6 +507,12 @@ class MoviesSlider extends StatefulWidget {
 
 class _MoviesSliderState extends State<MoviesSlider> {
   late PageController _pageController = PageController();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -303,12 +525,6 @@ class _MoviesSliderState extends State<MoviesSlider> {
       });
     });
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 
   @override
@@ -365,6 +581,7 @@ class _MoviesSliderState extends State<MoviesSlider> {
 
 class MovieImage extends StatelessWidget {
   const MovieImage(this.movie, {Key? key}) : super(key: key);
+
   final Movie movie;
 
   @override
@@ -373,7 +590,7 @@ class MovieImage extends StatelessWidget {
       tag: movie.title + "Thumbnail",
       child: ClipRRect(
         borderRadius: kAllBorderRadius,
-        child: Image.network(movie.url, fit: BoxFit.cover),
+        child: Image.network(movie.thumbnail, fit: BoxFit.cover),
       ),
     );
   }
