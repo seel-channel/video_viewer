@@ -49,6 +49,7 @@ class VideoViewerController extends ChangeNotifier {
 
   int _lastVideoPosition = 0;
   Duration _maxBuffering = Duration.zero;
+  Duration? _duration;
 
   /// Receive a list of all the resources to be played.
   ///
@@ -93,7 +94,7 @@ class VideoViewerController extends ChangeNotifier {
 
   Duration get position => video!.value.position - beginRange;
 
-  Duration get duration => endRange - beginRange;
+  Duration get duration => _duration!;
 
   VideoSource? get activeSource => _source?[_activeSourceName];
 
@@ -310,6 +311,7 @@ class VideoViewerController extends ChangeNotifier {
     if (inheritValues || source.range != null) {
       await seekTo(source.range != null ? beginRange : position);
     }
+    _duration = endRange - beginRange;
     if (autoPlay) await play();
     notifyListeners();
   }
