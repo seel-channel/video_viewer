@@ -8,7 +8,7 @@ import 'package:video_viewer/ui/widgets/play_and_pause.dart';
 import 'package:video_viewer/ui/widgets/helpers.dart';
 
 class OverlayBottom extends StatefulWidget {
-  OverlayBottom({Key? key}) : super(key: key);
+  const OverlayBottom({Key? key}) : super(key: key);
 
   @override
   _OverlayBottomState createState() => _OverlayBottomState();
@@ -26,19 +26,16 @@ class _OverlayBottomState extends State<OverlayBottom> {
 
   @override
   Widget build(BuildContext context) {
-    final style = _query.videoStyle(context);
     final controller = _query.video(context, listen: true);
-
-    final isFullscreen = controller.isFullScreen;
-    final video = controller.video!;
+    final style = _query.videoStyle(context);
     final barStyle = style.progressBarStyle;
-    final padding = barStyle.paddingBeetwen;
 
-    final halfPadding = Margin.all(padding / 2);
+    final bool isFullscreen = controller.isFullScreen;
+    final double padding = barStyle.paddingBeetwen;
+    final Margin halfPadding = Margin.all(padding / 2);
 
-    final videoValue = video.value;
-    final position = videoValue.position;
-    final duration = videoValue.duration;
+    final Duration position = controller.position;
+    final Duration duration = controller.duration;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -50,7 +47,7 @@ class _OverlayBottomState extends State<OverlayBottom> {
               type: PlayAndPauseType.bottom,
               padding: Margin.all(padding),
             ),
-            Expanded(child: VideoProgressBar()),
+            const Expanded(child: VideoProgressBar()),
             SizedBox(width: padding),
             ValueListenableBuilder(
               valueListenable: _showRemaingText,

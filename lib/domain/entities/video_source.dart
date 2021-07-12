@@ -1,19 +1,25 @@
 import 'dart:convert';
+import 'package:flutter/animation.dart';
 import 'package:http/http.dart' as http;
-import 'package:cached_video_player/cached_video_player.dart';
 import 'package:video_viewer/video_viewer.dart';
+import 'package:cached_video_player/cached_video_player.dart';
 
 export 'package:cached_video_player/cached_video_player.dart';
 
 class VideoSource {
   VideoSource({
     required this.video,
-    this.intialSubtitle = "",
-    this.subtitle,
     this.ads,
+    this.subtitle,
+    this.intialSubtitle = "",
+    this.range,
   });
 
+  ///It's the ads list it's going to show
   final List<VideoViewerAd>? ads;
+
+  ///It's the range of the video where it's going to play. For example, you want to play the video from `Duration.zero` to `Duration(minutes: 2)`
+  final Tween<Duration>? range;
 
   ///VideoPlayerController is from [video_player package.](https://pub.dev/packages/video_player)
   ///```dart

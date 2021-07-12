@@ -32,7 +32,7 @@ class VideoViewerController extends ChangeNotifier {
 
   VideoViewerAd? _activeAd;
   Timer? _activeAdTimeRemaing;
-  String? _activeSource;
+  String? _activeSourceName;
   String? _activeSubtitle;
   SubtitleData? _activeSubtitleData;
   Duration? _adTimeWatched;
@@ -75,6 +75,28 @@ class VideoViewerController extends ChangeNotifier {
     super.dispose();
   }
 
+  Duration get beginRange {
+    final Duration duration = video!.value.duration;
+    final Tween<Duration>? range = activeSource?.range;
+    Duration begin = range?.begin ?? Duration.zero;
+    if (begin >= duration) begin = Duration.zero;
+    return begin;
+  }
+
+  Duration get endRange {
+    final Duration duration = video!.value.duration;
+    final Tween<Duration>? range = activeSource?.range;
+    Duration end = range?.end ?? duration;
+    if (end >= duration) end = duration;
+    return end;
+  }
+
+  Duration get position => video!.value.position - beginRange;
+
+  Duration get duration => endRange - beginRange;
+
+  VideoSource? get activeSource => _source?[_activeSourceName];
+
   VideoViewerAd? get activeAd => _activeAd;
 
   Duration? get adTimeWatched => _adTimeWatched;
@@ -89,7 +111,7 @@ class VideoViewerController extends ChangeNotifier {
 
   String? get activeCaption => _activeSubtitle;
 
-  String? get activeSource => _activeSource;
+  String? get activeSourceName => _activeSourceName;
 
   Duration get maxBuffering => _maxBuffering;
 
@@ -150,72 +172,25 @@ class VideoViewerController extends ChangeNotifier {
     _source = sources;
     final String activedSource = sources.keys.toList().first;
     final VideoSource source = sources.values.toList().first;
-
     await changeSource(
       source: source,
       name: activedSource,
       autoPlay: autoPlay,
     );
-
     Wakelock.enable();
   }
 
-  //-----------------//
-  //SOURCE CONTROLLER//
-  //-----------------//
-  ///The [source.video] must be initialized previously
-  ///
-  ///[inheritValues] has the function to inherit last controller values.
-  ///It's useful on changed quality video.
-  ///
-  ///For example:
-  ///```dart
-  ///   _video.seekTo(lastController.value.position);
-  /// ```
-  Future<void> changeSource({
-    required VideoSource source,
-    required String name,
-    bool inheritValues = true,
-    bool autoPlay = true,
-  }) async {
-    final double speed = _video?.value.playbackSpeed ?? 1.0;
-    final Duration position = _video?.value.position ?? Duration.zero;
-
-    if (source.subtitle != null) {
-      final subtitle = source.subtitle![source.intialSubtitle];
-      if (subtitle != null) {
-        changeSubtitle(
-          subtitle: subtitle,
-          subtitleName: source.intialSubtitle,
-        );
-      }
-    }
-
-    _ads = source.ads;
-    _activeSource = name;
-
-    await source.video.initialize();
-    _video?.removeListener(_videoListener);
-    _video = source.video;
-    _video?.addListener(_videoListener);
-
-    await _video?.setPlaybackSpeed(speed);
-    await _video?.setLooping(looping);
-    if (inheritValues) await _video?.seekTo(position);
-    if (autoPlay) await _video?.play();
-    notifyListeners();
+  Future<void> seekTo(Duration position) async {
+    await _video?.seekTo(position);
   }
 
-  ///DON'T TOUCH >:]
-  Future<void> changeSubtitle({
-    required VideoViewerSubtitle? subtitle,
-    required String subtitleName,
-  }) async {
-    _activeSubtitle = subtitleName;
-    _activeSubtitleData = null;
-    _subtitle = subtitle;
-    if (subtitle != null) await _subtitle!.initialize();
-    notifyListeners();
+  Future<void> play() async {
+    if (position >= duration) await seekTo(beginRange);
+    await _video?.play();
+  }
+
+  Future<void> pause() async {
+    await _video?.pause();
   }
 
   //---------//
@@ -223,8 +198,23 @@ class VideoViewerController extends ChangeNotifier {
   //---------//
   void _videoListener() {
     final value = _video!.value;
-    final position = value.position;
-    final buffering = video!.value.isBuffering;
+    final Duration position = value.position;
+    final Duration duration = value.duration;
+    final bool buffering = video!.value.isBuffering;
+
+    final Tween<Duration>? range = activeSource?.range;
+
+    if (range != null) {
+      final Duration end = endRange;
+      final Duration begin = beginRange;
+      if (position < begin || position >= end) {
+        if (looping) {
+          _video?.seekTo(begin);
+        } else if (isPlaying && position >= end) {
+          _video?.pause();
+        }
+      }
+    }
 
     if (isPlaying && isShowingThumbnail) {
       _isShowingThumbnail = false;
@@ -247,7 +237,7 @@ class VideoViewerController extends ChangeNotifier {
 
     if (_isShowingOverlay) {
       if (isPlaying) {
-        if (position >= value.duration && looping) {
+        if (position >= duration && looping) {
           _video!.seekTo(Duration.zero);
         } else {
           if (_closeOverlayButtons == null) _startCloseOverlay();
@@ -275,6 +265,65 @@ class VideoViewerController extends ChangeNotifier {
         _findAd();
       }
     }
+  }
+
+  //-----------------//
+  //SOURCE CONTROLLER//
+  //-----------------//
+  ///The [source.video] must be initialized previously
+  ///
+  ///[inheritValues] has the function to inherit last controller values.
+  ///It's useful on changed quality video.
+  ///
+  ///For example:
+  ///```dart
+  ///   _video.seekTo(lastController.value.position);
+  /// ```
+  Future<void> changeSource({
+    required VideoSource source,
+    required String name,
+    bool inheritValues = true,
+    bool autoPlay = true,
+  }) async {
+    final double speed = _video?.value.playbackSpeed ?? 1.0;
+
+    if (source.subtitle != null) {
+      final subtitle = source.subtitle![source.intialSubtitle];
+      if (subtitle != null) {
+        changeSubtitle(
+          subtitle: subtitle,
+          subtitleName: source.intialSubtitle,
+        );
+      }
+    }
+
+    _ads = source.ads;
+    _activeSourceName = name;
+
+    await source.video.initialize();
+    _video?.removeListener(_videoListener);
+    _video = source.video;
+    _video?.addListener(_videoListener);
+
+    await _video?.setPlaybackSpeed(speed);
+    await _video?.setLooping(looping);
+    if (inheritValues || source.range != null) {
+      await seekTo(source.range != null ? beginRange : position);
+    }
+    if (autoPlay) await play();
+    notifyListeners();
+  }
+
+  ///DON'T TOUCH >:]
+  Future<void> changeSubtitle({
+    required VideoViewerSubtitle? subtitle,
+    required String subtitleName,
+  }) async {
+    _activeSubtitle = subtitleName;
+    _activeSubtitleData = null;
+    _subtitle = subtitle;
+    if (subtitle != null) await _subtitle!.initialize();
+    notifyListeners();
   }
 
   //-----------------//
@@ -306,7 +355,7 @@ class VideoViewerController extends ChangeNotifier {
   void skipAd() {
     _activeAd = null;
     _deleteAdTimer();
-    video?.play();
+    play();
     notifyListeners();
   }
 
@@ -395,12 +444,12 @@ class VideoViewerController extends ChangeNotifier {
   Future<void> onTapPlayAndPause() async {
     final value = _video!.value;
     if (isPlaying) {
-      await _video!.pause();
+      await pause();
       if (!_isShowingOverlay) _isShowingOverlay = false;
     } else {
       if (value.position >= value.duration) await _video!.seekTo(Duration.zero);
       _lastVideoPosition = _lastVideoPosition - 1;
-      await _video!.play();
+      await play();
     }
     notifyListeners();
   }

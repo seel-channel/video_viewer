@@ -30,7 +30,7 @@ class MainMenu extends StatelessWidget {
               index: 0,
               icon: style.settings,
               title: metadata.language.quality,
-              subtitle: controller.activeSource!,
+              subtitle: controller.activeSourceName!,
             ),
           _MainMenuItem(
             index: 1,
@@ -38,7 +38,7 @@ class MainMenu extends StatelessWidget {
             title: metadata.language.speed,
             subtitle: speed == 1.0 ? metadata.language.normalSpeed : "x$speed",
           ),
-          if (source[controller.activeSource!]!.subtitle != null)
+          if (source[controller.activeSourceName!]!.subtitle != null)
             _MainMenuItem(
               index: 2,
               icon: style.caption,

@@ -27,7 +27,7 @@ class CaptionMenu extends StatelessWidget {
     final video = query.video(context, listen: true);
     final metadata = query.videoMetadata(context, listen: true);
 
-    final activeSource = video.activeSource;
+    final activeSourceName = video.activeSourceName;
     final activeCaption = video.activeCaption;
     final none = metadata.language.captionNone;
 
@@ -41,7 +41,7 @@ class CaptionMenu extends StatelessWidget {
           ),
         ),
         for (MapEntry<String, VideoSource> entry in video.source!.entries)
-          if (entry.key == activeSource && entry.value.subtitle != null)
+          if (entry.key == activeSourceName && entry.value.subtitle != null)
             for (MapEntry<String, VideoViewerSubtitle> subtitle
                 in entry.value.subtitle!.entries)
               CustomInkWell(

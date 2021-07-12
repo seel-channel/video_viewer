@@ -13,14 +13,14 @@ class VideoCoreForwardAndRewindBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final query = VideoQuery();
-    final video = query.video(context).video!;
+    final VideoQuery query = VideoQuery();
+    final controller = query.video(context);
     final style = query.videoStyle(context);
     final forwardStyle = style.forwardAndRewindStyle;
 
-    final duration = video.value.duration;
-    final height = forwardStyle.bar.height;
-    final width = forwardStyle.bar.width;
+    final Duration duration = controller.duration;
+    final double height = forwardStyle.bar.height;
+    final double width = forwardStyle.bar.width;
 
     return Center(
       child: Container(

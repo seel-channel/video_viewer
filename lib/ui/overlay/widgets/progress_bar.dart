@@ -30,15 +30,12 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
           final _query = VideoQuery();
           final controller = _query.video(context, listen: true);
           final videoStyle = _query.videoStyle(context);
-
           final style = videoStyle.progressBarStyle;
-          final video = controller.video!;
-
-          final Duration position = video.value.position;
-          final Duration duration = video.value.duration;
-          final double width = constraints.maxWidth;
-
           final bar = style.bar;
+
+          final Duration position = controller.position;
+          final Duration end = controller.duration;
+          final double width = constraints.maxWidth;
 
           return ValueListenableBuilder(
             valueListenable: _progressBarDraggingBuffer,
@@ -46,7 +43,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
               final Duration draggingPosition =
                   controller.isDraggingProgressBar ? value : position;
               final double progressWidth =
-                  (draggingPosition.inMilliseconds / duration.inMilliseconds) *
+                  (draggingPosition.inMilliseconds / end.inMilliseconds) *
                       width;
 
               return _ProgressBarGesture(
@@ -60,7 +57,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
                       _ProgressBar(
                         color: bar.secondBackground,
                         width: (controller.maxBuffering.inMilliseconds /
-                                duration.inMilliseconds) *
+                                end.inMilliseconds) *
                             width,
                       ),
                       _ProgressBar(width: progressWidth, color: bar.color),
@@ -106,8 +103,8 @@ class _ProgressBarGesture extends StatefulWidget {
 class __ProgressBarGestureState extends State<_ProgressBarGesture> {
   final VideoQuery _query = VideoQuery();
 
-  set videoPosition(Duration value) {
-    Provider.of<ValueNotifier<Duration>>(context, listen: false).value = value;
+  ValueNotifier<Duration> get videoPosition {
+    return Provider.of<ValueNotifier<Duration>>(context, listen: false);
   }
 
   set animationMilliseconds(int value) {
@@ -115,18 +112,19 @@ class __ProgressBarGestureState extends State<_ProgressBarGesture> {
   }
 
   void _seekToRelativePosition(Offset local, [bool showText = false]) {
-    final video = _query.video(context).video!;
+    final controller = _query.video(context);
+    final Duration duration = controller.duration;
     final double localPos = local.dx / widget.width!;
-    final Duration position = video.value.duration * localPos;
+    final Duration position = duration * localPos;
 
-    if (position >= Duration.zero && position <= video.value.duration) {
-      videoPosition = position;
+    if (position >= Duration.zero && position <= duration) {
+      videoPosition.value = position;
     }
   }
 
   Future<void> play() async {
     animationMilliseconds = 1000;
-    await _query.video(context).video?.play();
+    await _query.video(context).play();
   }
 
   Future<void> pause() async {
@@ -140,9 +138,7 @@ class __ProgressBarGestureState extends State<_ProgressBarGesture> {
 
   Future<void> _endDragging() async {
     final controller = _query.video(context);
-    await controller.video?.seekTo(
-      Provider.of<ValueNotifier<Duration>>(context, listen: false).value,
-    );
+    await controller.video?.seekTo(controller.beginRange + videoPosition.value);
     controller.isDraggingProgressBar = false;
     if (controller.activeAd == null) await play();
   }

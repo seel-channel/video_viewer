@@ -38,18 +38,20 @@ class VideoCoreOverlay extends StatelessWidget {
         CustomSwipeTransition(
           direction: SwipeDirection.fromBottom,
           visible: overlayVisible,
-          child: OverlayBottom(),
+          child: const OverlayBottom(),
         ),
         AnimatedBuilder(
           animation: controller,
           builder: (_, __) => CustomOpacityTransition(
             visible: overlayVisible,
-            child: Center(child: PlayAndPause(type: PlayAndPauseType.center)),
+            child: const Center(
+              child: PlayAndPause(type: PlayAndPauseType.center),
+            ),
           ),
         ),
         CustomOpacityTransition(
           visible: controller.isShowingSettingsMenu,
-          child: SettingsMenu(),
+          child: const SettingsMenu(),
         ),
       ]),
     );

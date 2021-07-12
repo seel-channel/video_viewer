@@ -9,21 +9,21 @@ class VideoCoreThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final VideoQuery query = VideoQuery();
-    final video = query.video(context, listen: true);
+    final controller = query.video(context, listen: true);
     final style = query.videoStyle(context);
 
     final Widget? thumbnail = style.thumbnail;
 
     return CustomOpacityTransition(
-      visible: video.isShowingThumbnail,
+      visible: controller.isShowingThumbnail,
       child: Stack(children: [
         if (thumbnail != null) Positioned.fill(child: thumbnail),
         Center(child: PlayAndPause(type: PlayAndPauseType.center)),
         Positioned.fill(
           child: GestureDetector(
-            onTap: () {
-              video.video!.play();
-              video.showAndHideOverlay();
+            onTap: () async {
+              await controller.play();
+              controller.showAndHideOverlay();
             },
             child: Container(
               color: Colors.transparent,

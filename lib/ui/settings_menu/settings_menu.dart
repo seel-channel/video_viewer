@@ -10,7 +10,7 @@ import 'package:video_viewer/ui/settings_menu/main_menu.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
 class SettingsMenu extends StatelessWidget {
-  SettingsMenu({Key? key}) : super(key: key);
+  const SettingsMenu({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -12,7 +12,7 @@ class QualityMenu extends StatelessWidget {
     final query = VideoQuery();
     final video = query.video(context, listen: true);
 
-    final activeSource = video.activeSource;
+    final activeSourceName = video.activeSourceName;
 
     return SecondaryMenu(
       children: [
@@ -22,13 +22,13 @@ class QualityMenu extends StatelessWidget {
               final video = query.video(context);
               video.closeAllSecondarySettingsMenus();
               video.closeSettingsMenu();
-              if (entry.key != activeSource) {
+              if (entry.key != activeSourceName) {
                 await video.changeSource(source: entry.value, name: entry.key);
               }
             },
             child: CustomText(
               text: entry.key,
-              selected: entry.key == activeSource,
+              selected: entry.key == activeSourceName,
             ),
           ),
       ],
