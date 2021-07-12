@@ -23,12 +23,13 @@ class MainMenu extends StatelessWidget {
         crossAxisAlignment: WrapCrossAlignment.center,
         runAlignment: WrapAlignment.center,
         children: [
-          _MainMenuItem(
-            index: 0,
-            icon: style.settings,
-            title: metadata.language.quality,
-            subtitle: controller.activeSource!,
-          ),
+          if (controller.source!.length > 1)
+            _MainMenuItem(
+              index: 0,
+              icon: style.settings,
+              title: metadata.language.quality,
+              subtitle: controller.activeSource!,
+            ),
           _MainMenuItem(
             index: 1,
             icon: style.speed,
