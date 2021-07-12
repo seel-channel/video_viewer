@@ -66,12 +66,11 @@ class VideoViewerController extends ChangeNotifier {
 
   @override
   Future<void> dispose() async {
+    _video?.removeListener(_videoListener);
+    await _video?.pause();
+    await _video?.dispose();
     _deleteAdTimer();
     _closeOverlayButtons?.cancel();
-    if (_video != null) {
-      await _video?.pause();
-      _video!.dispose();
-    }
     Wakelock.disable();
     super.dispose();
   }
@@ -202,8 +201,9 @@ class VideoViewerController extends ChangeNotifier {
     }
 
     await source.video.initialize();
+    _video?.removeListener(_videoListener);
     _video = source.video;
-    _video!.addListener(_videoListener);
+    _video?.addListener(_videoListener);
 
     if (inheritValues) {
       await _video!.setPlaybackSpeed(speed);
