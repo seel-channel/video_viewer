@@ -1,10 +1,17 @@
 import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:video_viewer/video_viewer.dart';
 import 'package:helpers/helpers.dart';
 
-import 'package:video_viewer/video_viewer.dart';
+/// SUMMARY
+/// 1. Models
+/// 2. Constants
+/// 3. Main Aplications
+/// 4. Pages
+/// 5. Video Viewer Widgets
+/// 6. Movie Card Widgets
+/// 7. Misc Widgets
 
 //------//
 //MODELS//
@@ -84,8 +91,8 @@ const double kCardAspectRatio = 0.75;
 
 const double kPadding = 20;
 const double kSectionPadding = 40;
-const EdgeInsets kAllPadding = Margin.all(kPadding);
-const EdgeInsets kAllSectionPadding = Margin.all(kSectionPadding);
+const Margin kAllPadding = Margin.all(kPadding);
+const Margin kAllSectionPadding = Margin.all(kSectionPadding);
 
 const BorderRadius kAllBorderRadius = BorderRadius.all(
   Radius.circular(kPadding),
@@ -104,7 +111,7 @@ const Map<String, SerieSource> kTheWitcherSource = {
         "https://i.blogs.es/0f91c5/the-witcher-temporada-2-cartel/450_1000.jpeg",
     source: {
       "video":
-          "https://felipemurguia.com/assets/videos/the_witcher_trailer.mp4",
+          "https://felipemurguia.com/assets/videos/the_witcher_trailer_2.mp4",
     },
   )
 };
@@ -233,13 +240,13 @@ class MainPage extends StatelessWidget {
       SizedBox(height: kSectionPadding),
       Headline6("Series"),
       SizedBox(height: kPadding),
-      MoviesSlider(kSeriesData),
+      MovieCardSlider(kSeriesData),
       SizedBox(height: kSectionPadding),
       Headline6("Movies"),
       SizedBox(height: kPadding),
-      MoviesSlider(kMoviesData),
+      MovieCardSlider(kMoviesData),
     ]
-        .map((element) => element is MoviesSlider
+        .map((element) => element is MovieCardSlider
             ? element
             : Padding(
                 padding: const Margin.horizontal(kSectionPadding),
@@ -286,6 +293,9 @@ class MoviePage extends StatelessWidget {
   }
 }
 
+//--------------------//
+//VIDEO VIEWER WIDGETS//
+//--------------------//
 class MovieVideoViewer extends StatelessWidget {
   const MovieVideoViewer(this.movie, {Key? key}) : super(key: key);
 
@@ -343,11 +353,11 @@ class _SerieVideoViewerState extends State<SerieVideoViewer> {
   }
 
   void onEpisodeThumbnailTap(MapEntry<String, SerieSource> entry) async {
-    final episodeName = entry.key;
-    final qualities = entry.value;
+    final String episodeName = entry.key;
+    final SerieSource qualities = entry.value;
+    final String url = qualities.source.entries.first.value;
 
-    Map<String, VideoSource> sources;
-    String url = qualities.source.entries.first.value;
+    late Map<String, VideoSource> sources;
 
     if (url.contains("m3u8")) {
       sources = await VideoSource.fromM3u8PlaylistUrl(url);
@@ -355,7 +365,9 @@ class _SerieVideoViewerState extends State<SerieVideoViewer> {
       sources = VideoSource.fromNetworkVideoSources(qualities.source);
     }
 
-    final video = sources.entries.first;
+    final MapEntry<String, VideoSource> video = sources.entries.first;
+
+    controller.closeSettingsMenu();
 
     await controller.changeSource(
       inheritValues: false, //RESET SPEED TO NORMAL AND POSITION TO ZERO
@@ -363,7 +375,6 @@ class _SerieVideoViewerState extends State<SerieVideoViewer> {
       name: video.key,
     );
 
-    controller.closeAllSecondarySettingsMenus();
     controller.source = sources;
     episode = episodeName;
     setState(() {});
@@ -390,12 +401,12 @@ class _SerieVideoViewerState extends State<SerieVideoViewer> {
               ),
               secondaryMenuWidth: 300,
               secondaryMenu: Padding(
-                padding: EdgeInsets.only(top: 5),
+                padding: const Margin.top(5),
                 child: Center(
                   child: Container(
                     child: Wrap(
-                      spacing: 20,
-                      runSpacing: 10,
+                      spacing: kPadding,
+                      runSpacing: kPadding,
                       children: [
                         for (var entry in widget.serie.source.entries)
                           SerieEpisodeThumbnail(
@@ -430,38 +441,43 @@ class SerieEpisodeThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const Margin padding = const Margin.all(kPadding / 4);
     return ClipRRect(
       borderRadius: kAllBorderRadius,
-      child: Material(
-        child: InkWell(
-          onTap: onTap,
-          child: Stack(
-            alignment: AlignmentDirectional.bottomCenter,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                color: Colors.white,
-                child: Image.network(url, fit: BoxFit.cover),
-              ),
-              Text(
-                title,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+      child: SizedBox(
+        width: kSectionPadding * 2,
+        height: kSectionPadding * 2,
+        child: Stack(alignment: AlignmentDirectional.topEnd, children: [
+          Positioned.fill(child: Image.network(url, fit: BoxFit.cover)),
+          Padding(
+            padding: padding,
+            child: ClipRRect(
+              borderRadius: kAllBorderRadius,
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: Container(
+                  padding: padding,
+                  color: context.color.card.withOpacity(0.16),
+                  child: Subtitle1(title),
                 ),
-              )
-            ],
+              ),
+            ),
           ),
-        ),
+          Positioned.fill(
+            child: SplashTap(
+              onTap: onTap,
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+        ]),
       ),
     );
   }
 }
 
-//-------//
-//WIDGETS//
-//-------//
+//------------//
+//CARD WIDGETS//
+//------------//
 class MovieCard extends StatelessWidget {
   const MovieCard(this.movie, {Key? key}) : super(key: key);
 
@@ -496,16 +512,16 @@ class MovieCard extends StatelessWidget {
   }
 }
 
-class MoviesSlider extends StatefulWidget {
-  const MoviesSlider(this.movies, {Key? key}) : super(key: key);
+class MovieCardSlider extends StatefulWidget {
+  const MovieCardSlider(this.movies, {Key? key}) : super(key: key);
 
   final List<Movie> movies;
 
   @override
-  _MoviesSliderState createState() => _MoviesSliderState();
+  _MovieCardSliderState createState() => _MovieCardSliderState();
 }
 
-class _MoviesSliderState extends State<MoviesSlider> {
+class _MovieCardSliderState extends State<MovieCardSlider> {
   late PageController _pageController = PageController();
 
   @override
@@ -668,6 +684,9 @@ class MovieTitle extends StatelessWidget {
   }
 }
 
+//------------//
+//MISC WIDGETS//
+//------------//
 class CustomContainer extends StatelessWidget {
   const CustomContainer({
     Key? key,
