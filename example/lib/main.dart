@@ -4,8 +4,26 @@ import 'package:helpers/helpers.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:video_viewer/video_viewer.dart';
 
+//------//
+//MODELS//
+//------//
 enum MovieStyle { card, page }
 
+class Movie {
+  const Movie({
+    required this.url,
+    required this.title,
+    required this.category,
+    this.isFavorite = false,
+  });
+
+  final String url, title, category;
+  final bool isFavorite;
+}
+
+//---------//
+//CONSTANTS//
+//---------//
 const double kButtonHeight = 48;
 const double kCardAspectRatio = 0.75;
 
@@ -62,18 +80,9 @@ const List<Movie> kMoviesData = [
   ),
 ];
 
-class Movie {
-  const Movie({
-    required this.url,
-    required this.title,
-    required this.category,
-    this.isFavorite = false,
-  });
-
-  final String url, title, category;
-  final bool isFavorite;
-}
-
+//---------------//
+//MAIN APLICATION//
+//---------------//
 void main() => runApp(App());
 
 class App extends StatelessWidget {
@@ -164,15 +173,13 @@ class MainPage extends StatelessWidget {
   }
 }
 
-class MovieDetailsPage extends StatelessWidget {
-  const MovieDetailsPage(this.movie, {Key? key}) : super(key: key);
-
+class MoviePage extends StatelessWidget {
+  const MoviePage(this.movie, {Key? key}) : super(key: key);
   final Movie movie;
 
   @override
   Widget build(BuildContext context) {
     final Color primary = context.color.primary;
-
     return Scaffold(
       body: SafeArea(
         child: Column(children: [
@@ -234,7 +241,7 @@ class MovieCard extends StatelessWidget {
           child: Stack(children: [
             Positioned.fill(child: MovieImage(movie)),
             SplashTap(
-              onTap: () => context.to(MovieDetailsPage(movie)),
+              onTap: () => context.to(MoviePage(movie)),
               child: Container(color: Colors.transparent),
             ),
             Padding(padding: kAllPadding, child: MovieTitle(movie)),
@@ -341,8 +348,12 @@ class MovieImage extends StatelessWidget {
 }
 
 class MovieFavoriteIcon extends StatelessWidget {
-  const MovieFavoriteIcon(this.movie, {Key? key, this.type = MovieStyle.card})
-      : super(key: key);
+  const MovieFavoriteIcon(
+    this.movie, {
+    Key? key,
+    this.type = MovieStyle.card,
+  }) : super(key: key);
+
   final Movie movie;
   final MovieStyle type;
 
@@ -377,14 +388,19 @@ class MovieFavoriteIcon extends StatelessWidget {
 }
 
 class MovieTitle extends StatelessWidget {
-  const MovieTitle(this.movie, {Key? key, this.type = MovieStyle.card})
-      : super(key: key);
+  const MovieTitle(
+    this.movie, {
+    Key? key,
+    this.type = MovieStyle.card,
+  }) : super(key: key);
+
   final Movie movie;
   final MovieStyle type;
 
   @override
   Widget build(BuildContext context) {
     TextStyle? style;
+
     if (type == MovieStyle.page) {
       style = TextStyle(color: context.textTheme.bodyText1?.color);
     }
@@ -449,7 +465,21 @@ class SearchBar extends StatelessWidget {
           padding: const Margin.horizontal(kPadding),
           child: Icon(Icons.search, color: subtitle2?.color),
         ),
-        Expanded(child: Text("Search in catalog...", style: subtitle2)),
+        Expanded(
+          child: TextField(
+            style: subtitle2,
+            decoration: InputDecoration(
+              hintText: "Search in catalog...",
+              hintStyle: subtitle2,
+              border: InputBorder.none,
+              errorBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
+              contentPadding: const EdgeInsets.all(0),
+            ),
+          ),
+        ),
       ]),
     );
   }
