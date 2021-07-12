@@ -170,7 +170,6 @@ class VideoViewerController extends ChangeNotifier {
   ///
   ///For example:
   ///```dart
-  ///   _video.setPlaybackSpeed(lastController.value.playbackSpeed);
   ///   _video.seekTo(lastController.value.position);
   /// ```
   Future<void> changeSource({
@@ -179,8 +178,8 @@ class VideoViewerController extends ChangeNotifier {
     bool inheritValues = true,
     bool autoPlay = true,
   }) async {
-    double speed = 1.0;
-    Duration position = Duration.zero;
+    final double speed = _video?.value.playbackSpeed ?? 1.0;
+    final Duration position = _video?.value.position ?? Duration.zero;
 
     if (source.subtitle != null) {
       final subtitle = source.subtitle![source.intialSubtitle];
@@ -195,23 +194,15 @@ class VideoViewerController extends ChangeNotifier {
     _ads = source.ads;
     _activeSource = name;
 
-    if (_video != null) {
-      speed = _video!.value.playbackSpeed;
-      position = _video!.value.position;
-    }
-
     await source.video.initialize();
     _video?.removeListener(_videoListener);
     _video = source.video;
     _video?.addListener(_videoListener);
 
-    if (inheritValues) {
-      await _video!.setPlaybackSpeed(speed);
-      await _video!.seekTo(position);
-    }
-
-    await _video!.setLooping(looping);
-    if (autoPlay) await _video!.play();
+    await _video?.setPlaybackSpeed(speed);
+    await _video?.setLooping(looping);
+    if (inheritValues) await _video?.seekTo(position);
+    if (autoPlay) await _video?.play();
     notifyListeners();
   }
 
