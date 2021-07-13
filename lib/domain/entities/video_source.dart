@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/animation.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:video_viewer/video_viewer.dart';
 import 'package:cached_video_player/cached_video_player.dart';
-
-export 'package:cached_video_player/cached_video_player.dart';
 
 class VideoSource {
   VideoSource({
@@ -95,16 +94,18 @@ class VideoSource {
   /// ```
   static Map<String, VideoSource> fromNetworkVideoSources(
     Map<String, String> sources, {
+    String initialSubtitle = "",
     Map<String, VideoViewerSubtitle>? subtitle,
     List<VideoViewerAd>? ads,
-    String initialSubtitle = "",
+    Tween<Duration>? range,
   }) {
     Map<String, VideoSource> videoSource = {};
     for (String key in sources.keys)
       videoSource[key] = VideoSource(
         video: VideoPlayerController.network(sources[key]!),
-        subtitle: subtitle,
         intialSubtitle: initialSubtitle,
+        subtitle: subtitle,
+        range: range,
         ads: ads,
       );
     return videoSource;
@@ -122,9 +123,10 @@ class VideoSource {
   /// ```
   static Future<Map<String, VideoSource>> fromM3u8PlaylistUrl(
     String m3u8, {
-    Map<String, VideoViewerSubtitle>? subtitle,
     String initialSubtitle = "",
+    Map<String, VideoViewerSubtitle>? subtitle,
     List<VideoViewerAd>? ads,
+    Tween<Duration>? range,
     String Function(String quality)? formatter,
     bool descending = true,
   }) async {
@@ -180,6 +182,7 @@ class VideoSource {
     return VideoSource.fromNetworkVideoSources(
       sources,
       ads: ads,
+      range: range,
       subtitle: subtitle,
       initialSubtitle: initialSubtitle,
     );
