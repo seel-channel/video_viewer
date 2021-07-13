@@ -115,8 +115,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   Future<void> _videoSeekToNextSeconds(int seconds) async {
     final controller = _query.video(context);
-    final Duration position = controller.position;
-    await controller.seekTo(Duration(seconds: position.inSeconds + seconds));
+    final int position = controller.video!.value.position.inSeconds;
+    await controller.seekTo(Duration(seconds: position + seconds));
     await controller.play();
   }
 

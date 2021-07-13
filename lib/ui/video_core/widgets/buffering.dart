@@ -8,7 +8,7 @@ class VideoCoreBuffering extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final query = VideoQuery();
-    final video = query.video(context);
+    final video = query.video(context, listen: true);
     final style = query.videoStyle(context);
 
     return CustomOpacityTransition(
