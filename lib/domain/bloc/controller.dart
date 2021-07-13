@@ -31,6 +31,8 @@ class VideoViewerController extends ChangeNotifier {
   final List<bool> isShowingSecondarySettingsMenus = [];
   late bool looping;
 
+  bool _mounted = false;
+
   VideoViewerAd? _activeAd;
   Timer? _activeAdTimeRemaing;
   String? _activeSourceName;
@@ -81,6 +83,8 @@ class VideoViewerController extends ChangeNotifier {
     if (end >= duration) end = duration;
     return end;
   }
+
+  bool get mounted => _mounted;
 
   Duration get position => video!.value.position - beginRange;
 
@@ -152,31 +156,37 @@ class VideoViewerController extends ChangeNotifier {
   //-----------------//
   //SOURCE CONTROLLER//
   //-----------------//
+  @override
+  void notifyListeners() {
+    if (mounted) super.notifyListeners();
+  }
+
   Future<void> initialize(
     Map<String, VideoSource> sources, {
     bool autoPlay = true,
   }) async {
     final MapEntry<String, VideoSource> entry = sources.entries.first;
+    _mounted = true;
     _source = sources;
     await changeSource(
       name: entry.key,
       source: entry.value,
       autoPlay: autoPlay,
     );
-
     printAmber("VIDEO VIEWER INITIALIZED");
     Wakelock.enable();
   }
 
   @override
   Future<void> dispose() async {
-    printAmber("VIDEO VIEWER DISPOSED");
+    _mounted = false;
     _closeOverlayButtons?.cancel();
     _deleteAdTimer();
-    Wakelock.disable();
     _video?.removeListener(_videoListener);
     _video?.pause();
     _video?.dispose();
+    Wakelock.disable();
+    printAmber("VIDEO VIEWER DISPOSED");
     super.dispose();
   }
 
