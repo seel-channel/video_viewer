@@ -275,19 +275,24 @@ class MoviePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(children: [
-          movie is Serie
-              ? SerieVideoViewer(movie as Serie)
-              : MovieVideoViewer(movie),
-          Padding(
-            padding: kAllSectionPadding,
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(child: MovieTitle(movie, type: MovieStyle.page)),
-              const SizedBox(width: kPadding),
-              MovieFavoriteIcon(movie, type: MovieStyle.page)
-            ]),
-          ),
-        ]),
+        child: SingleChildScrollView(
+          child: Column(children: [
+            movie is Serie
+                ? SerieVideoViewer(movie as Serie)
+                : MovieVideoViewer(movie),
+            Padding(
+              padding: kAllSectionPadding,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: MovieTitle(movie, type: MovieStyle.page)),
+                  const SizedBox(width: kPadding),
+                  MovieFavoriteIcon(movie, type: MovieStyle.page)
+                ],
+              ),
+            ),
+          ]),
+        ),
       ),
     );
   }
@@ -310,7 +315,7 @@ class MovieVideoViewer extends StatelessWidget {
         ),
         ads: [
           VideoViewerAd(
-            durationToStart: Duration.zero,
+            fractionToStart: 0,
             child: Container(
               color: Colors.black,
               child: Center(child: Headline4("AD ZERO")),
@@ -326,6 +331,10 @@ class MovieVideoViewer extends StatelessWidget {
             durationToSkip: Duration(seconds: 4),
           ),
         ],
+        range: Tween<Duration>(
+          begin: const Duration(seconds: 5),
+          end: const Duration(seconds: 25),
+        ),
       ),
     }, style: CustomVideoViewerStyle(movie: movie, context: context));
   }
@@ -527,6 +536,7 @@ class MovieCardSlider extends StatefulWidget {
 
 class _MovieCardSliderState extends State<MovieCardSlider> {
   late PageController _pageController = PageController();
+  Size lastSize = Size.zero;
 
   @override
   void dispose() {
@@ -536,15 +546,15 @@ class _MovieCardSliderState extends State<MovieCardSlider> {
 
   @override
   void initState() {
-    Misc.onLayoutRendered(() {
-      setState(() {
-        final double width = context.media.width;
-        _pageController = PageController(
-          viewportFraction: (width - kSectionPadding * 2) / width,
-        );
-      });
-    });
+    Misc.onLayoutRendered(() => setState(_updateDimension));
     super.initState();
+  }
+
+  void _updateDimension([Size? size]) {
+    final double width = size?.width ?? context.media.width;
+    _pageController = PageController(
+      viewportFraction: (width - kSectionPadding * 2) / width,
+    );
   }
 
   @override
@@ -556,6 +566,10 @@ class _MovieCardSliderState extends State<MovieCardSlider> {
       aspectRatio: kCardAspectRatio,
       child: LayoutBuilder(builder: (_, constraints) {
         final Size size = constraints.biggest;
+        if (lastSize != size) {
+          lastSize = size;
+          _updateDimension(size);
+        }
         return PageView.builder(
           itemCount: widget.movies.length,
           clipBehavior: Clip.none,
