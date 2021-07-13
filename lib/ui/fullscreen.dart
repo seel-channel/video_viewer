@@ -51,7 +51,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
       backgroundColor: Colors.black,
       body: WillPopScope(
         onWillPop: () async {
-          await _query.video(context).closeFullScreen(context);
+          await _query.video(context).openOrCloseFullscreen(context);
           return false;
         },
         child: Center(

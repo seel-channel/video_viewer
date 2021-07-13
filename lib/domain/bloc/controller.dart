@@ -44,6 +44,7 @@ class VideoViewerController extends ChangeNotifier {
       _isShowingOverlay = false,
       _isFullScreen = false,
       _isGoingToCloseOverlay = false,
+      _isGoingToOpenOrCloseFullscreen = false,
       _isShowingThumbnail = true,
       _isShowingSettingsMenu = false,
       _isShowingMainSettingsMenu = false,
@@ -258,7 +259,7 @@ class VideoViewerController extends ChangeNotifier {
 
   Future<void> play() async {
     if (position >= duration) await seekTo(beginRange);
-    await _video?.play();
+    if (_activeAd == null) await _video?.play();
   }
 
   Future<void> pause() async {
@@ -266,6 +267,13 @@ class VideoViewerController extends ChangeNotifier {
   }
 
   Future<void> seekTo(Duration position) async {
+    final Duration end = endRange;
+    final Duration begin = beginRange;
+    if (position < begin) {
+      position = begin;
+    } else if (position > end) {
+      position = end;
+    }
     await _video?.seekTo(position);
   }
 
@@ -316,7 +324,7 @@ class VideoViewerController extends ChangeNotifier {
     if (_isShowingOverlay) {
       if (isPlaying) {
         if (position >= duration && looping) {
-          _video!.seekTo(Duration.zero);
+          seekTo(Duration.zero);
         } else {
           if (_closeOverlayButtons == null) _startCloseOverlay();
         }
@@ -502,13 +510,28 @@ class VideoViewerController extends ChangeNotifier {
   //----------//
   //FULLSCREEN//
   //----------//
+  Future<void> openOrCloseFullscreen(BuildContext context) async {
+    if (!_isGoingToOpenOrCloseFullscreen) {
+      _isGoingToOpenOrCloseFullscreen = true;
+      if (!_isFullScreen) {
+        _isFullScreen = true;
+        await _openFullScreen(context);
+      } else {
+        _isFullScreen = false;
+        await _closeFullScreen(context);
+      }
+      _isGoingToOpenOrCloseFullscreen = false;
+    }
+    notifyListeners();
+  }
+
   ///When you want to open FullScreen Page, you need pass the FullScreen's context,
   ///because this function do **Navigator.push(context, TransparentRoute(...))**
-  Future<void> openFullScreen(BuildContext context) async {
-    _isFullScreen = true;
+  Future<void> _openFullScreen(BuildContext context) async {
     final VideoQuery query = VideoQuery();
     final metadata = query.videoMetadata(context);
-    await context.toTransparentPage(
+    await Misc.setSystemOverlay([]);
+    context.toTransparentPage(
       MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: query.video(context)),
@@ -518,18 +541,13 @@ class VideoViewerController extends ChangeNotifier {
       ),
       duration: metadata.style.transitions,
     );
-    notifyListeners();
   }
 
   ///When you want to close FullScreen Page, you need pass the FullScreen's context,
   ///because this function do **Navigator.pop(context);**
-  Future<void> closeFullScreen(BuildContext context) async {
-    if (_isFullScreen) {
-      _isFullScreen = false;
-      await Misc.setSystemOverlay(SystemOverlay.values);
-      await Misc.setSystemOrientation(SystemOrientation.values);
-      context.goBack();
-      notifyListeners();
-    }
+  Future<void> _closeFullScreen(BuildContext context) async {
+    await Misc.setSystemOverlay(SystemOverlay.values);
+    await Misc.setSystemOrientation(SystemOrientation.values);
+    context.goBack();
   }
 }

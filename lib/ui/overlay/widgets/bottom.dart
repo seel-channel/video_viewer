@@ -75,12 +75,7 @@ class _OverlayBottomState extends State<OverlayBottom> {
             ),
             SplashCircularIcon(
               padding: halfPadding + Margin.right(padding / 2),
-              onTap: () async {
-                if (!isFullscreen)
-                  await controller.openFullScreen(context);
-                else
-                  await controller.closeFullScreen(context);
-              },
+              onTap: () => controller.openOrCloseFullscreen(context),
               child:
                   isFullscreen ? barStyle.fullScreenExit : barStyle.fullScreen,
             ),

@@ -138,7 +138,7 @@ class __ProgressBarGestureState extends State<_ProgressBarGesture> {
 
   Future<void> _endDragging() async {
     final controller = _query.video(context);
-    await controller.video?.seekTo(controller.beginRange + videoPosition.value);
+    await controller.seekTo(controller.beginRange + videoPosition.value);
     controller.isDraggingProgressBar = false;
     if (controller.activeAd == null) await play();
   }

@@ -121,26 +121,25 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   void _showRewindAndForward(int index, int amount) async {
     _videoSeekTo(amount);
-    setState(() {
-      if (index == 0) {
-        if (!_showAMomentRewindIcons[index]) _rewindDoubleTapCount = 0;
-        _rewindDoubleTapTimer?.cancel();
-        _rewindDoubleTapCount += 1;
-        _rewindDoubleTapTimer = Misc.timer(600, () {
-          _showAMomentRewindIcons[index] = false;
-          setState(() {});
-        });
-      } else {
-        if (!_showAMomentRewindIcons[index]) _forwardDoubleTapCount = 0;
-        _forwardDoubleTapTimer?.cancel();
-        _forwardDoubleTapCount += 1;
-        _forwardDoubleTapTimer = Misc.timer(600, () {
-          _showAMomentRewindIcons[index] = false;
-          setState(() {});
-        });
-      }
-      _showAMomentRewindIcons[index] = true;
-    });
+    if (index == 0) {
+      if (!_showAMomentRewindIcons[index]) _rewindDoubleTapCount = 0;
+      _rewindDoubleTapTimer?.cancel();
+      _rewindDoubleTapCount += 1;
+      _rewindDoubleTapTimer = Misc.timer(600, () {
+        _showAMomentRewindIcons[index] = false;
+        setState(() {});
+      });
+    } else {
+      if (!_showAMomentRewindIcons[index]) _forwardDoubleTapCount = 0;
+      _forwardDoubleTapTimer?.cancel();
+      _forwardDoubleTapCount += 1;
+      _forwardDoubleTapTimer = Misc.timer(600, () {
+        _showAMomentRewindIcons[index] = false;
+        setState(() {});
+      });
+    }
+    _showAMomentRewindIcons[index] = true;
+    setState(() {});
   }
 
   //------------------------------------//
@@ -150,7 +149,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     final controller = _query.video(context);
     await controller.pause();
     if (!controller.isShowingSettingsMenu) {
-      Misc.delayed(100, () {
+      Misc.delayed(50, () {
         if (_canListenerMove(controller)) {
           _initialForwardPosition = controller.position;
           _horizontalDragStartOffset = globalPosition;
@@ -188,37 +187,15 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //VIDEO VOLUME (VERTICAL DRAG)//
   //----------------------------//
   void _setVolume(double volume) async {
-    if (volume <= _maxVolume && volume >= 0) {
-      final controller = _query.video(context);
-      final fractional = _maxVolume * 0.05;
-      if (volume >= _maxVolume - fractional) volume = _maxVolume;
-      if (volume <= fractional) volume = 0.0;
-      switch (_query.videoMetadata(context).volumeManager) {
-        case VideoViewerVolumeManager.device:
-          await VolumeWatcher.setVolume(volume);
-          break;
-        case VideoViewerVolumeManager.video:
-          await controller.video!.setVolume(volume);
-          break;
-      }
-      _currentVolume.value = volume;
-    }
-  }
-
-  void _volumeDragStart(Offset globalPosition) {
-    final controller = _query.video(context);
-    if (!controller.isShowingSettingsMenu) {
-      Misc.delayed(100, () {
-        if (_canListenerMove(controller)) {
-          setState(() {
-            _closeVolumeStatus?.cancel();
-            _showVolumeStatus = true;
-            _onDragStartVolume = controller.video!.value.volume;
-            _currentVolume.value = _onDragStartVolume;
-            _verticalDragStartOffset = globalPosition;
-          });
-        }
-      });
+    volume = volume.clamp(0.0, _maxVolume);
+    _currentVolume.value = volume;
+    switch (_query.videoMetadata(context).volumeManager) {
+      case VideoViewerVolumeManager.device:
+        await VolumeWatcher.setVolume(volume);
+        break;
+      case VideoViewerVolumeManager.video:
+        await _query.video(context).video!.setVolume(volume);
+        break;
     }
   }
 
@@ -226,8 +203,25 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     final controller = _query.video(context);
     if (!controller.isShowingSettingsMenu) {
       double diff = _verticalDragStartOffset.dy - globalPosition.dy;
-      double volume = (diff / 125) + _onDragStartVolume;
+      double volume = (diff / 250) + _onDragStartVolume;
       _setVolume(volume);
+    }
+  }
+
+  void _volumeDragStart(Offset globalPosition) {
+    final controller = _query.video(context);
+    if (!controller.isShowingSettingsMenu) {
+      Misc.delayed(50, () {
+        if (_canListenerMove(controller)) {
+          setState(() {
+            _closeVolumeStatus?.cancel();
+            _showVolumeStatus = true;
+            _onDragStartVolume = _currentVolume.value;
+            _currentVolume.value = _onDragStartVolume;
+            _verticalDragStartOffset = globalPosition;
+          });
+        }
+      });
     }
   }
 
