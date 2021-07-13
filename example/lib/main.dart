@@ -311,7 +311,7 @@ class MovieVideoViewer extends StatelessWidget {
     return VideoViewer(source: {
       movie.title: VideoSource(
         video: VideoPlayerController.network(
-          "https://felipemurguia.com/assets/videos/the_witcher_trailer.mp4",
+          "https://felipemurguia.com/assets/videos/mortal_machines_trailer.mp4",
         ),
         ads: [
           VideoViewerAd(
