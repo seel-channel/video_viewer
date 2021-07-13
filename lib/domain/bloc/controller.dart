@@ -163,6 +163,7 @@ class VideoViewerController extends ChangeNotifier {
       source: entry.value,
       autoPlay: autoPlay,
     );
+
     printAmber("VIDEO VIEWER INITIALIZED");
     Wakelock.enable();
   }
@@ -249,21 +250,27 @@ class VideoViewerController extends ChangeNotifier {
   //-------------//
   //VIDEO CONTROL//
   //-------------//
+
   Future<void> playOrPause() async {
     if (isPlaying) {
       await pause();
     } else {
+      await _seekToBegin();
       await play();
     }
   }
 
   Future<void> play() async {
-    if (position >= duration) await seekTo(beginRange);
+    if (looping) _seekToBegin();
     if (_activeAd == null) await _video?.play();
   }
 
   Future<void> pause() async {
     await _video?.pause();
+  }
+
+  Future<void> _seekToBegin() async {
+    if (position >= duration) await seekTo(beginRange);
   }
 
   Future<void> seekTo(Duration position) async {
@@ -273,8 +280,6 @@ class VideoViewerController extends ChangeNotifier {
       position = begin;
     } else if (position > end) {
       position = end;
-    } else {
-      position += begin;
     }
     await _video?.seekTo(position);
   }
