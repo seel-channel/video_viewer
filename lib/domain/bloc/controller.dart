@@ -273,6 +273,8 @@ class VideoViewerController extends ChangeNotifier {
       position = begin;
     } else if (position > end) {
       position = end;
+    } else {
+      position += begin;
     }
     await _video?.seekTo(position);
   }

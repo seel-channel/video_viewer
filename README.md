@@ -18,6 +18,7 @@
 - Fully customizable.
 - HLS (m3u8) format support.
 - Captions (Subtitles) support.
+- Cut the video (It just will show a specific time of the video)
 - Easy and powerful implementation! :)
 
 <br><br>
@@ -375,7 +376,7 @@ class _UsingVideoControllerExampleState extends State<UsingVideoControllerExampl
   }
 
   VideoPlayerController getVideoPlayer() => controller.controller;
-  String getActiveSourceName() => controller.activeSource;
+  String getactiveSourceNameName() => controller.activeSourceName;
   String getActiveCaption() => controller.activeCaption;
   bool isFullScreen() => controller.isFullScreen;
   bool isBuffering() => controller.isBuffering;

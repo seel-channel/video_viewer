@@ -6,6 +6,8 @@ Added
 - Auto Cached video
 - New project example
 - Control device volume
+- Cut the video (It just will show a specific time of the video)
+- Fixed a lot of bugs
 
 ## [1.2.2]
 

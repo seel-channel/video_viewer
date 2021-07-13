@@ -36,7 +36,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //------------------------------//
   //REWIND AND FORWARD (VARIABLES)//
   //------------------------------//
-  final ValueNotifier<int> _forwardAndRewindAmount = ValueNotifier<int>(1);
+  final ValueNotifier<int> _forwardAndRewindSecondsAmount =
+      ValueNotifier<int>(1);
   Duration _initialForwardPosition = Duration.zero;
   Offset _dragInitialDelta = Offset.zero;
   Axis _dragDirection = Axis.vertical;
@@ -93,7 +94,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     _closeVolumeStatus?.cancel();
     _rewindDoubleTapTimer?.cancel();
     _forwardDoubleTapTimer?.cancel();
-    _forwardAndRewindAmount.dispose();
+    _forwardAndRewindSecondsAmount.dispose();
     super.dispose();
   }
 
@@ -112,15 +113,15 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   void _rewind() => _showRewindAndForward(0, _defaultRewindAmount);
   void _forward() => _showRewindAndForward(1, _defaultForwardAmount);
 
-  void _videoSeekTo(int amount) async {
+  Future<void> _videoSeekToNextSeconds(int seconds) async {
     final controller = _query.video(context);
     final Duration position = controller.position;
-    await controller.seekTo(Duration(seconds: position.inSeconds + amount));
+    await controller.seekTo(Duration(seconds: position.inSeconds + seconds));
     await controller.play();
   }
 
   void _showRewindAndForward(int index, int amount) async {
-    _videoSeekTo(amount);
+    _videoSeekToNextSeconds(amount);
     if (index == 0) {
       if (!_showAMomentRewindIcons[index]) _rewindDoubleTapCount = 0;
       _rewindDoubleTapTimer?.cancel();
@@ -169,18 +170,14 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       final int seconds = -(diff / (200 / duration)).round();
       final int relativePosition = position + seconds;
       if (relativePosition <= duration && relativePosition >= 0) {
-        _forwardAndRewindAmount.value = seconds;
+        _forwardAndRewindSecondsAmount.value = seconds;
       }
     }
   }
 
   void _forwardDragEnd() async {
-    final controller = _query.video(context);
-    await controller.play();
-    if (!controller.isShowingSettingsMenu && _showForwardStatus) {
-      setState(() => _showForwardStatus = false);
-      _videoSeekTo(_forwardAndRewindAmount.value);
-    }
+    await _videoSeekToNextSeconds(_forwardAndRewindSecondsAmount.value);
+    setState(() => _showForwardStatus = false);
   }
 
   //----------------------------//
@@ -373,7 +370,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       CustomOpacityTransition(
         visible: _showForwardStatus,
         child: ValueListenableBuilder(
-          valueListenable: _forwardAndRewindAmount,
+          valueListenable: _forwardAndRewindSecondsAmount,
           builder: (_, int seconds, __) => VideoCoreForwardAndRewindBar(
             seconds: seconds,
             position: _initialForwardPosition,
