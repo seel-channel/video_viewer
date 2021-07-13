@@ -162,7 +162,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 <br><br>
 
 ## **EXAMPLES**
-
+<!-- 
 ### **Serie Example** with 2 episodes
 
 ![](./assets/readme/SerieExample.gif)
@@ -356,7 +356,7 @@ class _SerieExampleState extends State<SerieExample> {
 }
 ```
 
-<br><br>
+<br><br> -->
 
 ### Using **VideoViewerController**
 
