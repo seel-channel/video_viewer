@@ -1,3 +1,8 @@
+
+
+
+
+
 # video_viewer
 
 <br>
@@ -26,7 +31,7 @@
 ## **PREVIEW**
 View the full source code in the [example](https://pub.dev/packages/video_viewer/example)
 
-<video src="https://felipemurguia.com/assets/videos/video_viewer_preview_2.mp4" autoplay muted>
+https://user-images.githubusercontent.com/65832922/125376603-3a45d800-e340-11eb-84ba-6be9df67d9b7.mp4
 
 <br><br>
 
