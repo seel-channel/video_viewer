@@ -1,3 +1,7 @@
+## [1.2.3+1]
+
+- README.md preview fixed
+
 ## [1.2.3]
 
 Added
