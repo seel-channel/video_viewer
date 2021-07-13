@@ -23,6 +23,13 @@
 
 <br><br>
 
+## **PREVIEW**
+View the full source code in the [example](https://pub.dev/packages/video_viewer/example)
+
+<video src="https://felipemurguia.com/assets/videos/video_viewer_preview_2.mp4" autoplay muted>
+
+<br><br>
+
 ## **INSTALLATION**
 ### Android
 
@@ -67,7 +74,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 
 <br><br>
 
-## **ANDROID AND IOS**
+## **SCREENSHOTS**
 
 |                Playing                 |                Paused                 |
 | :------------------------------------: | :-----------------------------------: |
@@ -104,7 +111,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 ![](./assets/readme/movil/volume_bar.jpg)
 
 <br><br>
-
+<!-- 
 <br><br>
 
 ## **WEB**
@@ -140,7 +147,7 @@ Add the following entry to your **Info.plist** file, located in `<project_root>/
 ### Volume Bar
 
 ![](./assets/readme/web/volume_bar.jpg)
-<br><br>
+<br><br> -->
 
 ---
 
