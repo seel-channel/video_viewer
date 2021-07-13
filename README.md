@@ -7,6 +7,7 @@
 
 
 
+
 # video_viewer
 
 <br>
@@ -35,12 +36,9 @@
 ## **PREVIEW**
 View the full source code in the [example](https://pub.dev/packages/video_viewer/example)
 
-<figure class="video_container">
-  <video src="https://user-images.githubusercontent.com/65832922/125376603-3a45d800-e340-11eb-84ba-6be9df67d9b7.mp4" autoplay muted controls>
-  </video>
-</figure>
+![video_viewer_preview](https://user-images.githubusercontent.com/65832922/125378278-4ed79f80-e343-11eb-992d-b7baeae0b06f.jpg)
 
-High-Quality Video Preview: https://user-images.githubusercontent.com/65832922/125377927-acb7b780-e342-11eb-950d-b80707e96341.mp4
+High-Quality Video Demo: https://user-images.githubusercontent.com/65832922/125377927-acb7b780-e342-11eb-950d-b80707e96341.mp4
 
 <br><br>
 
