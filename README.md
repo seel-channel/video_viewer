@@ -3,6 +3,10 @@
 
 
 
+
+
+
+
 # video_viewer
 
 <br>
@@ -35,6 +39,8 @@ View the full source code in the [example](https://pub.dev/packages/video_viewer
   <video src="https://user-images.githubusercontent.com/65832922/125376603-3a45d800-e340-11eb-84ba-6be9df67d9b7.mp4" autoplay muted controls>
   </video>
 </figure>
+
+High-Quality Video Preview: https://user-images.githubusercontent.com/65832922/125377927-acb7b780-e342-11eb-950d-b80707e96341.mp4
 
 <br><br>
 
