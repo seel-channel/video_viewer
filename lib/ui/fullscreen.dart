@@ -18,30 +18,30 @@ class FullScreenPage extends StatefulWidget {
 
 class _FullScreenPageState extends State<FullScreenPage> {
   final VideoQuery _query = VideoQuery();
-  Timer? _systemResetTimer;
+  late Timer _systemResetTimer;
 
   @override
   void initState() {
-    if (!widget.fixedLandscape) {
-      _systemResetTimer = Misc.periodic(3000, _resetSystem);
-    }
-    _resetSystem();
+    _systemResetTimer = Misc.periodic(3000, _hideSystemOverlay);
+    if (widget.fixedLandscape) _setLandscapeFixed();
     super.initState();
   }
 
   @override
   void dispose() {
-    _systemResetTimer?.cancel();
+    _systemResetTimer.cancel();
     super.dispose();
   }
 
-  Future<void> _resetSystem() async {
-    if (widget.fixedLandscape) {
-      await Misc.setSystemOrientation([
-        ...SystemOrientation.landscapeLeft,
-        ...SystemOrientation.landscapeRight
-      ]);
-    }
+  Future<void> _setLandscapeFixed() async {
+    await Misc.setSystemOrientation([
+      ...SystemOrientation.landscapeLeft,
+      ...SystemOrientation.landscapeRight
+    ]);
+    await _hideSystemOverlay();
+  }
+
+  Future<void> _hideSystemOverlay() async {
     await Misc.setSystemOverlay([]);
   }
 
@@ -51,7 +51,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
       backgroundColor: Colors.black,
       body: WillPopScope(
         onWillPop: () async {
-          _systemResetTimer?.cancel();
+          _systemResetTimer.cancel();
           await _query.video(context).openOrCloseFullscreen(context);
           return false;
         },
