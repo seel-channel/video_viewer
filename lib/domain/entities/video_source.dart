@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
+import 'package:helpers/helpers/print.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:video_viewer/video_viewer.dart';
 import 'package:video_player/video_player.dart';
 
@@ -130,61 +133,97 @@ class VideoSource {
     String Function(String quality)? formatter,
     bool descending = true,
   }) async {
-    final RegExp netRegx = RegExp(r'^(http|https):\/\/([\w.]+\/?)\S*');
+    //REGULAR EXPRESIONS//
+    final RegExp netRegxUrl = RegExp(r'^(http|https):\/\/([\w.]+\/?)\S*');
     final RegExp netRegx2 = RegExp(r'(.*)\r?\/');
-    final RegExp regExp = RegExp(
+    final RegExp regExpPlaylist = RegExp(
       r"#EXT-X-STREAM-INF:(?:.*,RESOLUTION=(\d+x\d+))?,?(.*)\r?\n(.*)",
       caseSensitive: false,
       multiLine: true,
     );
+    final RegExp regExpAudio = RegExp(
+      r"""^#EXT-X-MEDIA:TYPE=AUDIO(?:.*,URI="(.*m3u8)")""",
+      caseSensitive: false,
+      multiLine: true,
+    );
 
-    Map<String, String> sources = {};
-    late String content;
-
-    final response = await http.get(Uri.parse(m3u8));
+    //GET m3u8 file
+    late String content = "";
+    final http.Response response = await http.get(Uri.parse(m3u8));
     if (response.statusCode == 200) content = utf8.decode(response.bodyBytes);
+    final String directoryPath = (await getTemporaryDirectory()).path;
 
-    List<RegExpMatch> matches = regExp.allMatches(content).toList();
+    //Find matches
+    List<RegExpMatch> playlistMatches =
+        regExpPlaylist.allMatches(content).toList();
+    List<RegExpMatch> audioMatches = regExpAudio.allMatches(content).toList();
 
-    matches.forEach((RegExpMatch regExpMatch) {
-      final RegExpMatch? match = netRegx2.firstMatch(m3u8);
-      final String sourceURL = (regExpMatch.group(3)).toString();
-      final String quality = (regExpMatch.group(1)).toString();
-      final bool isNetwork = netRegx.hasMatch(sourceURL);
-      String url = sourceURL;
+    Map<String, File> sources = {};
+    final List<String> audioUrls = [];
+
+    for (final RegExpMatch playlistMatch in playlistMatches) {
+      final RegExpMatch? playlist = netRegx2.firstMatch(m3u8);
+      final String sourceURL = (playlistMatch.group(3)).toString();
+      final String quality = (playlistMatch.group(1)).toString();
+      final bool isNetwork = netRegxUrl.hasMatch(sourceURL);
+      String playlistUrl = sourceURL;
 
       if (!isNetwork) {
-        final String? dataURL = match!.group(0);
-        url = "$dataURL$sourceURL";
+        final String? dataURL = playlist!.group(0);
+        playlistUrl = "$dataURL$sourceURL";
       }
 
-      sources[quality] = url;
-    });
+      //Find audio url
+      for (final RegExpMatch audioMatch in audioMatches) {
+        final String audio = (audioMatch.group(1)).toString();
+        final bool isNetwork = netRegxUrl.hasMatch(audio);
+        final RegExpMatch? match = netRegx2.firstMatch(playlistUrl);
+        String audioUrl = audio;
 
-    if (formatter != null) {
-      Map<String, String> newSources = {};
-      for (var entry in sources.entries) {
-        newSources[formatter(entry.key)] = entry.value;
+        if (!isNetwork && match != null) {
+          audioUrl = "${match.group(0)}$audio";
+        }
+        audioUrls.add(audioUrl);
       }
-      sources = newSources;
+
+      final String audioMetadata;
+      if (audioUrls.length > 0) {
+        audioMetadata =
+            """#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio-medium",NAME="audio",AUTOSELECT=YES,DEFAULT=YES,CHANNELS="2",URI="${audioUrls.last}"\n""";
+      } else {
+        audioMetadata = "";
+      }
+      final File file = File('$directoryPath/hls$quality.m3u8');
+      file.writeAsStringSync(
+        """#EXTM3U\n#EXT-X-INDEPENDENT-SEGMENTS\n$audioMetadata#EXT-X-STREAM-INF:CLOSED-CAPTIONS=NONE,BANDWIDTH=1469712,RESOLUTION=$quality,FRAME-RATE=30.000\n$playlistUrl""",
+      );
+      sources[quality] = file;
     }
 
-    if (descending) {
-      Map<String, String> newSources = {};
-      newSources["Auto"] = m3u8;
-      for (var entry in sources.entries.toList().reversed)
-        newSources[entry.key] = entry.value;
-      sources = newSources;
-    } else {
-      sources["Auto"] = m3u8;
+    Map<String, VideoSource> videoSource = {};
+    void addAutoSource() {
+      videoSource["Auto"] = VideoSource(
+        video: VideoPlayerController.network(m3u8),
+        intialSubtitle: initialSubtitle,
+        subtitle: subtitle,
+        range: range,
+        ads: ads,
+      );
     }
 
-    return VideoSource.fromNetworkVideoSources(
-      sources,
-      ads: ads,
-      range: range,
-      subtitle: subtitle,
-      initialSubtitle: initialSubtitle,
-    );
+    if (descending) addAutoSource();
+    for (final entry
+        in descending ? sources.entries.toList().reversed : sources.entries) {
+      final String key = formatter?.call(entry.key) ?? entry.key;
+      videoSource[key] = VideoSource(
+        video: VideoPlayerController.file(sources[entry.key]!),
+        intialSubtitle: initialSubtitle,
+        subtitle: subtitle,
+        range: range,
+        ads: ads,
+      );
+    }
+    if (!descending) addAutoSource();
+    return videoSource;
   }
 }
