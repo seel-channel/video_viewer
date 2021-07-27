@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
-import 'package:helpers/helpers/print.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:video_viewer/video_viewer.dart';
