@@ -380,7 +380,7 @@ class _SerieVideoViewerState extends State<SerieVideoViewer> {
       controller.closeSettingsMenu();
 
       await controller.changeSource(
-        inheritValues: false, //RESET SPEED TO NORMAL AND POSITION TO ZERO
+        inheritPosition: false, //RESET SPEED TO NORMAL AND POSITION TO ZERO
         source: video.value,
         name: video.key,
       );

@@ -1,7 +1,7 @@
 name: video_viewer
 description: Multiplatform minimalist video viewer with spectacular user experience.
 homepage: https://github.com/seel-channel/video_viewer
-version: 1.2.3+1
+version: 1.2.4
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -10,11 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  video_player: ^2.1.12
   gesture_x_detector: ^1.0.0
   helpers: ^1.1.3
   http: ^0.13.3
+  path_provider: ^2.0.2
   provider: ^5.0.0
+  video_player: ^2.1.12
   volume_watcher: ^2.0.1
   wakelock: ^0.5.2
 
