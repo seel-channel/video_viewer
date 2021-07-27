@@ -11,7 +11,7 @@ import 'package:video_viewer/domain/entities/video_source.dart';
 import 'package:video_viewer/domain/entities/volume_control.dart';
 import 'package:video_viewer/ui/video_core/video_core.dart';
 
-export 'package:cached_video_player/cached_video_player.dart';
+export 'package:video_player/video_player.dart';
 export 'package:video_viewer/domain/bloc/controller.dart';
 export 'package:video_viewer/domain/entities/ads.dart';
 export 'package:video_viewer/domain/entities/language.dart';

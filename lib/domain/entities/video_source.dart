@@ -3,7 +3,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:video_viewer/video_viewer.dart';
-import 'package:cached_video_player/cached_video_player.dart';
+import 'package:video_player/video_player.dart';
 
 class VideoSource {
   VideoSource({
