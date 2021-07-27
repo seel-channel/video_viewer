@@ -548,17 +548,22 @@ class VideoViewerController extends ChangeNotifier {
   Future<void> _openFullScreen(BuildContext context) async {
     final VideoQuery query = VideoQuery();
     final metadata = query.videoMetadata(context);
-    await Misc.setSystemOverlay([]);
-    context.toTransparentPage(
-      MultiProvider(
+    final Duration transition = metadata.style.transitions;
+    Navigator.of(context).push(PageRouteBuilder(
+      opaque: false,
+      fullscreenDialog: true,
+      transitionDuration: transition,
+      reverseTransitionDuration: transition,
+      pageBuilder: (_, __, ___) => MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: query.video(context)),
           Provider.value(value: metadata),
         ],
-        child: const FullScreenPage(),
+        child: FullScreenPage(
+          fixedLandscape: metadata.onFullscreenFixLandscape,
+        ),
       ),
-      duration: metadata.style.transitions,
-    );
+    ));
   }
 
   ///When you want to close FullScreen Page, you need pass the FullScreen's context,
