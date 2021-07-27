@@ -38,6 +38,7 @@ class VideoViewer extends StatefulWidget {
     this.enableFullscreenScale = true,
     this.enableVerticalSwapingGesture = true,
     this.enableHorizontalSwapingGesture = true,
+    this.enableChat = false,
   }) : super(key: key);
 
   /// Once the video is initialized, it will be played
@@ -112,6 +113,8 @@ class VideoViewer extends StatefulWidget {
   ///On HorizontalSwapingGesture the video is able to control the forward and rewind of itself
   final bool enableHorizontalSwapingGesture;
 
+  final bool enableChat;
+
   @override
   VideoViewerState createState() => VideoViewerState();
 }
@@ -163,6 +166,7 @@ class VideoViewerState extends State<VideoViewer> {
                       widget.enableVerticalSwapingGesture,
                   enableHorizontalSwapingGesture:
                       widget.enableHorizontalSwapingGesture,
+                  enableChat: widget.enableChat,
                 ),
               ),
             ],

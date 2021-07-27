@@ -1,4 +1,5 @@
 import 'package:video_viewer/domain/entities/language.dart';
+import 'package:video_viewer/domain/entities/styles/chat.dart';
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/domain/entities/volume_control.dart';
 
@@ -14,6 +15,7 @@ class VideoViewerMetadata {
     required this.enableFullscreenScale,
     required this.enableVerticalSwapingGesture,
     required this.enableHorizontalSwapingGesture,
+    required this.enableChat,
   });
 
   /// It is the Aspect Ratio that the widget.style.loading will take when the video
@@ -54,4 +56,6 @@ class VideoViewerMetadata {
   final bool enableVerticalSwapingGesture;
 
   final bool enableHorizontalSwapingGesture;
+
+  final bool enableChat;
 }

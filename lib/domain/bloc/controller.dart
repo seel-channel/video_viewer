@@ -51,7 +51,8 @@ class VideoViewerController extends ChangeNotifier {
       _isShowingThumbnail = true,
       _isShowingSettingsMenu = false,
       _isShowingMainSettingsMenu = false,
-      _isDraggingProgressBar = false;
+      _isDraggingProgressBar = false,
+      _isShowingChat = false;
 
   Duration _maxBuffering = Duration.zero;
 
@@ -118,6 +119,13 @@ class VideoViewerController extends ChangeNotifier {
   bool get isFullScreen => _isFullScreen;
 
   bool get isPlaying => _video!.value.isPlaying;
+
+  bool get isShowingChat => _isShowingChat;
+
+  set isShowingChat(bool isShowingChat) {
+    _isShowingChat = isShowingChat;
+    notifyListeners();
+  }
 
   bool get isBuffering => _isBuffering;
 

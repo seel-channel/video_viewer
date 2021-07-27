@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:video_viewer/domain/entities/styles/forward_and_rewind.dart';
+import 'package:video_viewer/domain/entities/styles/chat.dart';
 import 'package:video_viewer/domain/entities/styles/play_and_pause.dart';
 import 'package:video_viewer/domain/entities/styles/progress_bar.dart';
 import 'package:video_viewer/domain/entities/styles/settings_menu.dart';
@@ -14,6 +15,7 @@ export 'package:video_viewer/domain/entities/styles/progress_bar.dart';
 export 'package:video_viewer/domain/entities/styles/settings_menu.dart';
 export 'package:video_viewer/domain/entities/styles/subtitle.dart';
 export 'package:video_viewer/domain/entities/styles/volume_bar.dart';
+export 'package:video_viewer/domain/entities/styles/chat.dart';
 
 class VideoViewerStyle {
   /// It is the main class of VideoViewer styles, in this class you can almost
@@ -25,6 +27,7 @@ class VideoViewerStyle {
     ForwardAndRewindStyle? forwardAndRewindStyle,
     VolumeBarStyle? volumeBarStyle,
     SubtitleStyle? subtitleStyle,
+    VideoViewerChatStyle? chatStyle,
     Widget? loading,
     Widget? buffering,
     TextStyle? textStyle,
@@ -33,28 +36,29 @@ class VideoViewerStyle {
     this.transitions = const Duration(milliseconds: 400),
     this.skipAdBuilder,
     this.skipAdAlignment = Alignment.bottomRight,
-  })  : this.loading = loading ??
+  })  : loading = loading ??
             Center(
               child: CircularProgressIndicator(
                 strokeWidth: 1.6,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ),
-        this.buffering = buffering ??
+        buffering = buffering ??
             Center(
               child: CircularProgressIndicator(
                 strokeWidth: 1.6,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ),
-        this.subtitleStyle = subtitleStyle ?? SubtitleStyle(),
-        this.settingsStyle = settingsStyle ?? SettingsMenuStyle(),
-        this.progressBarStyle = progressBarStyle ?? ProgressBarStyle(),
-        this.volumeBarStyle = volumeBarStyle ?? VolumeBarStyle(),
-        this.forwardAndRewindStyle =
+        chatStyle = chatStyle ?? const VideoViewerChatStyle(),
+        subtitleStyle = subtitleStyle ?? SubtitleStyle(),
+        settingsStyle = settingsStyle ?? SettingsMenuStyle(),
+        progressBarStyle = progressBarStyle ?? ProgressBarStyle(),
+        volumeBarStyle = volumeBarStyle ?? VolumeBarStyle(),
+        forwardAndRewindStyle =
             forwardAndRewindStyle ?? ForwardAndRewindStyle(),
-        this.playAndPauseStyle = playAndPauseStyle ?? PlayAndPauseWidgetStyle(),
-        this.textStyle = textStyle ??
+        playAndPauseStyle = playAndPauseStyle ?? PlayAndPauseWidgetStyle(),
+        textStyle = textStyle ??
             TextStyle(
                 color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold);
 
@@ -121,6 +125,8 @@ class VideoViewerStyle {
   final Widget Function(Duration)? skipAdBuilder;
 
   final Alignment skipAdAlignment;
+
+  final VideoViewerChatStyle chatStyle;
 
   VideoViewerStyle copyWith({
     SettingsMenuStyle? settingsStyle,

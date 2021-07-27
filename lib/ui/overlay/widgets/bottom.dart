@@ -74,6 +74,14 @@ class _OverlayBottomState extends State<OverlayBottom> {
               child: style.settingsStyle.settings,
             ),
             SplashCircularIcon(
+              padding: halfPadding,
+              onTap: () {
+                controller.openSettingsMenu();
+                controller.showAndHideOverlay(false);
+              },
+              child: style.settingsStyle.settings,
+            ),
+            SplashCircularIcon(
               padding: halfPadding + Margin.right(padding / 2),
               onTap: () => controller.openOrCloseFullscreen(context),
               child:
