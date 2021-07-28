@@ -43,6 +43,9 @@ class _OverlayBottomState extends State<OverlayBottom> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        SizedBox(
+          height: (style.textStyle.fontSize ?? 14) + barStyle.bar.height,
+        ),
         GradientBackground(
           child: Row(children: [
             PlayAndPause(
