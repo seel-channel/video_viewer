@@ -1,5 +1,5 @@
-import 'package:helpers/helpers.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:helpers/helpers/widgets/align.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 
 import 'package:video_viewer/ui/settings_menu/settings_menu.dart';
@@ -25,20 +25,23 @@ class VideoCoreOverlay extends StatelessWidget {
       child: Stack(children: [
         if (header != null)
           CustomSwipeTransition(
-            direction: SwipeDirection.fromTop,
+            axisAlignment: 1.0,
             visible: overlayVisible,
             child: Align(
               alignment: Alignment.topLeft,
               child: GradientBackground(
                 child: header,
-                direction: Direction.top,
+                end: Alignment.topCenter,
+                begin: Alignment.bottomCenter,
               ),
             ),
           ),
-        CustomSwipeTransition(
-          direction: SwipeDirection.fromBottom,
-          visible: overlayVisible,
-          child: const OverlayBottom(),
+        BottomCenterAlign(
+          child: CustomSwipeTransition(
+            visible: overlayVisible,
+            axisAlignment: -1.0,
+            child: const OverlayBottom(),
+          ),
         ),
         AnimatedBuilder(
           animation: controller,
