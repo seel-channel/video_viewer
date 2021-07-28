@@ -157,7 +157,7 @@ class VideoViewerState extends State<VideoViewer> {
         ? MultiProvider(
             providers: [
               ChangeNotifierProvider.value(value: _controller),
-              ChangeNotifierProvider(
+              Provider(
                 create: (_) => VideoViewerMetadata(
                   style: _style,
                   language: widget.language,

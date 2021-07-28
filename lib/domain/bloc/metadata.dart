@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:video_viewer/domain/entities/language.dart';
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/domain/entities/volume_control.dart';
 
-class VideoViewerMetadata extends ChangeNotifier {
+class VideoViewerMetadata {
   VideoViewerMetadata({
     required this.defaultAspectRatio,
     required this.rewindAmount,

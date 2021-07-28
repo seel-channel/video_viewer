@@ -89,12 +89,12 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 class _ProgressBarGesture extends StatefulWidget {
   const _ProgressBarGesture({
     Key? key,
-    this.child,
-    this.width,
+    required this.child,
+    required this.width,
   }) : super(key: key);
 
-  final Widget? child;
-  final double? width;
+  final Widget child;
+  final double width;
 
   @override
   __ProgressBarGestureState createState() => __ProgressBarGestureState();
@@ -114,7 +114,7 @@ class __ProgressBarGestureState extends State<_ProgressBarGesture> {
   void _seekToRelativePosition(Offset local, [bool showText = false]) {
     final controller = _query.video(context);
     final Duration duration = controller.duration;
-    final double localPos = local.dx / widget.width!;
+    final double localPos = local.dx / widget.width;
     final Duration position = duration * localPos;
 
     if (position >= Duration.zero && position <= duration) {

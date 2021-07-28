@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:video_viewer/domain/entities/styles/forward_and_rewind.dart';
 import 'package:video_viewer/domain/entities/styles/chat.dart';
+import 'package:video_viewer/domain/entities/styles/forward_and_rewind.dart';
 import 'package:video_viewer/domain/entities/styles/play_and_pause.dart';
 import 'package:video_viewer/domain/entities/styles/progress_bar.dart';
 import 'package:video_viewer/domain/entities/styles/settings_menu.dart';
@@ -9,13 +9,13 @@ import 'package:video_viewer/domain/entities/styles/subtitle.dart';
 import 'package:video_viewer/domain/entities/styles/volume_bar.dart';
 
 export 'package:video_viewer/domain/entities/styles/bar.dart';
+export 'package:video_viewer/domain/entities/styles/chat.dart';
 export 'package:video_viewer/domain/entities/styles/forward_and_rewind.dart';
 export 'package:video_viewer/domain/entities/styles/play_and_pause.dart';
 export 'package:video_viewer/domain/entities/styles/progress_bar.dart';
 export 'package:video_viewer/domain/entities/styles/settings_menu.dart';
 export 'package:video_viewer/domain/entities/styles/subtitle.dart';
 export 'package:video_viewer/domain/entities/styles/volume_bar.dart';
-export 'package:video_viewer/domain/entities/styles/chat.dart';
 
 class VideoViewerStyle {
   /// It is the main class of VideoViewer styles, in this class you can almost
@@ -143,6 +143,7 @@ class VideoViewerStyle {
     TextStyle? textStyle,
     Widget Function(Duration)? skipAdBuilder,
     Alignment? skipAdAlignment,
+    VideoViewerChatStyle? chatStyle,
   }) {
     return VideoViewerStyle(
       settingsStyle: settingsStyle ?? this.settingsStyle,
@@ -160,6 +161,7 @@ class VideoViewerStyle {
       textStyle: textStyle ?? this.textStyle,
       skipAdBuilder: skipAdBuilder ?? this.skipAdBuilder,
       skipAdAlignment: skipAdAlignment ?? this.skipAdAlignment,
+      chatStyle: chatStyle ?? this.chatStyle,
     );
   }
 
@@ -181,7 +183,8 @@ class VideoViewerStyle {
         other.transitions == transitions &&
         other.textStyle == textStyle &&
         other.skipAdBuilder == skipAdBuilder &&
-        other.skipAdAlignment == skipAdAlignment;
+        other.skipAdAlignment == skipAdAlignment &&
+        other.chatStyle == chatStyle;
   }
 
   @override
@@ -199,6 +202,7 @@ class VideoViewerStyle {
         transitions.hashCode ^
         textStyle.hashCode ^
         skipAdBuilder.hashCode ^
-        skipAdAlignment.hashCode;
+        skipAdAlignment.hashCode ^
+        chatStyle.hashCode;
   }
 }
