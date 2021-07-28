@@ -30,12 +30,14 @@ class CustomSwipeTransition extends StatelessWidget {
     Key? key,
     required this.visible,
     required this.child,
-    required this.direction,
+    this.axisAlignment = -1.0,
+    this.axis = Axis.vertical,
   }) : super(key: key);
 
   final bool visible;
   final Widget child;
-  final SwipeDirection direction;
+  final double axisAlignment;
+  final Axis axis;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +45,9 @@ class CustomSwipeTransition extends StatelessWidget {
 
     return SwipeTransition(
       curve: Curves.ease,
+      axis: axis,
       duration: style.transitions,
-      direction: direction,
+      axisAlignment: axisAlignment,
       visible: visible,
       child: child,
     );

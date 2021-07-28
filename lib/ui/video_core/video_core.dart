@@ -388,10 +388,11 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           animation: _query.video(context, listen: true),
           builder: (_, __) {
             final controller = _query.video(context);
-            final style = _query.videoStyle(context);
+            final style = _query.videoStyle(context, listen: true);
             return CustomSwipeTransition(
               visible: controller.isShowingChat,
-              direction: SwipeDirection.fromRight,
+              axis: Axis.horizontal,
+              axisAlignment: 1.0,
               child: GradientBackground(
                 child: style.chatStyle.chat,
                 begin: Alignment.centerLeft,

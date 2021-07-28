@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:helpers/helpers.dart';
 import 'package:video_viewer/data/repositories/video.dart';
 import 'package:video_viewer/ui/widgets/transitions.dart';
 
@@ -16,18 +15,19 @@ class VideoCoreVolumeBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = VideoQuery().videoStyle(context).volumeBarStyle;
-    SwipeDirection direction;
+    final double axisAlignment;
 
     if (style.alignment == Alignment.topRight ||
         style.alignment == Alignment.centerRight ||
         style.alignment == Alignment.bottomRight)
-      direction = SwipeDirection.fromRight;
+      axisAlignment = 1.0;
     else
-      direction = SwipeDirection.fromLeft;
+      axisAlignment = -1.0;
 
     return CustomSwipeTransition(
       visible: visible,
-      direction: direction,
+      axisAlignment: axisAlignment,
+      axis: Axis.horizontal,
       child: _VolumeBar(progress: progress),
     );
   }
