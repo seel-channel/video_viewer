@@ -1,3 +1,7 @@
+## [1.2.5]
+
+- Chat support added
+
 ## [1.2.4]
 
 - Fixed some bugs

@@ -23,7 +23,7 @@
 
 - Amazing UI / UX.
 - Fancy animations.
-- Auto Cached Video
+- Streaming Chat
 - Custom Ads Support.
 - Fully customizable.
 - HLS (m3u8) format support.
