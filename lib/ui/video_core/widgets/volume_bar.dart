@@ -20,9 +20,9 @@ class VideoCoreVolumeBar extends StatelessWidget {
     if (style.alignment == Alignment.topRight ||
         style.alignment == Alignment.centerRight ||
         style.alignment == Alignment.bottomRight)
-      axisAlignment = 1.0;
-    else
       axisAlignment = -1.0;
+    else
+      axisAlignment = 1.0;
 
     return CustomSwipeTransition(
       visible: visible,
