@@ -38,6 +38,7 @@ class VideoViewer extends StatefulWidget {
     this.enableFullscreenScale = true,
     this.enableVerticalSwapingGesture = true,
     this.enableHorizontalSwapingGesture = true,
+    this.enableShowReplayIconAtVideoEnd = true,
     this.enableChat = false,
   }) : super(key: key);
 
@@ -113,7 +114,11 @@ class VideoViewer extends StatefulWidget {
   ///On HorizontalSwapingGesture the video is able to control the forward and rewind of itself
   final bool enableHorizontalSwapingGesture;
 
+  //If true, it will add the chat icon to bottom bar. The icon on tap it will show the chat widget.
   final bool enableChat;
+
+  //When the video end, it show a replay icon. If its false, it will never show.
+  final bool enableShowReplayIconAtVideoEnd;
 
   @override
   VideoViewerState createState() => VideoViewerState();
@@ -152,8 +157,8 @@ class VideoViewerState extends State<VideoViewer> {
         ? MultiProvider(
             providers: [
               ChangeNotifierProvider.value(value: _controller),
-              Provider.value(
-                value: VideoViewerMetadata(
+              ChangeNotifierProvider(
+                create: (_) => VideoViewerMetadata(
                   style: _style,
                   language: widget.language,
                   rewindAmount: widget.rewindAmount,
@@ -167,11 +172,12 @@ class VideoViewerState extends State<VideoViewer> {
                   enableHorizontalSwapingGesture:
                       widget.enableHorizontalSwapingGesture,
                   enableChat: widget.enableChat,
+                  enableShowReplayIconAtVideoEnd:
+                      widget.enableShowReplayIconAtVideoEnd,
                 ),
               ),
             ],
-            builder: (_, child) => child!,
-            child: const VideoViewerCore(),
+            builder: (_, child) => const VideoViewerCore(),
           )
         : AspectRatio(
             aspectRatio: widget.defaultAspectRatio,
