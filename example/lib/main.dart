@@ -451,14 +451,18 @@ class SerieChat extends StatefulWidget {
 }
 
 class _SerieChatState extends State<SerieChat> {
+  final ScrollController _controller = ScrollController();
   final List<String> _texts = [];
   late Timer timer;
 
   @override
   void initState() {
     timer = Misc.periodic(500, () {
-      _texts.add("HELLO");
-      if (mounted) setState(() {});
+      if (mounted) {
+        _texts.add("HELLO");
+        _controller.jumpTo(_controller.position.maxScrollExtent);
+        setState(() {});
+      }
     });
     super.initState();
   }
@@ -475,6 +479,7 @@ class _SerieChatState extends State<SerieChat> {
       width: 160,
       color: Colors.black.withOpacity(0.8),
       child: ListView.builder(
+        controller: _controller,
         itemCount: _texts.length,
         itemBuilder: (_, int index) {
           return Text(
