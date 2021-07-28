@@ -27,6 +27,7 @@ class _OverlayBottomState extends State<OverlayBottom> {
   @override
   Widget build(BuildContext context) {
     final controller = _query.video(context, listen: true);
+    final metadata = _query.videoMetadata(context);
     final style = _query.videoStyle(context);
     final barStyle = style.progressBarStyle;
 
@@ -40,6 +41,7 @@ class _OverlayBottomState extends State<OverlayBottom> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         GradientBackground(
           child: Row(children: [
@@ -73,14 +75,12 @@ class _OverlayBottomState extends State<OverlayBottom> {
               },
               child: style.settingsStyle.settings,
             ),
-            SplashCircularIcon(
-              padding: halfPadding,
-              onTap: () {
-                controller.openSettingsMenu();
-                controller.showAndHideOverlay(false);
-              },
-              child: style.settingsStyle.settings,
-            ),
+            if (metadata.enableChat)
+              SplashCircularIcon(
+                padding: halfPadding,
+                onTap: () => controller.isShowingChat = true,
+                child: style.chatStyle.chatIcon,
+              ),
             SplashCircularIcon(
               padding: halfPadding + Margin.right(padding / 2),
               onTap: () => controller.openOrCloseFullscreen(context),
