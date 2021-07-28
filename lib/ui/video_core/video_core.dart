@@ -57,8 +57,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //------------------//
   final ValueNotifier<double> _currentVolume = ValueNotifier<double>(1.0);
   double _maxVolume = 1.0;
-  Offset _verticalDragStartOffset = Offset.zero;
-  double _onDragStartVolume = 1;
   bool _showVolumeStatus = false;
   Timer? _closeVolumeStatus;
 
@@ -199,16 +197,14 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     }
   }
 
-  void _volumeDragUpdate(Offset globalPosition) {
+  void _volumeDragUpdate(Offset delta) {
     final controller = _query.video(context);
     if (!controller.isShowingSettingsMenu) {
-      double diff = _verticalDragStartOffset.dy - globalPosition.dy;
-      double volume = (diff / 250) + _onDragStartVolume;
-      _setVolume(volume);
+      _setVolume(_currentVolume.value - (delta.dy / 100));
     }
   }
 
-  void _volumeDragStart(Offset globalPosition) {
+  void _volumeDragStart() {
     final controller = _query.video(context);
     if (!controller.isShowingSettingsMenu) {
       Misc.delayed(50, () {
@@ -216,9 +212,6 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           setState(() {
             _closeVolumeStatus?.cancel();
             _showVolumeStatus = true;
-            _onDragStartVolume = _currentVolume.value;
-            _currentVolume.value = _onDragStartVolume;
-            _verticalDragStartOffset = globalPosition;
           });
         }
       });
@@ -288,14 +281,14 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
                 ? (MoveEvent details) {
                     if (_canListenerMove()) {
                       final Offset position = details.localPos;
+                      final Offset delta = details.localDelta;
                       if (_dragInitialDelta == Offset.zero) {
-                        final Offset delta = details.localDelta;
                         if (delta.dx.abs() > delta.dy.abs() && horizontal) {
                           _dragDirection = Axis.horizontal;
                           _forwardDragStart(position);
                         } else if (vertical) {
                           _dragDirection = Axis.vertical;
-                          _volumeDragStart(position);
+                          _volumeDragStart();
                         }
                         _dragInitialDelta = delta;
                       }
@@ -304,7 +297,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
                           if (horizontal) _forwardDragUpdate(position);
                           break;
                         case Axis.vertical:
-                          if (vertical) _volumeDragUpdate(position);
+                          if (vertical) _volumeDragUpdate(delta);
                           break;
                       }
                     }
@@ -353,24 +346,21 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         rewind: GestureDetector(onDoubleTap: _rewind),
         forward: GestureDetector(onDoubleTap: _forward),
       ),
-      AnimatedBuilder(
-        animation: _query.video(context, listen: true),
-        builder: (_, __) {
-          final controller = _query.video(context);
-          final metadata = _query.videoMetadata(context);
-          return Stack(children: [
-            const VideoCoreBuffering(),
-            if (metadata.enableShowReplayIconAtVideoEnd)
-              CustomOpacityTransition(
-                visible: controller.position >= controller.duration &&
-                    !controller.isShowingOverlay,
-                child: const Center(
-                  child: PlayAndPause(type: PlayAndPauseType.center),
-                ),
+      Builder(builder: (_) {
+        final controller = _query.video(context, listen: true);
+        final metadata = _query.videoMetadata(context);
+        return Stack(children: [
+          const VideoCoreBuffering(),
+          if (metadata.enableShowReplayIconAtVideoEnd)
+            CustomOpacityTransition(
+              visible: controller.position >= controller.duration &&
+                  !controller.isShowingOverlay,
+              child: const Center(
+                child: PlayAndPause(type: PlayAndPauseType.center),
               ),
-          ]);
-        },
-      ),
+            ),
+        ]);
+      }),
       const VideoCoreOverlay(),
       CustomOpacityTransition(
         visible: _showForwardStatus,
@@ -384,23 +374,20 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       ),
       Align(
         alignment: Alignment.centerRight,
-        child: AnimatedBuilder(
-          animation: _query.video(context, listen: true),
-          builder: (_, __) {
-            final controller = _query.video(context);
-            final style = _query.videoStyle(context, listen: true);
-            return CustomSwipeTransition(
-              visible: controller.isShowingChat,
-              axis: Axis.horizontal,
-              axisAlignment: 1.0,
-              child: GradientBackground(
-                child: style.chatStyle.chat,
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            );
-          },
-        ),
+        child: Builder(builder: (_) {
+          final controller = _query.video(context, listen: true);
+          final style = _query.videoStyle(context);
+          return CustomSwipeTransition(
+            visible: controller.isShowingChat,
+            axis: Axis.horizontal,
+            axisAlignment: 1.0,
+            child: GradientBackground(
+              child: style.chatStyle.chat,
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+          );
+        }),
       ),
       ValueListenableBuilder(
         valueListenable: _currentVolume,
