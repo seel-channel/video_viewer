@@ -503,9 +503,13 @@ class VideoViewerController extends ChangeNotifier {
   //OVERLAY//
   //-------//
   void showAndHideOverlay([bool? show]) {
-    _isShowingOverlay = show ?? !_isShowingOverlay;
-    if (_isShowingOverlay) cancelCloseOverlay();
-    notifyListeners();
+    if (!isShowingChat) {
+      _isShowingOverlay = show ?? !_isShowingOverlay;
+      if (_isShowingOverlay) cancelCloseOverlay();
+      notifyListeners();
+    } else {
+      isShowingChat = false;
+    }
   }
 
   //-------------//
@@ -586,6 +590,6 @@ class VideoViewerController extends ChangeNotifier {
   Future<void> _closeFullScreen(BuildContext context) async {
     await Misc.setSystemOverlay(SystemOverlay.values);
     await Misc.setSystemOrientation(SystemOrientation.values);
-    context.goBack();
+    context.navigator.pop();
   }
 }
