@@ -6,6 +6,7 @@ import 'package:video_viewer/data/repositories/video.dart';
 import 'package:gesture_x_detector/gesture_x_detector.dart';
 import 'package:video_viewer/domain/bloc/controller.dart';
 import 'package:video_viewer/domain/entities/volume_control.dart';
+import 'package:video_viewer/ui/overlay/widgets/background.dart';
 import 'package:video_viewer/ui/video_core/widgets/ad.dart';
 
 import 'package:video_viewer/ui/video_core/widgets/forward_and_rewind/forward_and_rewind.dart';
@@ -102,9 +103,11 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //OVERLAY (TAP)//
   //-------------//
 
-  bool _canListenerMove([VideoViewerController? video]) {
-    video ??= _query.video(context);
-    return !(video.isDraggingProgressBar || video.activeAd != null);
+  bool _canListenerMove([VideoViewerController? controller]) {
+    controller ??= _query.video(context);
+    return !(controller.isDraggingProgressBar ||
+        controller.activeAd != null ||
+        controller.isShowingChat);
   }
 
   //-------------------------------//
@@ -354,15 +357,17 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         animation: _query.video(context, listen: true),
         builder: (_, __) {
           final controller = _query.video(context);
+          final metadata = _query.videoMetadata(context);
           return Stack(children: [
             const VideoCoreBuffering(),
-            CustomOpacityTransition(
-              visible: controller.position >= controller.duration &&
-                  !controller.isShowingOverlay,
-              child: const Center(
-                child: PlayAndPause(type: PlayAndPauseType.center),
+            if (metadata.enableShowReplayIconAtVideoEnd)
+              CustomOpacityTransition(
+                visible: controller.position >= controller.duration &&
+                    !controller.isShowingOverlay,
+                child: const Center(
+                  child: PlayAndPause(type: PlayAndPauseType.center),
+                ),
               ),
-            ),
           ]);
         },
       ),
@@ -375,6 +380,25 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
             seconds: seconds,
             position: _initialForwardPosition,
           ),
+        ),
+      ),
+      Align(
+        alignment: Alignment.centerRight,
+        child: AnimatedBuilder(
+          animation: _query.video(context, listen: true),
+          builder: (_, __) {
+            final controller = _query.video(context);
+            final style = _query.videoStyle(context);
+            return CustomSwipeTransition(
+              visible: controller.isShowingChat,
+              direction: SwipeDirection.fromRight,
+              child: GradientBackground(
+                child: style.chatStyle.chat,
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+            );
+          },
         ),
       ),
       ValueListenableBuilder(
