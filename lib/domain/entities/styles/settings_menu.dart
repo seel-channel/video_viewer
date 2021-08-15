@@ -11,7 +11,7 @@ class SettingsMenuStyle {
     Widget? selected,
     Widget? chevron,
     this.paddingBetweenMainMenuItems = 24,
-    this.paddingSecondaryMenuItems = const EdgeInsets.symmetric(vertical: 8),
+    this.paddingSecondaryMenuItems = const EdgeInsets.symmetric(vertical: 4),
     this.items,
   })  : this.settings = settings ??
             Icon(

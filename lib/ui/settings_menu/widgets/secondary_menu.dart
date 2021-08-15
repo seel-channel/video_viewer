@@ -22,27 +22,29 @@ class SecondaryMenu extends StatelessWidget {
       child: Container(
         width: width,
         color: Colors.transparent,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomInkWell(
-              onTap: query.video(context).closeAllSecondarySettingsMenus,
-              child: Row(children: [
-                style.chevron,
-                Expanded(
-                  child: Text(
-                    metadata.language.settings,
-                    style: metadata.style.textStyle,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomInkWell(
+                onTap: query.video(context).closeAllSecondarySettingsMenus,
+                child: Row(children: [
+                  style.chevron,
+                  Expanded(
+                    child: Text(
+                      metadata.language.settings,
+                      style: metadata.style.textStyle,
+                    ),
                   ),
-                ),
-              ]),
-            ),
-            for (int i = 0; i < children.length; i++) ...[
-              children[i],
-            ]
-          ],
+                ]),
+              ),
+              for (int i = 0; i < children.length; i++) ...[
+                children[i],
+              ]
+            ],
+          ),
         ),
       ),
     );

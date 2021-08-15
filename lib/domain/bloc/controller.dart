@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:video_player/video_player.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ import 'package:video_viewer/domain/entities/video_source.dart';
 
 const int _kMillisecondsToHideTheOverlay = 2800;
 
-class VideoViewerController extends ChangeNotifier {
+class VideoViewerController extends ChangeNotifier with WidgetsBindingObserver {
   /// Controls a platform video viewer, and provides updates when the state is
   /// changing.
   ///
@@ -52,7 +53,9 @@ class VideoViewerController extends ChangeNotifier {
       _isShowingSettingsMenu = false,
       _isShowingMainSettingsMenu = false,
       _isDraggingProgressBar = false,
-      _isShowingChat = false;
+      _isShowingChat = false,
+      _videoWasPlaying = false,
+      _isChangingSource = false;
 
   Duration _maxBuffering = Duration.zero;
 
@@ -122,6 +125,8 @@ class VideoViewerController extends ChangeNotifier {
 
   bool get isShowingChat => _isShowingChat;
 
+  bool get isChangingSource => _isChangingSource;
+
   set isShowingChat(bool isShowingChat) {
     _isShowingChat = isShowingChat;
     notifyListeners();
@@ -174,6 +179,7 @@ class VideoViewerController extends ChangeNotifier {
     Map<String, VideoSource> sources, {
     bool autoPlay = true,
   }) async {
+    WidgetsBinding.instance?.addObserver(this);
     final MapEntry<String, VideoSource> entry = sources.entries.first;
     _mounted = true;
     _source = sources;
@@ -182,12 +188,13 @@ class VideoViewerController extends ChangeNotifier {
       source: entry.value,
       autoPlay: autoPlay,
     );
-    printAmber("VIDEO VIEWER INITIALIZED");
+    log("VIDEO VIEWER INITIALIZED");
     Wakelock.enable();
   }
 
   @override
   Future<void> dispose() async {
+    WidgetsBinding.instance?.removeObserver(this);
     _mounted = false;
     _closeOverlayButtons?.cancel();
     _deleteAdTimer();
@@ -195,8 +202,20 @@ class VideoViewerController extends ChangeNotifier {
     _video?.pause();
     _video?.dispose();
     Wakelock.disable();
-    printAmber("VIDEO VIEWER DISPOSED");
+    log("VIDEO VIEWER DISPOSED");
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      log("APP PAUSED");
+      _videoWasPlaying = isPlaying;
+      if (_videoWasPlaying) pause();
+    } else if (state == AppLifecycleState.resumed) {
+      log("APP RESUMED");
+      if (_videoWasPlaying) play();
+    }
   }
 
   ///The [source.video] must be initialized previously
@@ -240,12 +259,19 @@ class VideoViewerController extends ChangeNotifier {
     }
 
     //Initialize the video
+    _isChangingSource = true;
+    notifyListeners();
+    final oldVideo = _video;
+    oldVideo?.removeListener(_videoListener);
+    await oldVideo?.pause();
     await source.video.initialize();
-    _video?.removeListener(_videoListener);
+    await oldVideo?.dispose();
     _video = source.video;
-    _video?.addListener(_videoListener);
+    source.video.addListener(_videoListener);
     _activeSourceName = name;
     _duration = endRange - beginRange;
+    _isChangingSource = false;
+    notifyListeners();
 
     //Update it inheritValues
     await _video?.setPlaybackSpeed(speed);
@@ -287,12 +313,16 @@ class VideoViewerController extends ChangeNotifier {
   }
 
   Future<void> play() async {
-    if (looping) _seekToBegin();
-    if (_activeAd == null) await _video?.play();
+    if (!_isChangingSource) {
+      if (looping) _seekToBegin();
+      if (_activeAd == null) await _video?.play();
+    }
   }
 
   Future<void> pause() async {
-    await _video?.pause();
+    if (!_isChangingSource) {
+      await _video?.pause();
+    }
   }
 
   Future<void> _seekToBegin() async {
@@ -300,14 +330,16 @@ class VideoViewerController extends ChangeNotifier {
   }
 
   Future<void> seekTo(Duration position) async {
-    final Duration end = endRange;
-    final Duration begin = beginRange;
-    if (position < begin) {
-      position = begin;
-    } else if (position > end) {
-      position = end;
+    if (!_isChangingSource) {
+      final Duration end = endRange;
+      final Duration begin = beginRange;
+      if (position < begin) {
+        position = begin;
+      } else if (position > end) {
+        position = end;
+      }
+      await _video?.seekTo(position);
     }
-    await _video?.seekTo(position);
   }
 
   void _videoListener() {

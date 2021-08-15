@@ -16,5 +16,6 @@ class SubtitleStyle {
               color: Colors.white,
               fontSize: 16,
               backgroundColor: Colors.black,
+              height: 1.2,
             );
 }

@@ -12,11 +12,16 @@ class VideoCorePlayer extends StatefulWidget {
 class _VideoCorePlayerState extends State<VideoCorePlayer> {
   @override
   Widget build(BuildContext context) {
-    final video = VideoQuery().video(context, listen: true).video;
+    final VideoQuery query = VideoQuery();
+    final style = query.videoStyle(context);
+    final controller = VideoQuery().video(context, listen: true);
+
     return Center(
       child: AspectRatio(
-        aspectRatio: video!.value.aspectRatio,
-        child: VideoPlayer(video),
+        aspectRatio: controller.video!.value.aspectRatio,
+        child: !controller.isChangingSource
+            ? VideoPlayer(controller.video!)
+            : Container(color: Colors.black, child: style.loading),
       ),
     );
   }
