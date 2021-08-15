@@ -10,7 +10,8 @@ class SettingsMenuStyle {
     Widget? caption,
     Widget? selected,
     Widget? chevron,
-    this.paddingBetween = 24,
+    this.paddingBetweenMainMenuItems = 24,
+    this.paddingSecondaryMenuItems = const EdgeInsets.symmetric(vertical: 8),
     this.items,
   })  : this.settings = settings ??
             Icon(
@@ -72,8 +73,10 @@ class SettingsMenuStyle {
   final Widget settings;
 
   /// It is the padding between all the elements of the SettingsMenu
-  final double paddingBetween;
+  final double paddingBetweenMainMenuItems;
 
   ///ADD CUSTOM SECTIONS TO SETTINGS MENU
   final List<SettingsMenuItem>? items;
+
+  final EdgeInsets paddingSecondaryMenuItems;
 }
