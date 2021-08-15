@@ -5,11 +5,11 @@ import 'package:video_viewer/data/repositories/video.dart';
 class SecondaryMenu extends StatelessWidget {
   const SecondaryMenu({
     Key? key,
-    this.children,
+    required this.children,
     this.width = 150,
   }) : super(key: key);
 
-  final List<Widget>? children;
+  final List<Widget> children;
   final double width;
 
   @override
@@ -39,7 +39,9 @@ class SecondaryMenu extends StatelessWidget {
                 ),
               ]),
             ),
-            ...children!,
+            for (int i = 0; i < children.length; i++) ...[
+              children[i],
+            ]
           ],
         ),
       ),

@@ -53,7 +53,8 @@ class MainMenu extends StatelessWidget {
                       onTap: () => query
                           .video(context)
                           .openSecondarySettingsMenu(i + kDefaultMenus),
-                      padding: Margin.all(style.paddingBetween / 2),
+                      padding:
+                          Margin.all(style.paddingBetweenMainMenuItems / 2),
                       child: items[i].mainMenu,
                     )
                   : _MainMenuItem(
@@ -91,7 +92,7 @@ class _MainMenuItem extends StatelessWidget {
     final textStyle = metadata.style.textStyle;
 
     return SplashCircularIcon(
-      padding: Margin.all(style.paddingBetween),
+      padding: Margin.all(style.paddingBetweenMainMenuItems),
       onTap: () => query.video(context).openSecondarySettingsMenu(index),
       child: Column(
         mainAxisSize: MainAxisSize.min,
