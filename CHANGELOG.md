@@ -1,3 +1,8 @@
+## [1.2.6]
+
+- Fatal controller error fixed
+- Auto full screen video
+
 ## [1.2.5]
 
 - Chat support added
