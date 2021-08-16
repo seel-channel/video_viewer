@@ -177,7 +177,10 @@ class VideoViewerState extends State<VideoViewer> {
                 ),
               ),
             ],
-            builder: (_, child) => const VideoViewerCore(),
+            builder: (_, child) {
+              _controller.context = _;
+              return const VideoViewerCore();
+            },
           )
         : AspectRatio(
             aspectRatio: widget.defaultAspectRatio,

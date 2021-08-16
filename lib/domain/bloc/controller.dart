@@ -57,6 +57,7 @@ class VideoViewerController extends ChangeNotifier with WidgetsBindingObserver {
       _videoWasPlaying = false,
       _isChangingSource = false;
 
+  BuildContext? context;
   Duration _maxBuffering = Duration.zero;
 
   /// Receive a list of all the resources to be played.
@@ -259,13 +260,17 @@ class VideoViewerController extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     //Initialize the video
-    _isChangingSource = true;
-    notifyListeners();
     final oldVideo = _video;
-    oldVideo?.removeListener(_videoListener);
-    await oldVideo?.pause();
+    if (oldVideo != null) {
+      _isChangingSource = true;
+      notifyListeners();
+    }
     await source.video.initialize();
-    await oldVideo?.dispose();
+    if (oldVideo != null) {
+      oldVideo.removeListener(_videoListener);
+      await oldVideo.pause();
+      await oldVideo.dispose();
+    }
     _video = source.video;
     source.video.addListener(_videoListener);
     _activeSourceName = name;
@@ -579,15 +584,13 @@ class VideoViewerController extends ChangeNotifier with WidgetsBindingObserver {
   //----------//
   //FULLSCREEN//
   //----------//
-  Future<void> openOrCloseFullscreen(BuildContext context) async {
+  Future<void> openOrCloseFullscreen() async {
     if (!_isGoingToOpenOrCloseFullscreen) {
       _isGoingToOpenOrCloseFullscreen = true;
       if (!_isFullScreen) {
-        _isFullScreen = true;
-        await _openFullScreen(context);
+        await openFullScreen();
       } else {
-        _isFullScreen = false;
-        await _closeFullScreen(context);
+        await closeFullScreen();
       }
       _isGoingToOpenOrCloseFullscreen = false;
     }
@@ -596,32 +599,38 @@ class VideoViewerController extends ChangeNotifier with WidgetsBindingObserver {
 
   ///When you want to open FullScreen Page, you need pass the FullScreen's context,
   ///because this function do **Navigator.push(context, TransparentRoute(...))**
-  Future<void> _openFullScreen(BuildContext context) async {
-    final VideoQuery query = VideoQuery();
-    final metadata = query.videoMetadata(context);
-    final Duration transition = metadata.style.transitions;
-    Navigator.of(context).push(PageRouteBuilder(
-      opaque: false,
-      fullscreenDialog: true,
-      transitionDuration: transition,
-      reverseTransitionDuration: transition,
-      pageBuilder: (_, __, ___) => MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(value: query.video(context)),
-          Provider.value(value: metadata),
-        ],
-        child: FullScreenPage(
-          fixedLandscape: metadata.onFullscreenFixLandscape,
+  Future<void> openFullScreen() async {
+    if (context != null && !_isFullScreen) {
+      _isFullScreen = true;
+      final VideoQuery query = VideoQuery();
+      final metadata = query.videoMetadata(context!);
+      final Duration transition = metadata.style.transitions;
+      context?.navigator.push(PageRouteBuilder(
+        opaque: false,
+        fullscreenDialog: true,
+        transitionDuration: transition,
+        reverseTransitionDuration: transition,
+        pageBuilder: (_, __, ___) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: query.video(context!)),
+            Provider.value(value: metadata),
+          ],
+          child: FullScreenPage(
+            fixedLandscape: metadata.onFullscreenFixLandscape,
+          ),
         ),
-      ),
-    ));
+      ));
+    }
   }
 
   ///When you want to close FullScreen Page, you need pass the FullScreen's context,
   ///because this function do **Navigator.pop(context);**
-  Future<void> _closeFullScreen(BuildContext context) async {
-    await Misc.setSystemOverlay(SystemOverlay.values);
-    await Misc.setSystemOrientation(SystemOrientation.values);
-    context.navigator.pop();
+  Future<void> closeFullScreen() async {
+    if (_isFullScreen) {
+      _isFullScreen = false;
+      await Misc.setSystemOverlay(SystemOverlay.values);
+      await Misc.setSystemOrientation(SystemOrientation.values);
+      context?.navigator.pop();
+    }
   }
 }

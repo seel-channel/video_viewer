@@ -52,7 +52,7 @@ class _FullScreenPageState extends State<FullScreenPage> {
       body: WillPopScope(
         onWillPop: () async {
           _systemResetTimer.cancel();
-          await _query.video(context).openOrCloseFullscreen(context);
+          await _query.video(context).openOrCloseFullscreen();
           return false;
         },
         child: Center(
