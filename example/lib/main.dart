@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:video_viewer/video_viewer.dart';
 import 'package:helpers/helpers.dart';
+import 'package:native_device_orientation/native_device_orientation.dart';
+
+import 'package:video_viewer/video_viewer.dart';
 
 /// SUMMARY
 /// 1. Models
@@ -302,42 +305,57 @@ class MoviePage extends StatelessWidget {
 //--------------------//
 //VIDEO VIEWER WIDGETS//
 //--------------------//
-class MovieVideoViewer extends StatelessWidget {
+class MovieVideoViewer extends StatefulWidget {
   const MovieVideoViewer(this.movie, {Key? key}) : super(key: key);
 
   final Movie movie;
 
   @override
+  _MovieVideoViewerState createState() => _MovieVideoViewerState();
+}
+
+class _MovieVideoViewerState extends State<MovieVideoViewer> {
+  final VideoViewerController _controller = VideoViewerController();
+
+  @override
   Widget build(BuildContext context) {
-    return VideoViewer(source: {
-      movie.title: VideoSource(
-        video: VideoPlayerController.network(
-          "https://felipemurguia.com/assets/videos/mortal_machines_trailer.mp4",
-        ),
-        ads: [
-          VideoViewerAd(
-            fractionToStart: 0,
-            child: Container(
-              color: Colors.black,
-              child: Center(child: Headline4("AD ZERO")),
+    return VideoViewerOrientation(
+      controller: _controller,
+      child: VideoViewer(
+        controller: _controller,
+        onFullscreenFixLandscape: false,
+        source: {
+          widget.movie.title: VideoSource(
+            video: VideoPlayerController.network(
+              "https://felipemurguia.com/assets/videos/mortal_machines_trailer.mp4",
             ),
-            durationToSkip: Duration.zero,
-          ),
-          VideoViewerAd(
-            fractionToStart: 0.5,
-            child: Container(
-              color: Colors.black,
-              child: Center(child: Headline4("AD HALF")),
+            ads: [
+              VideoViewerAd(
+                fractionToStart: 0,
+                child: Container(
+                  color: Colors.black,
+                  child: Center(child: Headline4("AD ZERO")),
+                ),
+                durationToSkip: Duration.zero,
+              ),
+              VideoViewerAd(
+                fractionToStart: 0.5,
+                child: Container(
+                  color: Colors.black,
+                  child: Center(child: Headline4("AD HALF")),
+                ),
+                durationToSkip: Duration(seconds: 4),
+              ),
+            ],
+            range: Tween<Duration>(
+              begin: const Duration(seconds: 5),
+              end: const Duration(seconds: 25),
             ),
-            durationToSkip: Duration(seconds: 4),
           ),
-        ],
-        range: Tween<Duration>(
-          begin: const Duration(seconds: 5),
-          end: const Duration(seconds: 25),
-        ),
+        },
+        style: CustomVideoViewerStyle(movie: widget.movie, context: context),
       ),
-    }, style: CustomVideoViewerStyle(movie: movie, context: context));
+    );
   }
 }
 
@@ -396,51 +414,108 @@ class _SerieVideoViewerState extends State<SerieVideoViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return VideoViewer(
+    return VideoViewerOrientation(
       controller: controller,
-      enableChat: true,
-      source: VideoSource.fromNetworkVideoSources(initial.value.source),
-      style: CustomVideoViewerStyle(movie: widget.serie, context: context)
-          .copyWith(
-        chatStyle: const VideoViewerChatStyle(chat: SerieChat()),
-        settingsStyle: SettingsMenuStyle(
-          paddingBetween: 10,
-          items: [
-            SettingsMenuItem(
-              themed: SettingsMenuItemThemed(
-                title: "Episodes",
-                subtitle: episode,
-                icon: Icon(
-                  Icons.view_module_outlined,
-                  color: Colors.white,
+      child: VideoViewer(
+        controller: controller,
+        enableChat: true,
+        onFullscreenFixLandscape: false,
+        source: VideoSource.fromNetworkVideoSources(initial.value.source),
+        style: CustomVideoViewerStyle(movie: widget.serie, context: context)
+            .copyWith(
+          chatStyle: const VideoViewerChatStyle(chat: SerieChat()),
+          settingsStyle: SettingsMenuStyle(
+            paddingBetweenMainMenuItems: 10,
+            items: [
+              SettingsMenuItem(
+                themed: SettingsMenuItemThemed(
+                  title: "Episodes",
+                  subtitle: episode,
+                  icon: Icon(
+                    Icons.view_module_outlined,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              secondaryMenuWidth: 300,
-              secondaryMenu: Padding(
-                padding: const Margin.top(5),
-                child: Center(
-                  child: Container(
-                    child: Wrap(
-                      spacing: kPadding,
-                      runSpacing: kPadding,
-                      children: [
-                        for (var entry in widget.serie.source.entries)
-                          SerieEpisodeThumbnail(
-                            title: entry.key,
-                            url: entry.value.thumbnail,
-                            onTap: () => onEpisodeThumbnailTap(entry),
-                          )
-                      ],
+                secondaryMenuWidth: 300,
+                secondaryMenu: Padding(
+                  padding: const Margin.top(5),
+                  child: Center(
+                    child: Container(
+                      child: Wrap(
+                        spacing: kPadding,
+                        runSpacing: kPadding,
+                        children: [
+                          for (var entry in widget.serie.source.entries)
+                            SerieEpisodeThumbnail(
+                              title: entry.key,
+                              url: entry.value.thumbnail,
+                              onTap: () => onEpisodeThumbnailTap(entry),
+                            )
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+class VideoViewerOrientation extends StatefulWidget {
+  const VideoViewerOrientation({
+    Key? key,
+    required this.child,
+    required this.controller,
+  }) : super(key: key);
+
+  final Widget child;
+  final VideoViewerController controller;
+
+  @override
+  _VideoViewerOrientationState createState() => _VideoViewerOrientationState();
+}
+
+class _VideoViewerOrientationState extends State<VideoViewerOrientation> {
+  late StreamSubscription<NativeDeviceOrientation> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    _subscription = NativeDeviceOrientationCommunicator()
+        .onOrientationChanged()
+        .listen(_onOrientationChanged);
+    super.initState();
+  }
+
+  void _onOrientationChanged(NativeDeviceOrientation orientation) {
+    final bool isFullScreen = widget.controller.isFullScreen;
+    final bool isLandscape =
+        orientation == NativeDeviceOrientation.landscapeLeft ||
+            orientation == NativeDeviceOrientation.landscapeRight;
+    if (!isFullScreen && isLandscape) {
+      printGreen("OPEN FULLSCREEN");
+      widget.controller.openFullScreen();
+    } else if (isFullScreen && !isLandscape) {
+      printRed("CLOSING FULLSCREEN");
+      widget.controller.closeFullScreen();
+      Misc.delayed(300, () {
+        Misc.setSystemOverlay(SystemOverlay.values);
+        Misc.setSystemOrientation(SystemOrientation.values);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class SerieChat extends StatefulWidget {
@@ -451,9 +526,16 @@ class SerieChat extends StatefulWidget {
 }
 
 class _SerieChatState extends State<SerieChat> {
+  late Timer timer;
+
   final ScrollController _controller = ScrollController();
   final List<String> _texts = [];
-  late Timer timer;
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -465,12 +547,6 @@ class _SerieChatState extends State<SerieChat> {
       }
     });
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    timer.cancel();
-    super.dispose();
   }
 
   @override
@@ -589,8 +665,9 @@ class MovieCardSlider extends StatefulWidget {
 }
 
 class _MovieCardSliderState extends State<MovieCardSlider> {
-  late PageController _pageController = PageController();
   Size lastSize = Size.zero;
+
+  late PageController _pageController = PageController();
 
   @override
   void dispose() {
