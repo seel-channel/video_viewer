@@ -1,3 +1,7 @@
+## [1.2.7]
+
+- Dependencies updated
+
 ## [1.2.6]
 
 - Fatal controller error fixed
@@ -18,8 +22,9 @@
 ## [1.2.3]
 
 Added
-- Ads  
-- Wakelock 
+
+- Ads
+- Wakelock
 - Auto Cached video
 - New project example
 - Control device volume
@@ -44,16 +49,14 @@ Added
 - SerieExample improved (It longer need an InheritedWidget to works)
 - m3u8 (HLS) multiplataform support added (It longer need path_provider and dart:io)
 
-
 # [1.1.0]
 
 - ProgressBarTextPosition follow the finger.
 - Changed example's WEBVTT Files URL
 - SettingsMenu bugs fixed.
 - Improved:
-    - Performance
-    - Fullscreen UX
-
+  - Performance
+  - Fullscreen UX
 
 ## [1.0.9+1]
 
