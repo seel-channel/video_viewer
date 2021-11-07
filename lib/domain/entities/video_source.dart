@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -150,14 +151,20 @@ class VideoSource {
     late String content = "";
     final http.Response response = await http.get(Uri.parse(m3u8));
     if (response.statusCode == 200) content = utf8.decode(response.bodyBytes);
-    final String directoryPath = (await getTemporaryDirectory()).path;
+    final String? directoryPath;
+    if (kIsWeb) {
+      directoryPath = null;
+    } else {
+      directoryPath = (await getTemporaryDirectory()).path;
+    }
 
     //Find matches
     List<RegExpMatch> playlistMatches =
         regExpPlaylist.allMatches(content).toList();
     List<RegExpMatch> audioMatches = regExpAudio.allMatches(content).toList();
 
-    Map<String, File> sources = {};
+    Map<String, dynamic> sources = {};
+    Map<String, String> sourceUrls = {};
     final List<String> audioUrls = [];
 
     for (final RegExpMatch playlistMatch in playlistMatches) {
@@ -192,11 +199,15 @@ class VideoSource {
       } else {
         audioMetadata = "";
       }
-      final File file = File('$directoryPath/hls$quality.m3u8');
-      file.writeAsStringSync(
-        """#EXTM3U\n#EXT-X-INDEPENDENT-SEGMENTS\n$audioMetadata#EXT-X-STREAM-INF:CLOSED-CAPTIONS=NONE,BANDWIDTH=1469712,RESOLUTION=$quality,FRAME-RATE=30.000\n$playlistUrl""",
-      );
-      sources[quality] = file;
+      if (directoryPath != null) {
+        final File file = File('$directoryPath/hls$quality.m3u8');
+        file.writeAsStringSync(
+          """#EXTM3U\n#EXT-X-INDEPENDENT-SEGMENTS\n$audioMetadata#EXT-X-STREAM-INF:CLOSED-CAPTIONS=NONE,BANDWIDTH=1469712,RESOLUTION=$quality,FRAME-RATE=30.000\n$playlistUrl""",
+        );
+        sources[quality] = file;
+      } else {
+        sourceUrls[quality] = playlistUrl;
+      }
     }
 
     Map<String, VideoSource> videoSource = {};
@@ -215,7 +226,9 @@ class VideoSource {
         in descending ? sources.entries.toList().reversed : sources.entries) {
       final String key = formatter?.call(entry.key) ?? entry.key;
       videoSource[key] = VideoSource(
-        video: VideoPlayerController.file(sources[entry.key]!),
+        video: directoryPath == null
+            ? VideoPlayerController.network(sourceUrls[entry.key]!)
+            : VideoPlayerController.file(sources[entry.key]!),
         intialSubtitle: initialSubtitle,
         subtitle: subtitle,
         range: range,
