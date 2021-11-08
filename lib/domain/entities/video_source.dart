@@ -222,8 +222,7 @@ class VideoSource {
     }
 
     if (descending) addAutoSource();
-    for (final entry
-        in descending ? sources.entries.toList().reversed : sources.entries) {
+    for (final entry in getSource(descending, sources, sourceUrls)) {
       final String key = formatter?.call(entry.key) ?? entry.key;
       videoSource[key] = VideoSource(
         video: directoryPath == null
@@ -237,5 +236,14 @@ class VideoSource {
     }
     if (!descending) addAutoSource();
     return videoSource;
+  }
+
+  static Iterable<MapEntry<String, dynamic>> getSource(bool descending,
+      Map<String, dynamic> sources, Map<String, String> sourceUrls) {
+    Map<String, dynamic> tmp = sources;
+    if (kIsWeb) {
+      tmp = sourceUrls;
+    }
+    return descending ? tmp.entries.toList().reversed : tmp.entries;
   }
 }
