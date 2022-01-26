@@ -147,6 +147,9 @@ class VideoViewerState extends State<VideoViewer> {
     _controller.looping = widget.looping;
     _controller.isShowingThumbnail = _style.thumbnail != null;
     await _controller.initialize(widget.source, autoPlay: widget.autoPlay);
+    
+    if (!mounted) return;
+    
     setState(() => _initialized = true);
   }
 
