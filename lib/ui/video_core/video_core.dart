@@ -37,8 +37,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
   //------------------------------//
   //REWIND AND FORWARD (VARIABLES)//
   //------------------------------//
-  final ValueNotifier<int> _forwardAndRewindSecondsAmount =
-      ValueNotifier<int>(1);
+  final ValueNotifier<int> _forwardAndRewindSecondsAmount = ValueNotifier<int>(1);
   Duration _initialForwardPosition = Duration.zero;
   Offset _dragInitialDelta = Offset.zero;
   Axis _dragDirection = Axis.vertical;
@@ -270,8 +269,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
             onScaleUpdate: scale
                 ? (ScaleEvent details) {
                     final double newScale = _initialScale * details.scale;
-                    if (newScale >= _minScale && newScale <= _maxScale)
-                      _scale.value = newScale;
+                    if (newScale >= _minScale && newScale <= _maxScale) _scale.value = newScale;
                   }
                 : null,
             //---------------------------//
@@ -336,66 +334,66 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
         behavior: HitTestBehavior.opaque,
         child: Container(height: double.infinity, width: double.infinity),
       ),
-      VideoCoreForwardAndRewind(
-        showRewind: _showAMomentRewindIcons[0],
-        showForward: _showAMomentRewindIcons[1],
-        rewindSeconds: _defaultRewindAmount * _rewindDoubleTapCount,
-        forwardSeconds: _defaultForwardAmount * _forwardDoubleTapCount,
-      ),
+      // VideoCoreForwardAndRewind(
+      //   showRewind: _showAMomentRewindIcons[0],
+      //   showForward: _showAMomentRewindIcons[1],
+      //   rewindSeconds: _defaultRewindAmount * _rewindDoubleTapCount,
+      //   forwardSeconds: _defaultForwardAmount * _forwardDoubleTapCount,
+      // ),
       VideoCoreForwardAndRewindLayout(
         rewind: GestureDetector(onDoubleTap: _rewind),
         forward: GestureDetector(onDoubleTap: _forward),
       ),
-      Builder(builder: (_) {
-        final controller = _query.video(context, listen: true);
-        final metadata = _query.videoMetadata(context);
-        return Stack(children: [
-          const VideoCoreBuffering(),
-          if (metadata.enableShowReplayIconAtVideoEnd)
-            CustomOpacityTransition(
-              visible: controller.position >= controller.duration &&
-                  !controller.isShowingOverlay,
-              child: const Center(
-                child: PlayAndPause(type: PlayAndPauseType.center),
-              ),
-            ),
-        ]);
-      }),
+      // Builder(builder: (_) {
+      //   final controller = _query.video(context, listen: true);
+      //   final metadata = _query.videoMetadata(context);
+      //   return Stack(children: [
+      //     const VideoCoreBuffering(),
+      //     if (metadata.enableShowReplayIconAtVideoEnd)
+      //       CustomOpacityTransition(
+      //         visible: controller.position >= controller.duration &&
+      //             !controller.isShowingOverlay,
+      //         child: const Center(
+      //           child: PlayAndPause(type: PlayAndPauseType.center),
+      //         ),
+      //       ),
+      //   ]);
+      // }),
       const VideoCoreOverlay(),
-      CustomOpacityTransition(
-        visible: _showForwardStatus,
-        child: ValueListenableBuilder(
-          valueListenable: _forwardAndRewindSecondsAmount,
-          builder: (_, int seconds, __) => VideoCoreForwardAndRewindBar(
-            seconds: seconds,
-            position: _initialForwardPosition,
-          ),
-        ),
-      ),
-      Align(
-        alignment: Alignment.centerRight,
-        child: Builder(builder: (_) {
-          final controller = _query.video(context, listen: true);
-          final style = _query.videoStyle(context);
-          return CustomSwipeTransition(
-            visible: controller.isShowingChat,
-            axis: Axis.horizontal,
-            axisAlignment: 1.0,
-            child: GradientBackground(
-              child: style.chatStyle.chat,
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-          );
-        }),
-      ),
-      ValueListenableBuilder(
-        valueListenable: _currentVolume,
-        builder: (_, double value, __) => VideoCoreVolumeBar(
-          visible: _showVolumeStatus,
-          progress: value / _maxVolume,
-        ),
-      ),
+      // CustomOpacityTransition(
+      //   visible: _showForwardStatus,
+      //   child: ValueListenableBuilder(
+      //     valueListenable: _forwardAndRewindSecondsAmount,
+      //     builder: (_, int seconds, __) => VideoCoreForwardAndRewindBar(
+      //       seconds: seconds,
+      //       position: _initialForwardPosition,
+      //     ),
+      //   ),
+      // ),
+      // Align(
+      //   alignment: Alignment.centerRight,
+      //   child: Builder(builder: (_) {
+      //     final controller = _query.video(context, listen: true);
+      //     final style = _query.videoStyle(context);
+      //     return CustomSwipeTransition(
+      //       visible: controller.isShowingChat,
+      //       axis: Axis.horizontal,
+      //       axisAlignment: 1.0,
+      //       child: GradientBackground(
+      //         child: style.chatStyle.chat,
+      //         begin: Alignment.centerLeft,
+      //         end: Alignment.centerRight,
+      //       ),
+      //     );
+      //   }),
+      // ),
+      // ValueListenableBuilder(
+      //   valueListenable: _currentVolume,
+      //   builder: (_, double value, __) => VideoCoreVolumeBar(
+      //     visible: _showVolumeStatus,
+      //     progress: value / _maxVolume,
+      //   ),
+      // ),
       const VideoCoreThumbnail(),
       const VideoCoreAdViewer(),
     ]);
