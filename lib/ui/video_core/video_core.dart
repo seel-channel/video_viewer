@@ -25,6 +25,7 @@ import 'package:video_viewer/ui/overlay/overlay.dart';
 import 'package:volume_watcher/volume_watcher.dart';
 
 class VideoViewerCore extends StatefulWidget {
+
   const VideoViewerCore({Key? key}) : super(key: key);
 
   @override
@@ -34,6 +35,8 @@ class VideoViewerCore extends StatefulWidget {
 class _VideoViewerCoreState extends State<VideoViewerCore> {
   final VideoQuery _query = VideoQuery();
 
+
+  Widget? overWidget;
   //------------------------------//
   //REWIND AND FORWARD (VARIABLES)//
   //------------------------------//
@@ -81,8 +84,11 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           _maxVolume = 1.0;
           break;
       }
+
       setState(() {});
+      
     });
+
     super.initState();
   }
 
@@ -235,7 +241,8 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
 
   @override
   Widget build(BuildContext context) {
-    return VideoCoreOrientation(builder: (isFullScreenLandscape) {
+    return VideoCoreOrientation(
+      builder: (isFullScreenLandscape) {
       return isFullScreenLandscape
           ? _globalGesture(isFullScreenLandscape)
           : VideoCoreAspectRadio(child: _globalGesture(isFullScreenLandscape));
@@ -252,77 +259,83 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
     final bool scale = metadata.onFullscreenFixLandscape;
 
     return scale || horizontal || vertical
-        ? XGestureDetector(
-            //--------------//
-            //SCALE GESTURES//
-            //--------------//
-            onScaleStart: scale
-                ? (_) {
-                    _initialScale = _scale.value;
-                    final size = context.media.size;
-                    final video = _query.video(context).video!;
-                    final aspectWidth = size.height * video.value.aspectRatio;
+        ? Stack(
+          children: [
+   
+            XGestureDetector(
+                //--------------//
+                //SCALE GESTURES//
+                //--------------//
+                onScaleStart: scale
+                    ? (_) {
+                        _initialScale = _scale.value;
+                        final size = context.media.size;
+                        final video = _query.video(context).video!;
+                        final aspectWidth = size.height * video.value.aspectRatio;
 
-                    _initialScale = _scale.value;
-                    _maxScale = size.width / aspectWidth;
-                  }
-                : null,
-            onScaleUpdate: scale
-                ? (ScaleEvent details) {
-                    final double newScale = _initialScale * details.scale;
-                    if (newScale >= _minScale && newScale <= _maxScale)
-                      _scale.value = newScale;
-                  }
-                : null,
-            //---------------------------//
-            //VOLUME AND FORWARD GESTURES//
-            //---------------------------//
-            onMoveUpdate: horizontal || vertical
-                ? (MoveEvent details) {
-                    if (_canListenerMove()) {
-                      final Offset position = details.localPos;
-                      final Offset delta = details.localDelta;
-                      if (_dragInitialDelta == Offset.zero) {
-                        if (delta.dx.abs() > delta.dy.abs() && horizontal) {
-                          _dragDirection = Axis.horizontal;
-                          _forwardDragStart(position);
-                        } else if (vertical) {
-                          _dragDirection = Axis.vertical;
-                          _volumeDragStart();
+                        _initialScale = _scale.value;
+                        _maxScale = size.width / aspectWidth;
+                      }
+                    : null,
+                onScaleUpdate: scale
+                    ? (ScaleEvent details) {
+                        final double newScale = _initialScale * details.scale;
+                        if (newScale >= _minScale && newScale <= _maxScale)
+                          _scale.value = newScale;
+                      }
+                    : null,
+                //---------------------------//
+                //VOLUME AND FORWARD GESTURES//
+                //---------------------------//
+                onMoveUpdate: horizontal || vertical
+                    ? (MoveEvent details) {
+                        if (_canListenerMove()) {
+                          final Offset position = details.localPos;
+                          final Offset delta = details.localDelta;
+                          if (_dragInitialDelta == Offset.zero) {
+                            if (delta.dx.abs() > delta.dy.abs() && horizontal) {
+                              _dragDirection = Axis.horizontal;
+                              _forwardDragStart(position);
+                            } else if (vertical) {
+                              _dragDirection = Axis.vertical;
+                              _volumeDragStart();
+                            }
+                            _dragInitialDelta = delta;
+                          }
+                          switch (_dragDirection) {
+                            case Axis.horizontal:
+                              if (horizontal) _forwardDragUpdate(position);
+                              break;
+                            case Axis.vertical:
+                              if (vertical) _volumeDragUpdate(delta);
+                              break;
+                          }
                         }
-                        _dragInitialDelta = delta;
                       }
-                      switch (_dragDirection) {
-                        case Axis.horizontal:
-                          if (horizontal) _forwardDragUpdate(position);
-                          break;
-                        case Axis.vertical:
-                          if (vertical) _volumeDragUpdate(delta);
-                          break;
+                    : null,
+                onMoveEnd: horizontal || vertical
+                    ? (_) {
+                        _dragInitialDelta = Offset.zero;
+                        switch (_dragDirection) {
+                          case Axis.horizontal:
+                            if (horizontal) _forwardDragEnd();
+                            break;
+                          case Axis.vertical:
+                            if (vertical) _volumeDragEnd();
+                            break;
+                        }
                       }
-                    }
-                  }
-                : null,
-            onMoveEnd: horizontal || vertical
-                ? (_) {
-                    _dragInitialDelta = Offset.zero;
-                    switch (_dragDirection) {
-                      case Axis.horizontal:
-                        if (horizontal) _forwardDragEnd();
-                        break;
-                      case Axis.vertical:
-                        if (vertical) _volumeDragEnd();
-                        break;
-                    }
-                  }
-                : null,
-            child: _player(),
-          )
+                    : null,
+                child: _player(),
+              ),
+          ],
+        )
         : _player();
   }
 
   Widget _player() {
     return Stack(children: [
+   
       ValueListenableBuilder(
         valueListenable: _scale,
         builder: (_, double scale, __) => Transform.scale(
@@ -330,6 +343,10 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           child: const VideoCorePlayer(),
         ),
       ),
+
+    _query.videoMetadata(context).overlayWidget==null ? Container() :   _query.videoMetadata(context).overlayWidget! ,
+       
+    
       const VideoCoreActiveSubtitleText(),
       GestureDetector(
         onTap: () => _query.video(context).showAndHideOverlay(),
@@ -389,6 +406,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
           );
         }),
       ),
+      
       ValueListenableBuilder(
         valueListenable: _currentVolume,
         builder: (_, double value, __) => VideoCoreVolumeBar(
@@ -398,6 +416,7 @@ class _VideoViewerCoreState extends State<VideoViewerCore> {
       ),
       const VideoCoreThumbnail(),
       const VideoCoreAdViewer(),
+      
     ]);
   }
 }

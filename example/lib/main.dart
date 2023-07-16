@@ -323,11 +323,16 @@ class _MovieVideoViewerState extends State<MovieVideoViewer> {
       controller: _controller,
       child: VideoViewer(
         controller: _controller,
-        onFullscreenFixLandscape: false,
+        overlayWidget: Align(
+          alignment: Alignment.center,
+          child: Opacity(
+            opacity: 0.5,
+            child: Text("text",style: TextStyle(fontSize: 50,color: Colors.red),))),
+       // onFullscreenFixLandscape: false,
         source: {
           widget.movie.title: VideoSource(
             video: VideoPlayerController.network(
-              "https://felipemurguia.com/assets/videos/mortal_machines_trailer.mp4",
+            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
             ),
             ads: [
               VideoViewerAd(
@@ -419,7 +424,7 @@ class _SerieVideoViewerState extends State<SerieVideoViewer> {
       child: VideoViewer(
         controller: controller,
         enableChat: true,
-        onFullscreenFixLandscape: false,
+     //   onFullscreenFixLandscape: false,
         source: VideoSource.fromNetworkVideoSources(initial.value.source),
         style: CustomVideoViewerStyle(movie: widget.serie, context: context)
             .copyWith(
