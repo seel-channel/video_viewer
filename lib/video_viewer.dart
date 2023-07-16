@@ -40,6 +40,7 @@ class VideoViewer extends StatefulWidget {
     this.enableHorizontalSwapingGesture = true,
     this.enableShowReplayIconAtVideoEnd = true,
     this.enableChat = false,
+    this.overlayWidget,
   }) : super(key: key);
 
   /// Once the video is initialized, it will be played
@@ -76,6 +77,9 @@ class VideoViewer extends StatefulWidget {
   ///in landscape mode and it will not be possible to rotate it in portrait.
   ///If it is `false`, you can rotate the entire screen in any position.
   final bool onFullscreenFixLandscape;
+
+
+  final Widget? overlayWidget;
 
   ///It's the custom language can you set to the VideoViewer.
   ///
@@ -177,12 +181,14 @@ class VideoViewerState extends State<VideoViewer> {
                   enableChat: widget.enableChat,
                   enableShowReplayIconAtVideoEnd:
                       widget.enableShowReplayIconAtVideoEnd,
+                      overlayWidget: widget.overlayWidget,
+
                 ),
               ),
             ],
             builder: (_, child) {
               _controller.context = _;
-              return const VideoViewerCore();
+              return  VideoViewerCore();
             },
           )
         : AspectRatio(

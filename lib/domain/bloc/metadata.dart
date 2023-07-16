@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:video_viewer/domain/entities/language.dart';
 import 'package:video_viewer/domain/entities/styles/video_viewer.dart';
 import 'package:video_viewer/domain/entities/volume_control.dart';
@@ -16,6 +17,7 @@ class VideoViewerMetadata {
     required this.enableHorizontalSwapingGesture,
     required this.enableShowReplayIconAtVideoEnd,
     required this.enableChat,
+    this.overlayWidget,
   });
 
   /// It is the Aspect Ratio that the widget.style.loading will take when the video
@@ -60,4 +62,5 @@ class VideoViewerMetadata {
   final bool enableShowReplayIconAtVideoEnd;
 
   final bool enableChat;
+  final Widget? overlayWidget;
 }
