@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
   gesture_x_detector: ^1.0.0
   helpers: ^1.1.4
-  http: ^0.13.4
+  http: ^1.1.0
   path_provider: ^2.0.6
   provider: ^6.0.1
   video_player: ^2.2.6
